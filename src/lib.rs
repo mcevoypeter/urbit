@@ -30,7 +30,7 @@ trait Lus {
 
 // =
 trait Tis {
-    fn tis(&self) {}
+    fn tis(&self) -> Loobean;
 }
 
 // /
@@ -105,6 +105,16 @@ impl PartialEq for Cell {
 impl Wut for Cell {
     fn wut(&self) -> Loobean {
         Loobean::Yes
+    }
+}
+
+impl Tis for Cell {
+    fn tis(&self) -> Loobean {
+        if self.head == self.tail {
+            Loobean::Yes
+        } else {
+            Loobean::No
+        }
     }
 }
 
@@ -275,5 +285,51 @@ mod tests {
             })),
         });
         assert!(lh != rh);
+    }
+
+    #[test]
+    fn tis_cell() {
+        // [2 2] -> 0
+        let cell = Cell {
+            head: Box::new(Noun::Atom(Atom(2))),
+            tail: Box::new(Noun::Atom(Atom(2))),
+        };
+        assert_eq!(Loobean::Yes, cell.tis());
+
+        // [7 6] -> 1
+        let cell = Cell {
+            head: Box::new(Noun::Atom(Atom(7))),
+            tail: Box::new(Noun::Atom(Atom(6))),
+        };
+        assert_eq!(Loobean::No, cell.tis());
+
+        // [[2 7] [2 7]] -> 0
+        let cell = Cell {
+            head: Box::new(Noun::Cell(Cell {
+                head: Box::new(Noun::Atom(Atom(2))),
+                tail: Box::new(Noun::Atom(Atom(7))),
+            })),
+            tail: Box::new(Noun::Cell(Cell {
+                head: Box::new(Noun::Atom(Atom(2))),
+                tail: Box::new(Noun::Atom(Atom(7))),
+            })),
+        };
+        assert_eq!(Loobean::Yes, cell.tis());
+
+        // [[2 7] [2 [7 3]]] -> 1
+        let cell = Cell {
+            head: Box::new(Noun::Cell(Cell {
+                head: Box::new(Noun::Atom(Atom(2))),
+                tail: Box::new(Noun::Atom(Atom(7))),
+            })),
+            tail: Box::new(Noun::Cell(Cell {
+                head: Box::new(Noun::Atom(Atom(2))),
+                tail: Box::new(Noun::Cell(Cell {
+                    head: Box::new(Noun::Atom(Atom(7))),
+                    tail: Box::new(Noun::Atom(Atom(3))),
+                }))
+            })),
+        };
+        assert_eq!(Loobean::No, cell.tis());
     }
 }
