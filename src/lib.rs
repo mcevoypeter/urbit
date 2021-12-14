@@ -1,3 +1,5 @@
+#[derive(Debug)]
+#[derive(PartialEq)]
 enum Loobean {
     Yes,
     No,
@@ -14,7 +16,7 @@ struct Cell {
 
 // ?
 trait Wut {
-    fn wut(&self) {}
+    fn wut(&self) -> Loobean;
 }
 
 // +
@@ -42,11 +44,53 @@ trait Tar {
     fn tar(&self) {}
 }
 
+impl Noun for Atom {}
+
+impl Wut for Atom {
+    fn wut(&self) -> Loobean {
+        Loobean::No
+    }
+}
+
+impl Noun for Cell {}
+
+impl Wut for Cell {
+    fn wut(&self) -> Loobean {
+        Loobean::Yes
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use crate::*;
+
     #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
+    fn wut_atom() {
+        // ?137 -> 1
+        let atom = Atom(137);
+        assert_eq!(Loobean::No, atom.wut());
+    }
+
+    #[test]
+    fn wut_cell() {
+        // ?[128 256] -> 0
+        let cell = Cell {
+            head: Box::new(Atom(128)),
+            tail: Box::new(Atom(256)),
+        };
+        assert_eq!(Loobean::Yes, cell.wut());
+
+        // ?[[512 1024] [16 32]] -> 0
+        let cell = Cell {
+            head: Box::new(Cell {
+                head: Box::new(Atom(512)),
+                tail: Box::new(Atom(1024)),
+            }),
+            tail: Box::new(Cell {
+                head: Box::new(Atom(16)),
+                tail: Box::new(Atom(32)),
+            }),
+        };
+        assert_eq!(Loobean::Yes, cell.wut());
     }
 }
