@@ -5,13 +5,16 @@ enum Loobean {
     No,
 }
 
-trait Noun {}
+enum Noun {
+    Atom(Atom),
+    Cell(Cell),
+}
 
 struct Atom(u64);
 
 struct Cell {
-    head: Box<dyn Noun>,
-    tail: Box<dyn Noun>,
+    head: Box<Noun>,
+    tail: Box<Noun>,
 }
 
 // ?
@@ -44,8 +47,6 @@ trait Tar {
     fn tar(&self) {}
 }
 
-impl Noun for Atom {}
-
 impl Wut for Atom {
     fn wut(&self) -> Loobean {
         Loobean::No
@@ -57,8 +58,6 @@ impl Lus for Atom {
         Atom(1 + self.0)
     }
 }
-
-impl Noun for Cell {}
 
 impl Wut for Cell {
     fn wut(&self) -> Loobean {
@@ -81,21 +80,21 @@ mod tests {
     fn wut_cell() {
         // ?[128 256] -> 0
         let cell = Cell {
-            head: Box::new(Atom(128)),
-            tail: Box::new(Atom(256)),
+            head: Box::new(Noun::Atom(Atom(128))),
+            tail: Box::new(Noun::Atom(Atom(256))),
         };
         assert_eq!(Loobean::Yes, cell.wut());
 
         // ?[[512 1024] [16 32]] -> 0
         let cell = Cell {
-            head: Box::new(Cell {
-                head: Box::new(Atom(512)),
-                tail: Box::new(Atom(1024)),
-            }),
-            tail: Box::new(Cell {
-                head: Box::new(Atom(16)),
-                tail: Box::new(Atom(32)),
-            }),
+            head: Box::new(Noun::Cell(Cell {
+                head: Box::new(Noun::Atom(Atom(512))),
+                tail: Box::new(Noun::Atom(Atom(1024))),
+            })),
+            tail: Box::new(Noun::Cell(Cell {
+                head: Box::new(Noun::Atom(Atom(16))),
+                tail: Box::new(Noun::Atom(Atom(32))),
+            })),
         };
         assert_eq!(Loobean::Yes, cell.wut());
     }
