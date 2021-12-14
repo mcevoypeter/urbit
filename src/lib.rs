@@ -7,7 +7,7 @@ enum Loobean {
 
 trait Noun {}
 
-struct Atom(u32);
+struct Atom(u64);
 
 struct Cell {
     head: Box<dyn Noun>,
@@ -21,7 +21,7 @@ trait Wut {
 
 // +
 trait Lus {
-    fn lus(&self) {}
+    fn lus(self) -> Atom;
 }
 
 // =
@@ -49,6 +49,12 @@ impl Noun for Atom {}
 impl Wut for Atom {
     fn wut(&self) -> Loobean {
         Loobean::No
+    }
+}
+
+impl Lus for Atom {
+    fn lus(self) -> Atom {
+        Atom(1 + self.0)
     }
 }
 
@@ -92,5 +98,12 @@ mod tests {
             }),
         };
         assert_eq!(Loobean::Yes, cell.wut());
+    }
+
+    #[test]
+    fn lus_atom() {
+        // +999 -> 1000
+        let atom = Atom(999);
+        assert_eq!(1000, atom.lus().0);
     }
 }
