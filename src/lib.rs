@@ -123,36 +123,6 @@ mod tests {
     use crate::*;
 
     #[test]
-    fn wut_atom() {
-        // ?137 -> 1
-        let atom = Atom(137);
-        assert_eq!(Loobean::No, atom.wut());
-    }
-
-    #[test]
-    fn wut_cell() {
-        // ?[128 256] -> 0
-        let cell = Cell {
-            head: Box::new(Noun::Atom(Atom(128))),
-            tail: Box::new(Noun::Atom(Atom(256))),
-        };
-        assert_eq!(Loobean::Yes, cell.wut());
-
-        // ?[[512 1024] [16 32]] -> 0
-        let cell = Cell {
-            head: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Atom(Atom(512))),
-                tail: Box::new(Noun::Atom(Atom(1024))),
-            })),
-            tail: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Atom(Atom(16))),
-                tail: Box::new(Noun::Atom(Atom(32))),
-            })),
-        };
-        assert_eq!(Loobean::Yes, cell.wut());
-    }
-
-    #[test]
     fn lus_atom() {
         // +999 -> 1000
         let atom = Atom(999);
@@ -332,4 +302,35 @@ mod tests {
         };
         assert_eq!(Loobean::No, cell.tis());
     }
+
+    #[test]
+    fn wut_atom() {
+        // ?137 -> 1
+        let atom = Atom(137);
+        assert_eq!(Loobean::No, atom.wut());
+    }
+
+    #[test]
+    fn wut_cell() {
+        // ?[128 256] -> 0
+        let cell = Cell {
+            head: Box::new(Noun::Atom(Atom(128))),
+            tail: Box::new(Noun::Atom(Atom(256))),
+        };
+        assert_eq!(Loobean::Yes, cell.wut());
+
+        // ?[[512 1024] [16 32]] -> 0
+        let cell = Cell {
+            head: Box::new(Noun::Cell(Cell {
+                head: Box::new(Noun::Atom(Atom(512))),
+                tail: Box::new(Noun::Atom(Atom(1024))),
+            })),
+            tail: Box::new(Noun::Cell(Cell {
+                head: Box::new(Noun::Atom(Atom(16))),
+                tail: Box::new(Noun::Atom(Atom(32))),
+            })),
+        };
+        assert_eq!(Loobean::Yes, cell.wut());
+    }
+
 }
