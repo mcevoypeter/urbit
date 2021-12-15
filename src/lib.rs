@@ -34,6 +34,29 @@ struct Cell {
 }
 
 /*==============================================================================
+ * Macros
+ */
+
+#[macro_export]
+macro_rules! atom {
+    ($val:expr) => {
+        Noun::Atom(Atom($val))
+    };
+}
+
+#[macro_export]
+macro_rules! cell {
+    ($head:expr, $tail:expr,) => {
+        Noun::Cell(Cell {
+            head: $head,
+            tail: $tail,
+        })
+    };
+}
+
+
+
+/*==============================================================================
  * Trait definitions
  */
 
@@ -83,13 +106,13 @@ impl Clone for Noun {
     fn clone(&self) -> Self {
         match self {
             Noun::Atom(atom) => {
-                Noun::Atom(Atom(atom.0))
+                atom!(atom.0)
             },
             Noun::Cell(cell) => {
-                Noun::Cell(Cell {
-                    head: cell.head.clone(),
-                    tail: cell.tail.clone(),
-                })
+                cell!(
+                    cell.head.clone(),
+                    cell.tail.clone(),
+                )
             },
         }
     }
@@ -208,18 +231,17 @@ impl Fas for Cell {
                 Atom(n) => {
                     if let Noun::Cell(_) = *self.tail {
                         let tail = Cell {
-                            head: boxed_atom!(n / 2),
-                            //head: Box::new(Noun::Atom(Atom(n / 2))),
+                            head: Box::new(atom!(n / 2)),
                             tail: self.tail,
                         }.fas()?;
                         if 0 == n % 2 {
                             Cell {
-                                head: Box::new(Noun::Atom(Atom(2))),
+                                head: Box::new(atom!(2)),
                                 tail: Box::new(tail),
                             }.fas()
                         } else {
                             Cell {
-                                head: Box::new(Noun::Atom(Atom(3))),
+                                head: Box::new(atom!(3)),
                                 tail: Box::new(tail),
                             }.fas()
                         }
@@ -257,8 +279,8 @@ mod tests {
     fn clone_cell() {
         // Clone [8 808].
         let cell = Cell {
-            head: Box::new(Noun::Atom(Atom(8))),
-            tail: Box::new(Noun::Atom(Atom(808))),
+            head: Box::new(atom!(8)),
+            tail: Box::new(atom!(808)),
         };
         assert_eq!(cell, cell.clone());
     }
@@ -266,33 +288,33 @@ mod tests {
     #[test]
     fn clone_noun() {
         // Clone 101010.
-        let noun = Noun::Atom(Atom(101010));
+        let noun = atom!(101010);
         assert_eq!(noun, noun.clone());
 
         // Clone [300 [400 500]].
-        let noun = Noun::Cell(Cell {
-            head: Box::new(Noun::Atom(Atom(300))),
-            tail: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Atom(Atom(400))),
-                tail: Box::new(Noun::Atom(Atom(500))),
-            })),
-        });
+        let noun = cell!(
+            Box::new(atom!(300)),
+            Box::new(cell!(
+                Box::new(atom!(400)),
+                Box::new(atom!(500)),
+            )),
+        );
         assert_eq!(noun, noun.clone());
     }
 
     #[test]
     fn fas_cell() {
-        let h1 = Box::new(Noun::Atom(Atom(1)));
-        let h2 = Box::new(Noun::Atom(Atom(2)));
-        let h3 = Box::new(Noun::Atom(Atom(3)));
-        let h5 = Box::new(Noun::Atom(Atom(5)));
-        let h6 = Box::new(Noun::Atom(Atom(6)));
+        let h1 = Box::new(atom!(1));
+        let h2 = Box::new(atom!(2));
+        let h3 = Box::new(atom!(3));
+        let h5 = Box::new(atom!(5));
+        let h6 = Box::new(atom!(6));
 
         // /[1 [98 89]] -> [98 89]
-        let t = Box::new(Noun::Cell(Cell {
-            head: Box::new(Noun::Atom(Atom(98))),
-            tail: Box::new(Noun::Atom(Atom(89))),
-        }));
+        let t = Box::new(cell!(
+            Box::new(atom!(98)),
+            Box::new(atom!(89)),
+        ));
         let cell = Cell {
             head: h1.clone(),
             tail: t.clone(),
@@ -307,13 +329,13 @@ mod tests {
         }
 
         // /[2 [292 1001]] -> 292
-        let th = Box::new(Noun::Atom(Atom(292)));
+        let th = Box::new(atom!(292));
         let cell = Cell {
             head: h2.clone(),
-            tail: Box::new(Noun::Cell(Cell {
-                head: th.clone(),
-                tail: Box::new(Noun::Atom(Atom(1001))),
-            })),
+            tail: Box::new(cell!(
+                th.clone(),
+                Box::new(atom!(1001)),
+            )),
         };
         match cell.fas() {
             Ok(res) => {
@@ -327,7 +349,7 @@ mod tests {
         // /[2 107] -> error
         let cell = Cell {
             head: h2.clone(),
-            tail: Box::new(Noun::Atom(Atom(107))),
+            tail: Box::new(atom!(107)),
         };
         match cell.fas() {
             Ok(_) => {
@@ -339,19 +361,19 @@ mod tests {
         }
 
         // /[3 [[80 50] [19 95]]] -> [19 95]
-        let tt = Box::new(Noun::Cell(Cell {
-            head: Box::new(Noun::Atom(Atom(19))),
-            tail: Box::new(Noun::Atom(Atom(95))),
-        }));
+        let tt = Box::new(cell!(
+            Box::new(atom!(19)),
+            Box::new(atom!(95)),
+        ));
         let cell = Cell {
             head: h3.clone(),
-            tail: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Cell(Cell {
-                    head: Box::new(Noun::Atom(Atom(80))),
-                    tail: Box::new(Noun::Atom(Atom(50))),
-                })),
-                tail: tt.clone(),
-            })),
+            tail: Box::new(cell!(
+                Box::new(cell!(
+                    Box::new(atom!(80)),
+                    Box::new(atom!(50)),
+                )),
+                tt.clone(),
+            )),
         };
         match cell.fas() {
             Ok(res) => {
@@ -366,16 +388,16 @@ mod tests {
         // -> /[3 /[2 [[15 16] 17]]]
         // -> /[3 [15 16]]
         // -> 16
-        let tht = Box::new(Noun::Atom(Atom(16)));
+        let tht = Box::new(atom!(16));
         let cell = Cell {
             head: h5.clone(),
-            tail: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Cell(Cell {
-                    head: Box::new(Noun::Atom(Atom(15))),
-                    tail: tht.clone(),
-                })),
-                tail: Box::new(Noun::Atom(Atom(17))),
-            })),
+            tail: Box::new(cell!(
+                Box::new(cell!(
+                    Box::new(atom!(15)),
+                    tht.clone(),
+                )),
+                Box::new(atom!(17)),
+            )),
         };
         match cell.fas() {
             Ok(res) => {
@@ -387,16 +409,16 @@ mod tests {
         }
 
         // /[(3 + 3) [4 [8 12]]] -> /[2 /[3 [4 [8 12]]]] -> 8
-        let tth = Box::new(Noun::Atom(Atom(8)));
+        let tth = Box::new(atom!(8));
         let cell = Cell {
             head: h6.clone(),
-            tail: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Atom(Atom(4))),
-                tail: Box::new(Noun::Cell(Cell {
-                    head: tth.clone(),
-                    tail: Box::new(Noun::Atom(Atom(12))),
-                })),
-            })),
+            tail: Box::new(cell!(
+                Box::new(atom!(4)),
+                Box::new(cell!(
+                    tth.clone(),
+                    Box::new(atom!(12)),
+                )),
+            )),
         };
         match cell.fas() {
             Ok(res) => {
@@ -419,57 +441,57 @@ mod tests {
     fn partialeq_cell() {
         // [71 109] == [71 109]
         let lh = Cell {
-            head: Box::new(Noun::Atom(Atom(71))),
-            tail: Box::new(Noun::Atom(Atom(109))),
+            head: Box::new(atom!(71)),
+            tail: Box::new(atom!(109)),
         };
         let rh = Cell {
-            head: Box::new(Noun::Atom(Atom(71))),
-            tail: Box::new(Noun::Atom(Atom(109))),
+            head: Box::new(atom!(71)),
+            tail: Box::new(atom!(109)),
         };
         assert!(lh == rh);
 
         // [71 109] != [109 71]
         let lh = Cell {
-            head: Box::new(Noun::Atom(Atom(71))),
-            tail: Box::new(Noun::Atom(Atom(109))),
+            head: Box::new(atom!(71)),
+            tail: Box::new(atom!(109)),
         };
         let rh = Cell {
-            head: Box::new(Noun::Atom(Atom(109))),
-            tail: Box::new(Noun::Atom(Atom(71))),
+            head: Box::new(atom!(109)),
+            tail: Box::new(atom!(71)),
         };
         assert!(lh != rh);
 
         // [11 [12 13]] == [11 [12 13]]
         let lh = Cell {
-            head: Box::new(Noun::Atom(Atom(11))),
-            tail: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Atom(Atom(12))),
-                tail: Box::new(Noun::Atom(Atom(13))),
-            })),
+            head: Box::new(atom!(11)),
+            tail: Box::new(cell!(
+                Box::new(atom!(12)),
+                Box::new(atom!(13)),
+            )),
         };
         let rh = Cell {
-            head: Box::new(Noun::Atom(Atom(11))),
-            tail: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Atom(Atom(12))),
-                tail: Box::new(Noun::Atom(Atom(13))),
-            })),
+            head: Box::new(atom!(11)),
+            tail: Box::new(cell!(
+                Box::new(atom!(12)),
+                Box::new(atom!(13)),
+            )),
         };
         assert!(lh == rh);
 
         // [11 [12 13]] != [11 [13 12]]
         let lh = Cell {
-            head: Box::new(Noun::Atom(Atom(11))),
-            tail: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Atom(Atom(12))),
-                tail: Box::new(Noun::Atom(Atom(13))),
-            })),
+            head: Box::new(atom!(11)),
+            tail: Box::new(cell!(
+                Box::new(atom!(12)),
+                Box::new(atom!(13)),
+            )),
         };
         let rh = Cell {
-            head: Box::new(Noun::Atom(Atom(11))),
-            tail: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Atom(Atom(13))),
-                tail: Box::new(Noun::Atom(Atom(12))),
-            })),
+            head: Box::new(atom!(11)),
+            tail: Box::new(cell!(
+                Box::new(atom!(13)),
+                Box::new(atom!(12)),
+            )),
         };
         assert!(lh != rh);
     }
@@ -477,69 +499,69 @@ mod tests {
     #[test]
     fn partialeq_noun() {
         // 500 == 500
-        let lh = Noun::Atom(Atom(500));
-        let rh = Noun::Atom(Atom(500));
+        let lh = atom!(500);
+        let rh = atom!(500);
         assert!(lh == rh);
 
         // 499 != 501
-        let lh = Noun::Atom(Atom(499));
-        let rh = Noun::Atom(Atom(501));
+        let lh = atom!(499);
+        let rh = atom!(501);
         assert!(lh != rh);
 
         // [0 5] == [0 5]
-        let lh = Noun::Cell(Cell {
-            head: Box::new(Noun::Atom(Atom(0))),
-            tail: Box::new(Noun::Atom(Atom(5))),
-        });
-        let rh = Noun::Cell(Cell {
-            head: Box::new(Noun::Atom(Atom(0))),
-            tail: Box::new(Noun::Atom(Atom(5))),
-        });
+        let lh = cell!(
+            Box::new(atom!(0)),
+            Box::new(atom!(5)),
+        );
+        let rh = cell!(
+            Box::new(atom!(0)),
+            Box::new(atom!(5)),
+        );
         assert!(lh == rh);
 
         // [0 0] == [0 5]
-        let lh = Noun::Cell(Cell {
-            head: Box::new(Noun::Atom(Atom(0))),
-            tail: Box::new(Noun::Atom(Atom(0))),
-        });
-        let rh = Noun::Cell(Cell {
-            head: Box::new(Noun::Atom(Atom(0))),
-            tail: Box::new(Noun::Atom(Atom(5))),
-        });
+        let lh = cell!(
+            Box::new(atom!(0)),
+            Box::new(atom!(0)),
+        );
+        let rh = cell!(
+            Box::new(atom!(0)),
+            Box::new(atom!(5)),
+        );
         assert!(lh != rh);
 
         // [[44 22] 88] == [[44 22] 88]
-        let lh = Noun::Cell(Cell {
-            head: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Atom(Atom(44))),
-                tail: Box::new(Noun::Atom(Atom(22))),
-            })),
-            tail: Box::new(Noun::Atom(Atom(88))),
-        });
-        let rh = Noun::Cell(Cell {
-            head: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Atom(Atom(44))),
-                tail: Box::new(Noun::Atom(Atom(22))),
-            })),
-            tail: Box::new(Noun::Atom(Atom(88))),
-        });
+        let lh = cell!(
+            Box::new(cell!(
+                Box::new(atom!(44)),
+                Box::new(atom!(22)),
+            )),
+            Box::new(atom!(88)),
+        );
+        let rh = cell!(
+            Box::new(cell!(
+                Box::new(atom!(44)),
+                Box::new(atom!(22)),
+            )),
+            Box::new(atom!(88)),
+        );
         assert!(lh == rh);
 
         // [[44 22] 88] != [44 [22 88]]
-        let lh = Noun::Cell(Cell {
-            head: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Atom(Atom(44))),
-                tail: Box::new(Noun::Atom(Atom(22))),
-            })),
-            tail: Box::new(Noun::Atom(Atom(88))),
-        });
-        let rh = Noun::Cell(Cell {
-            head: Box::new(Noun::Atom(Atom(44))),
-            tail: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Atom(Atom(22))),
-                tail: Box::new(Noun::Atom(Atom(88))),
-            })),
-        });
+        let lh = cell!(
+            Box::new(cell!(
+                Box::new(atom!(44)),
+                Box::new(atom!(22)),
+            )),
+            Box::new(atom!(88)),
+        );
+        let rh = cell!(
+            Box::new(atom!(44)),
+            Box::new(cell!(
+                Box::new(atom!(22)),
+                Box::new(atom!(88)),
+            )),
+        );
         assert!(lh != rh);
     }
 
@@ -547,42 +569,42 @@ mod tests {
     fn tis_cell() {
         // [2 2] -> 0
         let cell = Cell {
-            head: Box::new(Noun::Atom(Atom(2))),
-            tail: Box::new(Noun::Atom(Atom(2))),
+            head: Box::new(atom!(2)),
+            tail: Box::new(atom!(2)),
         };
         assert_eq!(Loobean::Yes, cell.tis());
 
         // [7 6] -> 1
         let cell = Cell {
-            head: Box::new(Noun::Atom(Atom(7))),
-            tail: Box::new(Noun::Atom(Atom(6))),
+            head: Box::new(atom!(7)),
+            tail: Box::new(atom!(6)),
         };
         assert_eq!(Loobean::No, cell.tis());
 
         // [[2 7] [2 7]] -> 0
         let cell = Cell {
-            head: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Atom(Atom(2))),
-                tail: Box::new(Noun::Atom(Atom(7))),
-            })),
-            tail: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Atom(Atom(2))),
-                tail: Box::new(Noun::Atom(Atom(7))),
-            })),
+            head: Box::new(cell!(
+                Box::new(atom!(2)),
+                Box::new(atom!(7)),
+            )),
+            tail: Box::new(cell!(
+                Box::new(atom!(2)),
+                Box::new(atom!(7)),
+            )),
         };
         assert_eq!(Loobean::Yes, cell.tis());
 
         // [[2 7] [2 [7 3]]] -> 1
         let cell = Cell {
             head: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Atom(Atom(2))),
-                tail: Box::new(Noun::Atom(Atom(7))),
+                head: Box::new(atom!(2)),
+                tail: Box::new(atom!(7)),
             })),
             tail: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Atom(Atom(2))),
+                head: Box::new(atom!(2)),
                 tail: Box::new(Noun::Cell(Cell {
-                    head: Box::new(Noun::Atom(Atom(7))),
-                    tail: Box::new(Noun::Atom(Atom(3))),
+                    head: Box::new(atom!(7)),
+                    tail: Box::new(atom!(3)),
                 }))
             })),
         };
@@ -600,20 +622,20 @@ mod tests {
     fn wut_cell() {
         // ?[128 256] -> 0
         let cell = Cell {
-            head: Box::new(Noun::Atom(Atom(128))),
-            tail: Box::new(Noun::Atom(Atom(256))),
+            head: Box::new(atom!(128)),
+            tail: Box::new(atom!(256)),
         };
         assert_eq!(Loobean::Yes, cell.wut());
 
         // ?[[512 1024] [16 32]] -> 0
         let cell = Cell {
             head: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Atom(Atom(512))),
-                tail: Box::new(Noun::Atom(Atom(1024))),
+                head: Box::new(atom!(512)),
+                tail: Box::new(atom!(1024)),
             })),
             tail: Box::new(Noun::Cell(Cell {
-                head: Box::new(Noun::Atom(Atom(16))),
-                tail: Box::new(Noun::Atom(Atom(32))),
+                head: Box::new(atom!(16)),
+                tail: Box::new(atom!(32)),
             })),
         };
         assert_eq!(Loobean::Yes, cell.wut());
