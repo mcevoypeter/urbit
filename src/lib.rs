@@ -297,9 +297,25 @@ impl Tar for Cell {
                         tail: self.head,
                     }.fas(),
                     Atom(1) => Ok(*tail.tail),
-                    Atom(2) => Err(Error {
-                        msg: "unimplemented".to_string(),
-                    }),
+                    Atom(2) => {
+                        if let Noun::Cell(tail_tail) = *tail.tail {
+                            Cell {
+                                head: Box::new(Cell {
+                                    head: self.head.clone(),
+                                    tail: tail_tail.head,
+                                }.tar()?),
+                                tail: Box::new(Cell {
+                                    head: self.head,
+                                    tail: tail_tail.tail,
+                                }.tar()?),
+                            }.tar()
+                        }
+                        else {
+                            Err(Error {
+                                msg: "*[a 2 b] cannot be evaluated when b is an atom".to_string(),
+                            })
+                        }
+                    },
                     Atom(3) => Err(Error {
                         msg: "unimplemented".to_string(),
                     }),
@@ -955,6 +971,41 @@ mod tests {
             {
                 Ok(res) => {
                     assert_eq!(*tt, res);
+                },
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                },
+            }
+        }
+
+        // *[77 [2 [1 42] [1 1 153 218]]] -> [153 218]
+        {
+            let ttttt = Box::new(cell! {
+                Box::new(atom!{ 153 }),
+                Box::new(atom!{ 218 }),
+            });
+            match (Cell {
+                head: Box::new(atom!{ 77 }),
+                tail:Box::new(cell! {
+                    Box::new(atom!{ 2 } ),
+                    Box::new(cell! {
+                        Box::new(cell! {
+                            Box::new(atom!{ 1 }),
+                            Box::new(atom!{ 42 }),
+                        }),
+                        Box::new(cell! {
+                            Box::new(atom!{ 1 }),
+                            Box::new(cell! {
+                                Box::new(atom!{ 1 }),
+                                ttttt.clone(),
+                            }),
+                        }),
+                    }),
+                }),
+            }.tar())
+            {
+                Ok(res) => {
+                    assert_eq!(*ttttt, res);
                 },
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
