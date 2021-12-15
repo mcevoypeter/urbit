@@ -107,10 +107,10 @@ impl Clone for Noun {
                 atom!{ atom.0 }
             },
             Noun::Cell(cell) => {
-                cell!(
+                cell! {
                     cell.head.clone(),
                     cell.tail.clone(),
-                )
+                }
             },
         }
     }
@@ -271,13 +271,13 @@ mod tests {
         assert_eq!(noun, noun.clone());
 
         // Clone [300 [400 500]].
-        let noun = cell!(
+        let noun = cell! {
             Box::new(atom!{ 300 }),
-            Box::new(cell!(
+            Box::new(cell! {
                 Box::new(atom!{ 400 }),
                 Box::new(atom!{ 500 }),
-            )),
-        );
+            }),
+        };
         assert_eq!(noun, noun.clone());
     }
 
@@ -290,10 +290,10 @@ mod tests {
         let h6 = Box::new(atom!{ 6 });
 
         // /[1 [98 89]] -> [98 89]
-        let t = Box::new(cell!(
+        let t = Box::new(cell! {
             Box::new(atom!{ 98 }),
             Box::new(atom!{ 89 }),
-        ));
+        });
         let cell = Cell {
             head: h1.clone(),
             tail: t.clone(),
@@ -311,10 +311,10 @@ mod tests {
         let th = Box::new(atom!{ 292 });
         let cell = Cell {
             head: h2.clone(),
-            tail: Box::new(cell!(
+            tail: Box::new(cell! {
                 th.clone(),
                 Box::new(atom!{ 1001 }),
-            )),
+            }),
         };
         match cell.fas() {
             Ok(res) => {
@@ -340,19 +340,19 @@ mod tests {
         }
 
         // /[3 [[80 50] [19 95]]] -> [19 95]
-        let tt = Box::new(cell!(
+        let tt = Box::new(cell! {
             Box::new(atom!{ 19 }),
             Box::new(atom!{ 95 }),
-        ));
+        });
         let cell = Cell {
             head: h3.clone(),
-            tail: Box::new(cell!(
-                Box::new(cell!(
+            tail: Box::new(cell! {
+                Box::new(cell! {
                     Box::new(atom!{ 80 }),
                     Box::new(atom!{ 50 }),
-                )),
+                }),
                 tt.clone(),
-            )),
+            }),
         };
         match cell.fas() {
             Ok(res) => {
@@ -370,13 +370,13 @@ mod tests {
         let tht = Box::new(atom!{ 16 });
         let cell = Cell {
             head: h5.clone(),
-            tail: Box::new(cell!(
-                Box::new(cell!(
+            tail: Box::new(cell! {
+                Box::new(cell! {
                     Box::new(atom!{ 15 }),
                     tht.clone(),
-                )),
+                }),
                 Box::new(atom!{ 17 }),
-            )),
+            }),
         };
         match cell.fas() {
             Ok(res) => {
@@ -391,13 +391,13 @@ mod tests {
         let tth = Box::new(atom!{ 8 });
         let cell = Cell {
             head: h6.clone(),
-            tail: Box::new(cell!(
+            tail: Box::new(cell! {
                 Box::new(atom!{ 4 }),
-                Box::new(cell!(
+                Box::new(cell! {
                     tth.clone(),
                     Box::new(atom!{ 12 }),
-                )),
-            )),
+                }),
+            }),
         };
         match cell.fas() {
             Ok(res) => {
@@ -443,34 +443,34 @@ mod tests {
         // [11 [12 13]] == [11 [12 13]]
         let lh = Cell {
             head: Box::new(atom!{ 11 }),
-            tail: Box::new(cell!(
+            tail: Box::new(cell! {
                 Box::new(atom!{ 12 }),
                 Box::new(atom!{ 13 }),
-            )),
+            }),
         };
         let rh = Cell {
             head: Box::new(atom!{ 11 }),
-            tail: Box::new(cell!(
+            tail: Box::new(cell! {
                 Box::new(atom!{ 12 }),
                 Box::new(atom!{ 13 }),
-            )),
+            }),
         };
         assert!(lh == rh);
 
         // [11 [12 13]] != [11 [13 12]]
         let lh = Cell {
             head: Box::new(atom!{ 11 }),
-            tail: Box::new(cell!(
+            tail: Box::new(cell! {
                 Box::new(atom!{ 12 }),
                 Box::new(atom!{ 13 }),
-            )),
+            }),
         };
         let rh = Cell {
             head: Box::new(atom!{ 11 }),
-            tail: Box::new(cell!(
+            tail: Box::new(cell! {
                 Box::new(atom!{ 13 }),
                 Box::new(atom!{ 12 }),
-            )),
+            }),
         };
         assert!(lh != rh);
     }
@@ -488,59 +488,59 @@ mod tests {
         assert!(lh != rh);
 
         // [0 5] == [0 5]
-        let lh = cell!(
+        let lh = cell! {
             Box::new(atom!{ 0 }),
             Box::new(atom!{ 5 }),
-        );
-        let rh = cell!(
+        };
+        let rh = cell! {
             Box::new(atom!{ 0 }),
             Box::new(atom!{ 5 }),
-        );
+        };
         assert!(lh == rh);
 
         // [0 0] == [0 5]
-        let lh = cell!(
+        let lh = cell! {
             Box::new(atom!{ 0 }),
             Box::new(atom!{ 0 }),
-        );
-        let rh = cell!(
+        };
+        let rh = cell! {
             Box::new(atom!{ 0 }),
             Box::new(atom!{ 5 }),
-        );
+        };
         assert!(lh != rh);
 
         // [[44 22] 88] == [[44 22] 88]
-        let lh = cell!(
-            Box::new(cell!(
+        let lh = cell! {
+            Box::new(cell! {
                 Box::new(atom!{ 44 }),
                 Box::new(atom!{ 22 }),
-            )),
+            }),
             Box::new(atom!{ 88 }),
-        );
-        let rh = cell!(
-            Box::new(cell!(
+        };
+        let rh = cell! {
+            Box::new(cell! {
                 Box::new(atom!{ 44 }),
                 Box::new(atom!{ 22 }),
-            )),
+            }),
             Box::new(atom!{ 88 }),
-        );
+        };
         assert!(lh == rh);
 
         // [[44 22] 88] != [44 [22 88]]
-        let lh = cell!(
-            Box::new(cell!(
+        let lh = cell! {
+            Box::new(cell! {
                 Box::new(atom!{ 44 }),
                 Box::new(atom!{ 22 }),
-            )),
+            }),
             Box::new(atom!{ 88 }),
-        );
-        let rh = cell!(
+        };
+        let rh = cell! {
             Box::new(atom!{ 44 }),
-            Box::new(cell!(
+            Box::new(cell! {
                 Box::new(atom!{ 22 }),
                 Box::new(atom!{ 88 }),
-            )),
-        );
+            }),
+        };
         assert!(lh != rh);
     }
 
@@ -562,14 +562,14 @@ mod tests {
 
         // [[2 7] [2 7]] -> 0
         let cell = Cell {
-            head: Box::new(cell!(
+            head: Box::new(cell! {
                 Box::new(atom!{ 2 }),
                 Box::new(atom!{ 7 }),
-            )),
-            tail: Box::new(cell!(
+            }),
+            tail: Box::new(cell! {
                 Box::new(atom!{ 2 }),
                 Box::new(atom!{ 7 }),
-            )),
+            }),
         };
         assert_eq!(Loobean::Yes, cell.tis());
 
