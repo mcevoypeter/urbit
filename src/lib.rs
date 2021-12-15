@@ -298,515 +298,618 @@ mod tests {
     #[test]
     fn clone_atom() {
         // Clone 777.
-        let atom = Atom(777);
-        assert_eq!(atom, atom.clone());
+        {
+            let atom = Atom(777);
+            assert_eq!(atom, atom.clone());
+        }
     }
 
     #[test]
     fn clone_cell() {
         // Clone [8 808].
-        let cell = Cell {
-            head: Box::new(atom!{ 8 }),
-            tail: Box::new(atom!{ 808 }),
-        };
-        assert_eq!(cell, cell.clone());
+        {
+            let cell = Cell {
+                head: Box::new(atom!{ 8 }),
+                tail: Box::new(atom!{ 808 }),
+            };
+            assert_eq!(cell, cell.clone());
+        }
     }
 
     #[test]
     fn clone_noun() {
         // Clone 101010.
-        let noun = atom!{ 101010 };
-        assert_eq!(noun, noun.clone());
+        {
+            let noun = atom!{ 101010 };
+            assert_eq!(noun, noun.clone());
+        }
 
         // Clone [300 [400 500]].
-        let noun = cell! {
-            Box::new(atom!{ 300 }),
-            Box::new(cell! {
-                Box::new(atom!{ 400 }),
-                Box::new(atom!{ 500 }),
-            }),
-        };
-        assert_eq!(noun, noun.clone());
+        {
+            let noun = cell! {
+                Box::new(atom!{ 300 }),
+                Box::new(cell! {
+                    Box::new(atom!{ 400 }),
+                    Box::new(atom!{ 500 }),
+                }),
+            };
+            assert_eq!(noun, noun.clone());
+        }
     }
 
     #[test]
     fn fas_cell() {
-        let h1 = Box::new(atom!{ 1 });
-        let h2 = Box::new(atom!{ 2 });
-        let h3 = Box::new(atom!{ 3 });
-        let h5 = Box::new(atom!{ 5 });
-        let h6 = Box::new(atom!{ 6 });
-
         // /[1 [98 89]] -> [98 89]
-        let t = Box::new(cell! {
-            Box::new(atom!{ 98 }),
-            Box::new(atom!{ 89 }),
-        });
-        let cell = Cell {
-            head: h1.clone(),
-            tail: t.clone(),
-        };
-        match cell.fas() {
-            Ok(res) => {
-                assert!(*t == res);
-            },
-            Err(err) => {
-                assert!(false, "Unexpected failure: {}.", err.msg);
-            },
+        {
+            let t = Box::new(cell! {
+                Box::new(atom!{ 98 }),
+                Box::new(atom!{ 89 }),
+            });
+            match (Cell {
+                head: Box::new(atom!{ 1 }),
+                tail: t.clone(),
+            }.fas())
+            {
+                Ok(res) => {
+                    assert_eq!(*t, res);
+                },
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                },
+            }
         }
 
         // /[2 [292 1001]] -> 292
-        let th = Box::new(atom!{ 292 });
-        let cell = Cell {
-            head: h2.clone(),
-            tail: Box::new(cell! {
-                th.clone(),
-                Box::new(atom!{ 1001 }),
-            }),
-        };
-        match cell.fas() {
-            Ok(res) => {
-                assert!(*th == res)
-            },
-            Err(err) => {
-                assert!(false, "Unexpected failure: {}.", err.msg);
-            },
+        {
+            let th = Box::new(atom!{ 292 });
+            match (Cell {
+                head: Box::new(atom!{ 2 }),
+                tail: Box::new(cell! {
+                    th.clone(),
+                    Box::new(atom!{ 1001 }),
+                }),
+            }.fas())
+            {
+                Ok(res) => {
+                    assert_eq!(*th, res)
+                },
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                },
+            }
         }
 
-        // /[2 107] -> error
-        let cell = Cell {
-            head: h2.clone(),
-            tail: Box::new(atom!{ 107 }),
-        };
-        match cell.fas() {
-            Ok(_) => {
-                assert!(false, "Unexpected success.");
-            },
-            Err(_) => {
-                assert!(true);
-            },
+        // /[2 107] -> crash
+        {
+            match (Cell {
+                head: Box::new(atom!{ 2 }),
+                tail: Box::new(atom!{ 107 }),
+            }.fas())
+            {
+                Ok(_) => {
+                    assert!(false, "Unexpected success.");
+                },
+                Err(_) => {
+                    assert!(true);
+                },
+            }
         }
 
         // /[3 [[80 50] [19 95]]] -> [19 95]
-        let tt = Box::new(cell! {
-            Box::new(atom!{ 19 }),
-            Box::new(atom!{ 95 }),
-        });
-        let cell = Cell {
-            head: h3.clone(),
-            tail: Box::new(cell! {
-                Box::new(cell! {
-                    Box::new(atom!{ 80 }),
-                    Box::new(atom!{ 50 }),
+        {
+            let tt = Box::new(cell! {
+                Box::new(atom!{ 19 }),
+                Box::new(atom!{ 95 }),
+            });
+            match (Cell {
+                head: Box::new(atom!{ 3 }),
+                tail: Box::new(cell! {
+                    Box::new(cell! {
+                        Box::new(atom!{ 80 }),
+                        Box::new(atom!{ 50 }),
+                    }),
+                    tt.clone(),
                 }),
-                tt.clone(),
-            }),
-        };
-        match cell.fas() {
-            Ok(res) => {
-                assert!(*tt == res)
-            },
-            Err(err) => {
-                assert!(false, "Unexpected failure: {}.", err.msg);
-            },
+            }.fas())
+            {
+                Ok(res) => {
+                    assert_eq!(*tt, res)
+                },
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                },
+            }
         }
 
-        // /[(2 + 2 + 1) [[15 16] 17]]
-        // -> /[3 /[2 [[15 16] 17]]]
-        // -> /[3 [15 16]]
-        // -> 16
-        let tht = Box::new(atom!{ 16 });
-        let cell = Cell {
-            head: h5.clone(),
-            tail: Box::new(cell! {
-                Box::new(cell! {
-                    Box::new(atom!{ 15 }),
-                    tht.clone(),
+        // /[5 [[15 16] 17]] -> 16
+        {
+            let tht = Box::new(atom!{ 16 });
+            match (Cell {
+                head: Box::new(atom!{ 5 }),
+                tail: Box::new(cell! {
+                    Box::new(cell! {
+                        Box::new(atom!{ 15 }),
+                        tht.clone(),
+                    }),
+                    Box::new(atom!{ 17 }),
                 }),
-                Box::new(atom!{ 17 }),
-            }),
-        };
-        match cell.fas() {
-            Ok(res) => {
-                assert!(*tht == res)
-            },
-            Err(err) => {
-                assert!(false, "Unexpected failure: {}.", err.msg);
-            },
+            }.fas())
+            {
+                Ok(res) => {
+                    assert_eq!(*tht, res)
+                },
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                },
+            }
         }
 
-        // /[(3 + 3) [4 [8 12]]] -> /[2 /[3 [4 [8 12]]]] -> 8
-        let tth = Box::new(atom!{ 8 });
-        let cell = Cell {
-            head: h6.clone(),
-            tail: Box::new(cell! {
-                Box::new(atom!{ 4 }),
-                Box::new(cell! {
-                    tth.clone(),
-                    Box::new(atom!{ 12 }),
+        // /[6 [4 [8 12]]] -> 8
+        {
+            let tth = Box::new(atom!{ 8 });
+            match (Cell {
+                head: Box::new(atom!{ 6 }),
+                tail: Box::new(cell! {
+                    Box::new(atom!{ 4 }),
+                    Box::new(cell! {
+                        tth.clone(),
+                        Box::new(atom!{ 12 }),
+                    }),
                 }),
-            }),
-        };
-        match cell.fas() {
-            Ok(res) => {
-                assert!(*tth == res)
-            },
-            Err(err) => {
-                assert!(false, "Unexpected failure: {}.", err.msg);
-            },
+            }.fas())
+            {
+                Ok(res) => {
+                    assert!(*tth == res)
+                },
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                },
+            }
+        }
+
+        // /[12 [531 25 99]] -> crash
+        {
+            match (Cell {
+                head: Box::new(atom!{ 12 }),
+                tail: Box::new(cell! {
+                    Box::new(atom!{ 531 }),
+                    Box::new(cell! {
+                        Box::new(atom!{ 25 }),
+                        Box::new(atom!{ 99 }),
+                    }),
+                }),
+            }.fas())
+            {
+                Ok(_) => {
+                    assert!(false, "Unexpected success.")
+                },
+                Err(_) => {
+                    assert!(true);
+                },
+            }
         }
     }
 
     #[test]
     fn hax_cell() {
         // #[1 [22 80]] -> 22
-        let th = Box::new(atom!{ 22 });
-        match (Cell {
-            head: Box::new(atom!{ 1 }),
-            tail: Box::new(cell! {
+        {
+            let th = Box::new(atom!{ 22 });
+            match (Cell {
+                head: Box::new(atom!{ 1 }),
+                tail: Box::new(cell! {
                     th.clone(),
                     Box::new(atom!{ 80 }),
-            }),
-        }.hax())
-        {
-            Ok(res) => {
-                assert_eq!(*th, res);
-            },
-            Err(err) => {
-                assert!(false, "Unexpected failure: {}.", err.msg);
-            },
+                }),
+            }.hax())
+            {
+                Ok(res) => {
+                    assert_eq!(*th, res);
+                },
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                },
+            }
         }
 
         // #[2 11 [22 33]] -> [11 33]
-        let th = Box::new(atom!{ 11 });
-        let ttt = Box::new(atom!{ 33 });
-        match (Cell {
-            head: Box::new(atom!{ 2 }),
-            tail: Box::new(cell! {
-                th.clone(),
-                Box::new(cell! {
-                    Box::new(atom!{ 22 }),
-                    ttt.clone(),
-                }),
-            }),
-        }.hax())
         {
-            Ok(res) => {
-                assert_eq!(
-                    cell!{ th, ttt, },
-                    res
-                );
-            },
-            Err(err) => {
-                assert!(false, "Unexpected failure: {}.", err.msg);
-            },
+            let th = Box::new(atom!{ 11 });
+            let ttt = Box::new(atom!{ 33 });
+            match (Cell {
+                head: Box::new(atom!{ 2 }),
+                tail: Box::new(cell! {
+                    th.clone(),
+                    Box::new(cell! {
+                        Box::new(atom!{ 22 }),
+                        ttt.clone(),
+                    }),
+                }),
+            }.hax())
+            {
+                Ok(res) => {
+                    assert_eq!(
+                        cell!{ th, ttt, },
+                        res
+                        );
+                },
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                },
+            }
         }
 
         // #[3 11 [22 33]] -> [22 11]
-        let th = Box::new(atom!{ 11 });
-        let tth = Box::new(atom!{ 22 });
-        match (Cell {
-            head: Box::new(atom!{ 3 }),
-            tail: Box::new(cell! {
-                th.clone(),
-                Box::new(cell! {
-                    tth.clone(),
-                    Box::new(atom!{ 33 }),
-                }),
-            }),
-        }.hax())
         {
-            Ok(res) => {
-                assert_eq!(
-                    cell!{ tth, th, },
-                    res
-                );
-            },
-            Err(err) => {
-                assert!(false, "Unexpected failure: {}.", err.msg);
-            },
+            let th = Box::new(atom!{ 11 });
+            let tth = Box::new(atom!{ 22 });
+            match (Cell {
+                head: Box::new(atom!{ 3 }),
+                tail: Box::new(cell! {
+                    th.clone(),
+                    Box::new(cell! {
+                        tth.clone(),
+                        Box::new(atom!{ 33 }),
+                    }),
+                }),
+            }.hax())
+            {
+                Ok(res) => {
+                    assert_eq!(
+                        cell!{ tth, th, },
+                        res
+                        );
+                },
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                },
+            }
         }
 
         // #[4 11 [[22 33] 44]] -> [[11 33] 44]
-        let th = Box::new(atom!{ 11 });
-        let ttht = Box::new(atom!{ 33 });
-        let ttt = Box::new(atom!{ 44 });
-        match (Cell {
-            head: Box::new(atom!{ 4 }),
-            tail: Box::new(cell! {
-                th.clone(),
-                Box::new(cell! {
-                    Box::new(cell! {
-                        Box::new(atom!{ 22 }),
-                        ttht.clone(),
-                    }),
-                    ttt.clone(),
-                }),
-            }),
-        }.hax())
         {
-            Ok(res) => {
-                assert_eq!(
-                    cell!{
-                        Box::new(cell!{
-                            th,
-                            ttht,
+            let th = Box::new(atom!{ 11 });
+            let ttht = Box::new(atom!{ 33 });
+            let ttt = Box::new(atom!{ 44 });
+            match (Cell {
+                head: Box::new(atom!{ 4 }),
+                tail: Box::new(cell! {
+                    th.clone(),
+                    Box::new(cell! {
+                        Box::new(cell! {
+                            Box::new(atom!{ 22 }),
+                            ttht.clone(),
                         }),
-                        ttt,
-                    },
-                    res
-                );
-            },
-            Err(err) => {
-                assert!(false, "Unexpected failure: {}.", err.msg);
-            },
+                        ttt.clone(),
+                    }),
+                }),
+            }.hax())
+            {
+                Ok(res) => {
+                    assert_eq!(
+                        cell!{
+                            Box::new(cell!{
+                                th,
+                                ttht,
+                            }),
+                            ttt,
+                        },
+                        res
+                        );
+                },
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                },
+            }
         }
 
         // #[5 11 [[22 33] 44] -> [[22 11] 44]
-        let th = Box::new(atom!{ 11 });
-        let tthh = Box::new(atom!{ 22 });
-        let ttt = Box::new(atom!{ 44 });
-        match (Cell {
-            head: Box::new(atom!{ 5 }),
-            tail: Box::new(cell! {
-                th.clone(),
-                Box::new(cell! {
-                    Box::new(cell! {
-                        tthh.clone(),
-                        Box::new(atom!{ 33 }),
-                    }),
-                    ttt.clone(),
-                }),
-            }),
-        }.hax())
         {
-            Ok(res) => {
-                assert_eq!(
-                    cell!{
-                        Box::new(cell!{
-                            tthh,
-                            th,
+            let th = Box::new(atom!{ 11 });
+            let tthh = Box::new(atom!{ 22 });
+            let ttt = Box::new(atom!{ 44 });
+            match (Cell {
+                head: Box::new(atom!{ 5 }),
+                tail: Box::new(cell! {
+                    th.clone(),
+                    Box::new(cell! {
+                        Box::new(cell! {
+                            tthh.clone(),
+                            Box::new(atom!{ 33 }),
                         }),
-                        ttt,
-                    },
-                    res
-                );
-            },
-            Err(err) => {
-                assert!(false, "Unexpected failure: {}.", err.msg);
-            },
+                        ttt.clone(),
+                    }),
+                }),
+            }.hax())
+            {
+                Ok(res) => {
+                    assert_eq!(
+                        cell!{
+                            Box::new(cell!{
+                                tthh,
+                                th,
+                            }),
+                            ttt,
+                        },
+                        res
+                        );
+                },
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                },
+            }
         }
     }
 
     #[test]
     fn lus_atom() {
         // +999 -> 1000
-        let atom = Atom(999);
-        assert_eq!(1000, atom.lus().0);
+        {
+            let atom = Atom(999);
+            assert_eq!(1000, atom.lus().0);
+        }
     }
 
     #[test]
     fn partialeq_cell() {
         // [71 109] == [71 109]
-        let lh = Cell {
-            head: Box::new(atom!{ 71 }),
-            tail: Box::new(atom!{ 109 }),
-        };
-        let rh = Cell {
-            head: Box::new(atom!{ 71 }),
-            tail: Box::new(atom!{ 109 }),
-        };
-        assert!(lh == rh);
+        {
+            assert_eq!(
+                Cell {
+                    head: Box::new(atom!{ 71 }),
+                    tail: Box::new(atom!{ 109 }),
+                },
+                Cell {
+                    head: Box::new(atom!{ 71 }),
+                    tail: Box::new(atom!{ 109 }),
+                },
+            );
+        }
 
         // [71 109] != [109 71]
-        let lh = Cell {
-            head: Box::new(atom!{ 71 }),
-            tail: Box::new(atom!{ 109 }),
-        };
-        let rh = Cell {
-            head: Box::new(atom!{ 109 }),
-            tail: Box::new(atom!{ 71 }),
-        };
-        assert!(lh != rh);
+        {
+            assert_ne!(
+                Cell {
+                    head: Box::new(atom!{ 71 }),
+                    tail: Box::new(atom!{ 109 }),
+                },
+                Cell {
+                    head: Box::new(atom!{ 109 }),
+                    tail: Box::new(atom!{ 71 }),
+                },
+            );
+        }
 
         // [11 [12 13]] == [11 [12 13]]
-        let lh = Cell {
-            head: Box::new(atom!{ 11 }),
-            tail: Box::new(cell! {
-                Box::new(atom!{ 12 }),
-                Box::new(atom!{ 13 }),
-            }),
-        };
-        let rh = Cell {
-            head: Box::new(atom!{ 11 }),
-            tail: Box::new(cell! {
-                Box::new(atom!{ 12 }),
-                Box::new(atom!{ 13 }),
-            }),
-        };
-        assert!(lh == rh);
+        {
+            assert_eq!(
+                Cell {
+                    head: Box::new(atom!{ 11 }),
+                    tail: Box::new(cell! {
+                        Box::new(atom!{ 12 }),
+                        Box::new(atom!{ 13 }),
+                    }),
+                },
+                Cell {
+                    head: Box::new(atom!{ 11 }),
+                    tail: Box::new(cell! {
+                        Box::new(atom!{ 12 }),
+                        Box::new(atom!{ 13 }),
+                    }),
+                },
+            );
+        }
 
         // [11 [12 13]] != [11 [13 12]]
-        let lh = Cell {
-            head: Box::new(atom!{ 11 }),
-            tail: Box::new(cell! {
-                Box::new(atom!{ 12 }),
-                Box::new(atom!{ 13 }),
-            }),
-        };
-        let rh = Cell {
-            head: Box::new(atom!{ 11 }),
-            tail: Box::new(cell! {
-                Box::new(atom!{ 13 }),
-                Box::new(atom!{ 12 }),
-            }),
-        };
-        assert!(lh != rh);
+        {
+            assert_ne!(
+                Cell {
+                    head: Box::new(atom!{ 11 }),
+                    tail: Box::new(cell! {
+                        Box::new(atom!{ 12 }),
+                        Box::new(atom!{ 13 }),
+                    }),
+                },
+                Cell {
+                    head: Box::new(atom!{ 11 }),
+                    tail: Box::new(cell! {
+                        Box::new(atom!{ 13 }),
+                        Box::new(atom!{ 12 }),
+                    }),
+                },
+            );
+        }
     }
 
     #[test]
     fn partialeq_noun() {
         // 500 == 500
-        let lh = atom!{ 500 };
-        let rh = atom!{ 500 };
-        assert!(lh == rh);
+        {
+            assert_eq!(
+                atom!{ 500 },
+                atom!{ 500 },
+            );
+        }
 
         // 499 != 501
-        let lh = atom!{ 499 };
-        let rh = atom!{ 501 };
-        assert!(lh != rh);
+        {
+            assert_ne!(
+                atom!{ 499 },
+                atom!{ 501 },
+            );
+        }
 
         // [0 5] == [0 5]
-        let lh = cell! {
-            Box::new(atom!{ 0 }),
-            Box::new(atom!{ 5 }),
-        };
-        let rh = cell! {
-            Box::new(atom!{ 0 }),
-            Box::new(atom!{ 5 }),
-        };
-        assert!(lh == rh);
+        {
+            assert_eq!(
+                cell! {
+                    Box::new(atom!{ 0 }),
+                    Box::new(atom!{ 5 }),
+                },
+                cell! {
+                    Box::new(atom!{ 0 }),
+                    Box::new(atom!{ 5 }),
+                },
+            );
+        }
 
         // [0 0] == [0 5]
-        let lh = cell! {
-            Box::new(atom!{ 0 }),
-            Box::new(atom!{ 0 }),
-        };
-        let rh = cell! {
-            Box::new(atom!{ 0 }),
-            Box::new(atom!{ 5 }),
-        };
-        assert!(lh != rh);
+        {
+            assert_ne!(
+                cell! {
+                    Box::new(atom!{ 0 }),
+                    Box::new(atom!{ 0 }),
+                },
+                cell! {
+                    Box::new(atom!{ 0 }),
+                    Box::new(atom!{ 5 }),
+                },
+            );
+        }
 
         // [[44 22] 88] == [[44 22] 88]
-        let lh = cell! {
-            Box::new(cell! {
-                Box::new(atom!{ 44 }),
-                Box::new(atom!{ 22 }),
-            }),
-            Box::new(atom!{ 88 }),
-        };
-        let rh = cell! {
-            Box::new(cell! {
-                Box::new(atom!{ 44 }),
-                Box::new(atom!{ 22 }),
-            }),
-            Box::new(atom!{ 88 }),
-        };
-        assert!(lh == rh);
+        {
+            assert_eq!(
+                cell! {
+                    Box::new(cell! {
+                        Box::new(atom!{ 44 }),
+                        Box::new(atom!{ 22 }),
+                    }),
+                    Box::new(atom!{ 88 }),
+                },
+                cell! {
+                    Box::new(cell! {
+                        Box::new(atom!{ 44 }),
+                        Box::new(atom!{ 22 }),
+                    }),
+                    Box::new(atom!{ 88 }),
+                },
+            );
+        }
 
         // [[44 22] 88] != [44 [22 88]]
-        let lh = cell! {
-            Box::new(cell! {
-                Box::new(atom!{ 44 }),
-                Box::new(atom!{ 22 }),
-            }),
-            Box::new(atom!{ 88 }),
-        };
-        let rh = cell! {
-            Box::new(atom!{ 44 }),
-            Box::new(cell! {
-                Box::new(atom!{ 22 }),
-                Box::new(atom!{ 88 }),
-            }),
-        };
-        assert!(lh != rh);
+        {
+            assert_ne!(
+                cell! {
+                    Box::new(cell! {
+                        Box::new(atom!{ 44 }),
+                        Box::new(atom!{ 22 }),
+                    }),
+                    Box::new(atom!{ 88 }),
+                },
+                cell! {
+                    Box::new(atom!{ 44 }),
+                    Box::new(cell! {
+                        Box::new(atom!{ 22 }),
+                        Box::new(atom!{ 88 }),
+                    }),
+                },
+            );
+        }
     }
 
     #[test]
     fn tis_cell() {
         // [2 2] -> 0
-        let cell = Cell {
-            head: Box::new(atom!{ 2 }),
-            tail: Box::new(atom!{ 2 }),
-        };
-        assert_eq!(Loobean::Yes, cell.tis());
+        {
+            assert_eq!(
+                Loobean::Yes,
+                Cell {
+                    head: Box::new(atom!{ 2 }),
+                    tail: Box::new(atom!{ 2 }),
+                }.tis(),
+            );
+        }
 
         // [7 6] -> 1
-        let cell = Cell {
-            head: Box::new(atom!{ 7 }),
-            tail: Box::new(atom!{ 6 }),
-        };
-        assert_eq!(Loobean::No, cell.tis());
+        {
+            assert_eq!(
+                Loobean::No,
+                Cell {
+                    head: Box::new(atom!{ 7 }),
+                    tail: Box::new(atom!{ 6 }),
+                }.tis(),
+            );
+        }
 
         // [[2 7] [2 7]] -> 0
-        let cell = Cell {
-            head: Box::new(cell! {
-                Box::new(atom!{ 2 }),
-                Box::new(atom!{ 7 }),
-            }),
-            tail: Box::new(cell! {
-                Box::new(atom!{ 2 }),
-                Box::new(atom!{ 7 }),
-            }),
-        };
-        assert_eq!(Loobean::Yes, cell.tis());
+        {
+            assert_eq!(
+                Loobean::Yes,
+                Cell {
+                    head: Box::new(cell! {
+                        Box::new(atom!{ 2 }),
+                        Box::new(atom!{ 7 }),
+                    }),
+                    tail: Box::new(cell! {
+                        Box::new(atom!{ 2 }),
+                        Box::new(atom!{ 7 }),
+                    }),
+                }.tis(),
+            );
+        }
 
         // [[2 7] [2 [7 3]]] -> 1
-        let cell = Cell {
-            head: Box::new(Noun::Cell(Cell {
-                head: Box::new(atom!{ 2 }),
-                tail: Box::new(atom!{ 7 }),
-            })),
-            tail: Box::new(Noun::Cell(Cell {
-                head: Box::new(atom!{ 2 }),
-                tail: Box::new(Noun::Cell(Cell {
-                    head: Box::new(atom!{ 7 }),
-                    tail: Box::new(atom!{ 3 }),
-                }))
-            })),
-        };
-        assert_eq!(Loobean::No, cell.tis());
+        {
+            assert_eq!(
+                Loobean::No,
+                Cell {
+                    head: Box::new(cell! {
+                        Box::new(atom!{ 2 }),
+                        Box::new(atom!{ 7 }),
+                    }),
+                    tail: Box::new(cell! {
+                        Box::new(atom!{ 2 }),
+                        Box::new(cell! {
+                            Box::new(atom!{ 7 }),
+                            Box::new(atom!{ 3 }),
+                        }),
+                    }),
+                }.tis(),
+            );
+        }
     }
 
     #[test]
     fn wut_atom() {
         // ?137 -> 1
-        let atom = Atom(137);
-        assert_eq!(Loobean::No, atom.wut());
+        {
+            assert_eq!(
+                Loobean::No,
+                Atom(137).wut(),
+            );
+        }
     }
 
     #[test]
     fn wut_cell() {
         // ?[128 256] -> 0
-        let cell = Cell {
-            head: Box::new(atom!{ 128 }),
-            tail: Box::new(atom!{ 256 }),
-        };
-        assert_eq!(Loobean::Yes, cell.wut());
+        {
+            assert_eq!(
+                Loobean::Yes,
+                Cell {
+                    head: Box::new(atom!{ 128 }),
+                    tail: Box::new(atom!{ 256 }),
+                }.wut(),
+            );
+        }
 
         // ?[[512 1024] [16 32]] -> 0
-        let cell = Cell {
-            head: Box::new(Noun::Cell(Cell {
-                head: Box::new(atom!{ 512 }),
-                tail: Box::new(atom!{ 1024 }),
-            })),
-            tail: Box::new(Noun::Cell(Cell {
-                head: Box::new(atom!{ 16 }),
-                tail: Box::new(atom!{ 32 }),
-            })),
-        };
-        assert_eq!(Loobean::Yes, cell.wut());
+        {
+            assert_eq!(
+                Loobean::Yes,
+                Cell {
+                    head: Box::new(cell! {
+                        Box::new(atom!{ 512 }),
+                        Box::new(atom!{ 1024 }),
+                    }),
+                    tail: Box::new(cell! {
+                        Box::new(atom!{ 16 }),
+                        Box::new(atom!{ 32 }),
+                    }),
+                }.wut(),
+            );
+        }
     }
 
 }
