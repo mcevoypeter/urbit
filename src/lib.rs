@@ -1,8 +1,15 @@
+use std::{error,fmt};
+
 #[derive(Debug)]
 #[derive(PartialEq)]
 enum Loobean {
     Yes,
     No,
+}
+
+#[derive(Debug)]
+struct Error {
+    msg: String,
 }
 
 #[derive(Debug)]
@@ -39,7 +46,7 @@ trait Tis {
 
 // /
 trait Fas {
-    fn fas(&self) {}
+    fn fas(self) -> Result<Noun, Error>;
 }
 
 // #
@@ -51,6 +58,14 @@ trait Hax {
 trait Tar {
     fn tar(&self) {}
 }
+
+impl fmt::Display for Error {
+   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+       write!(f, "{}", self.msg)
+   }
+}
+
+impl error::Error for Error {}
 
 impl Clone for Noun {
     fn clone(&self) -> Self {
@@ -147,6 +162,61 @@ impl Tis for Cell {
     }
 }
 
+impl Fas for Cell {
+    fn fas(self) -> Result<Noun, Error> {
+        if let Noun::Atom(head) = *self.head {
+            match head {
+                Atom(1) => Ok(*self.tail),
+                Atom(2) => {
+                    if let Noun::Cell(cell) = *self.tail {
+                        Ok(*cell.head)
+                    } else {
+                        Err(Error {
+                            msg: "/[2 a] cannot be evaluated when a is an atom".to_string(),
+                        })
+                    }
+                },
+                Atom(3) => {
+                    if let Noun::Cell(cell) = *self.tail {
+                        Ok(*cell.tail)
+                    } else {
+                        Err(Error {
+                            msg: "/[3 a] cannot be evaluated when a is an atom".to_string(),
+                        })
+                    }
+                },
+                Atom(n) => {
+                    if let Noun::Cell(_) = *self.tail {
+                        let tail = Cell {
+                            head: Box::new(Noun::Atom(Atom(n / 2))),
+                            tail: self.tail,
+                        }.fas()?;
+                        if 0 == n % 2 {
+                            Cell {
+                                head: Box::new(Noun::Atom(Atom(2))),
+                                tail: Box::new(tail),
+                            }.fas()
+                        } else {
+                            Cell {
+                                head: Box::new(Noun::Atom(Atom(3))),
+                                tail: Box::new(tail),
+                            }.fas()
+                        }
+                    } else {
+                        Err(Error {
+                            msg: "/[n b] cannot be evaluated when b is an atom".to_string(),
+                        })
+                    }
+                },
+            }
+        } else {
+            Err(Error {
+                msg: "/[a b] cannot be evaluated when a is a cell".to_string(),
+            })
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::*;
@@ -183,6 +253,134 @@ mod tests {
             })),
         });
         assert_eq!(noun, noun.clone());
+    }
+
+    #[test]
+    fn fas_cell() {
+        let h1 = Box::new(Noun::Atom(Atom(1)));
+        let h2 = Box::new(Noun::Atom(Atom(2)));
+        let h3 = Box::new(Noun::Atom(Atom(3)));
+        let h5 = Box::new(Noun::Atom(Atom(5)));
+        let h6 = Box::new(Noun::Atom(Atom(6)));
+
+        // /[1 [98 89]] -> [98 89]
+        let t = Box::new(Noun::Cell(Cell {
+            head: Box::new(Noun::Atom(Atom(98))),
+            tail: Box::new(Noun::Atom(Atom(89))),
+        }));
+        let cell = Cell {
+            head: h1.clone(),
+            tail: t.clone(),
+        };
+        match cell.fas() {
+            Ok(res) => {
+                assert!(*t == res);
+            },
+            Err(err) => {
+                assert!(false, "Unexpected failure: {}.", err.msg);
+            },
+        }
+
+        // /[2 [292 1001]] -> 292
+        let th = Box::new(Noun::Atom(Atom(292)));
+        let cell = Cell {
+            head: h2.clone(),
+            tail: Box::new(Noun::Cell(Cell {
+                head: th.clone(),
+                tail: Box::new(Noun::Atom(Atom(1001))),
+            })),
+        };
+        match cell.fas() {
+            Ok(res) => {
+                assert!(*th == res)
+            },
+            Err(err) => {
+                assert!(false, "Unexpected failure: {}.", err.msg);
+            },
+        }
+
+        // /[2 107] -> error
+        let cell = Cell {
+            head: h2.clone(),
+            tail: Box::new(Noun::Atom(Atom(107))),
+        };
+        match cell.fas() {
+            Ok(_) => {
+                assert!(false, "Unexpected success.");
+            },
+            Err(_) => {
+                assert!(true);
+            },
+        }
+
+        // /[3 [[80 50] [19 95]]] -> [19 95]
+        let tt = Box::new(Noun::Cell(Cell {
+            head: Box::new(Noun::Atom(Atom(19))),
+            tail: Box::new(Noun::Atom(Atom(95))),
+        }));
+        let cell = Cell {
+            head: h3.clone(),
+            tail: Box::new(Noun::Cell(Cell {
+                head: Box::new(Noun::Cell(Cell {
+                    head: Box::new(Noun::Atom(Atom(80))),
+                    tail: Box::new(Noun::Atom(Atom(50))),
+                })),
+                tail: tt.clone(),
+            })),
+        };
+        match cell.fas() {
+            Ok(res) => {
+                assert!(*tt == res)
+            },
+            Err(err) => {
+                assert!(false, "Unexpected failure: {}.", err.msg);
+            },
+        }
+
+        // /[(2 + 2 + 1) [[15 16] 17]]
+        // -> /[3 /[2 [[15 16] 17]]]
+        // -> /[3 [15 16]]
+        // -> 16
+        let tht = Box::new(Noun::Atom(Atom(16)));
+        let cell = Cell {
+            head: h5.clone(),
+            tail: Box::new(Noun::Cell(Cell {
+                head: Box::new(Noun::Cell(Cell {
+                    head: Box::new(Noun::Atom(Atom(15))),
+                    tail: tht.clone(),
+                })),
+                tail: Box::new(Noun::Atom(Atom(17))),
+            })),
+        };
+        match cell.fas() {
+            Ok(res) => {
+                assert!(*tht == res)
+            },
+            Err(err) => {
+                assert!(false, "Unexpected failure: {}.", err.msg);
+            },
+        }
+
+        // /[(3 + 3) [4 [8 12]]] -> /[2 /[3 [4 [8 12]]]] -> 8
+        let tth = Box::new(Noun::Atom(Atom(8)));
+        let cell = Cell {
+            head: h6.clone(),
+            tail: Box::new(Noun::Cell(Cell {
+                head: Box::new(Noun::Atom(Atom(4))),
+                tail: Box::new(Noun::Cell(Cell {
+                    head: tth.clone(),
+                    tail: Box::new(Noun::Atom(Atom(12))),
+                })),
+            })),
+        };
+        match cell.fas() {
+            Ok(res) => {
+                assert!(*tth == res)
+            },
+            Err(err) => {
+                assert!(false, "Unexpected failure: {}.", err.msg);
+            },
+        }
     }
 
     #[test]
