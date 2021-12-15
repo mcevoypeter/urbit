@@ -1,5 +1,9 @@
 use std::{error,fmt};
 
+/*==============================================================================
+ * Struct and enum definitions
+ */
+
 #[derive(Debug)]
 #[derive(PartialEq)]
 enum Loobean {
@@ -28,6 +32,10 @@ struct Cell {
     head: Box<Noun>,
     tail: Box<Noun>,
 }
+
+/*==============================================================================
+ * Trait definitions
+ */
 
 // ?
 trait Wut {
@@ -65,6 +73,10 @@ impl fmt::Display for Error {
    }
 }
 
+/*==============================================================================
+ * Trait implementations for Error struct
+ */
+
 impl error::Error for Error {}
 
 impl Clone for Noun {
@@ -97,6 +109,10 @@ impl PartialEq for Noun {
     }
 }
 
+/*==============================================================================
+ * Trait implementations for Atom struct
+ */
+
 impl Wut for Atom {
     fn wut(&self) -> Loobean {
         Loobean::No
@@ -108,6 +124,10 @@ impl Lus for Atom {
         Atom(1 + self.0)
     }
 }
+
+/*==============================================================================
+ * Trait implementations for Cell struct
+ */
 
 impl Clone for Cell {
     fn clone(&self) -> Self {
@@ -188,7 +208,8 @@ impl Fas for Cell {
                 Atom(n) => {
                     if let Noun::Cell(_) = *self.tail {
                         let tail = Cell {
-                            head: Box::new(Noun::Atom(Atom(n / 2))),
+                            head: boxed_atom!(n / 2),
+                            //head: Box::new(Noun::Atom(Atom(n / 2))),
                             tail: self.tail,
                         }.fas()?;
                         if 0 == n % 2 {
@@ -216,6 +237,10 @@ impl Fas for Cell {
         }
     }
 }
+
+/*==============================================================================
+ * Tests
+ */
 
 #[cfg(test)]
 mod tests {
