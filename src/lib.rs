@@ -100,6 +100,10 @@ impl fmt::Display for Error {
 
 impl error::Error for Error {}
 
+/*==============================================================================
+ * Implementations for Noun enum
+ */
+
 impl Clone for Noun {
     fn clone(&self) -> Self {
         match self {
@@ -116,10 +120,6 @@ impl Clone for Noun {
     }
 }
 
-/*==============================================================================
- * Implementations for Noun enum
- */
-
 impl PartialEq for Noun {
     fn eq(&self, other: &Self) -> bool {
         if let (Noun::Atom(lh), Noun::Atom(rh)) = (&*self, &*other) {
@@ -130,6 +130,15 @@ impl PartialEq for Noun {
         }
         else {
             false
+        }
+    }
+}
+
+impl Noun {
+    fn from_loobean(loob: Loobean) -> Self {
+        match loob {
+            Loobean::Yes => atom!(0),
+            Loobean::No => atom!(1),
         }
     }
 }
@@ -316,9 +325,16 @@ impl Tar for Cell {
                             })
                         }
                     },
-                    Atom(3) => Err(Error {
-                        msg: "unimplemented".to_string(),
-                    }),
+                    Atom(3) => {
+                        match (Cell {
+                            head: self.head,
+                            tail: tail.tail,
+                        }.tar()?)
+                        {
+                            Noun::Atom(atom) => Ok(Noun::from_loobean(atom.wut())),
+                            Noun::Cell(cell) => Ok(Noun::from_loobean(cell.wut())),
+                        }
+                    },
                     Atom(4) => Err(Error {
                         msg: "unimplemented".to_string(),
                     }),
@@ -1006,6 +1022,31 @@ mod tests {
             {
                 Ok(res) => {
                     assert_eq!(*ttttt, res);
+                },
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                },
+            }
+        }
+
+        // *[[19 20] 3 0 1] -> 0
+        {
+            match (Cell {
+                head: Box::new(cell! {
+                    Box::new(atom!{ 19 }),
+                    Box::new(atom!{ 20 }),
+                }),
+                tail: Box::new(cell! {
+                    Box::new(atom!{ 3 }),
+                    Box::new(cell! {
+                        Box::new(atom!{ 0 }),
+                        Box::new(atom!{ 1 }),
+                    }),
+                }),
+            }.tar())
+            {
+                Ok(res) => {
+                    assert_eq!(atom!{ 0 }, res);
                 },
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
