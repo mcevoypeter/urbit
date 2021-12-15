@@ -85,7 +85,7 @@ trait Hax {
 
 // *
 trait Tar {
-    fn tar(&self) {}
+    fn tar(self) -> Result<Noun, Error>;
 }
 
 /*==============================================================================
@@ -282,6 +282,66 @@ impl Hax for Cell {
         else {
             Err(Error {
                 msg: "#[a b] cannot be evaluated when a is cell and/or b is an atom".to_string(),
+            })
+        }
+    }
+}
+
+impl Tar for Cell {
+    fn tar(self) -> Result<Noun, Error> {
+        if let Noun::Cell(tail) = *self.tail {
+            if let Noun::Atom(opcode) = *tail.head {
+                match opcode {
+                    Atom(0) => Err(Error {
+                        msg: "unimplemented".to_string(),
+                    }),
+                    Atom(1) => Err(Error {
+                        msg: "unimplemented".to_string(),
+                    }),
+                    Atom(2) => Err(Error {
+                        msg: "unimplemented".to_string(),
+                    }),
+                    Atom(3) => Err(Error {
+                        msg: "unimplemented".to_string(),
+                    }),
+                    Atom(4) => Err(Error {
+                        msg: "unimplemented".to_string(),
+                    }),
+                    Atom(5) => Err(Error {
+                        msg: "unimplemented".to_string(),
+                    }),
+                    Atom(6) => Err(Error {
+                        msg: "unimplemented".to_string(),
+                    }),
+                    Atom(7) => Err(Error {
+                        msg: "unimplemented".to_string(),
+                    }),
+                    Atom(8) => Err(Error {
+                        msg: "unimplemented".to_string(),
+                    }),
+                    Atom(9) => Err(Error {
+                        msg: "unimplemented".to_string(),
+                    }),
+                    Atom(10) => Err(Error {
+                        msg: "unimplemented".to_string(),
+                    }),
+                    Atom(11) => Err(Error {
+                        msg: "unimplemented".to_string(),
+                    }),
+                    _ => Err(Error {
+                        msg: "unsupported opcode".to_string(),
+                    }),
+                }
+            }
+            else {
+                Err(Error {
+                    msg: "*[a b c] cannot be evaluated when b is a cell".to_string(),
+                })
+            }
+        }
+        else {
+            Err(Error {
+                msg: "*[a b] cannot be evaluated when b is an atom".to_string(),
             })
         }
     }
@@ -809,6 +869,47 @@ mod tests {
     }
 
     #[test]
+    fn tar_cell() {
+        // *[1 0] -> crash
+        {
+            match (Cell {
+                head: Box::new(atom!{ 1 }),
+                tail: Box::new(atom!{ 0 }),
+            }.tar())
+            {
+                Ok(_) => {
+                    assert!(false, "Unexpected success.");
+                },
+                Err(_) => {
+                    assert!(true);
+                },
+            }
+        }
+
+        // *[4 [0 0] 4] -> crash
+        {
+            match (Cell {
+                head: Box::new(atom!{ 4 }),
+                tail: Box::new(cell! {
+                    Box::new(cell! {
+                        Box::new(atom!{ 0 }),
+                        Box::new(atom!{ 0 }),
+                    }),
+                    Box::new(atom!{ 4 }),
+                }),
+            }.tar())
+            {
+                Ok(_) => {
+                    assert!(false, "Unexpected success.");
+                },
+                Err(_) => {
+                    assert!(true);
+                },
+            }
+        }
+    }
+
+    #[test]
     fn tis_cell() {
         // [2 2] -> 0
         {
@@ -911,5 +1012,4 @@ mod tests {
             );
         }
     }
-
 }
