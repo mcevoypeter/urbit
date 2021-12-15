@@ -45,11 +45,28 @@ macro_rules! atom {
 }
 
 #[macro_export]
+macro_rules! boxed_atom {
+    ($val:expr) => {
+        Box::new(atom!{ $val })
+    };
+}
+
+#[macro_export]
 macro_rules! cell {
     ($head:expr, $tail:expr,) => {
         Noun::Cell(Cell {
             head: $head,
             tail: $tail,
+        })
+    };
+}
+
+#[macro_export]
+macro_rules! boxed_cell {
+    ($head:expr, $tail:expr,) => {
+        Box::new(cell!{
+            $head,
+            $tail,
         })
     };
 }
