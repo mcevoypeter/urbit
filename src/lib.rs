@@ -104,7 +104,7 @@ impl Clone for Noun {
     fn clone(&self) -> Self {
         match self {
             Noun::Atom(atom) => {
-                atom!(atom.0)
+                atom!{ atom.0 }
             },
             Noun::Cell(cell) => {
                 cell!(
@@ -214,9 +214,9 @@ impl Fas for Cell {
                             3 => Ok(*tail.tail),
                             _ => {
                                 Cell {
-                                    head: Box::new(atom!(2 + n % 2)),
+                                    head: Box::new(atom!{ 2 + n % 2 }),
                                     tail: Box::new(Cell {
-                                        head: Box::new(atom!(n / 2)),
+                                        head: Box::new(atom!{ n / 2 }),
                                         tail: Box::new(Noun::Cell(tail)),
                                     }.fas()?),
                                 }.fas()
@@ -258,8 +258,8 @@ mod tests {
     fn clone_cell() {
         // Clone [8 808].
         let cell = Cell {
-            head: Box::new(atom!(8)),
-            tail: Box::new(atom!(808)),
+            head: Box::new(atom!{ 8 }),
+            tail: Box::new(atom!{ 808 }),
         };
         assert_eq!(cell, cell.clone());
     }
@@ -267,15 +267,15 @@ mod tests {
     #[test]
     fn clone_noun() {
         // Clone 101010.
-        let noun = atom!(101010);
+        let noun = atom!{ 101010 };
         assert_eq!(noun, noun.clone());
 
         // Clone [300 [400 500]].
         let noun = cell!(
-            Box::new(atom!(300)),
+            Box::new(atom!{ 300 }),
             Box::new(cell!(
-                Box::new(atom!(400)),
-                Box::new(atom!(500)),
+                Box::new(atom!{ 400 }),
+                Box::new(atom!{ 500 }),
             )),
         );
         assert_eq!(noun, noun.clone());
@@ -283,16 +283,16 @@ mod tests {
 
     #[test]
     fn fas_cell() {
-        let h1 = Box::new(atom!(1));
-        let h2 = Box::new(atom!(2));
-        let h3 = Box::new(atom!(3));
-        let h5 = Box::new(atom!(5));
-        let h6 = Box::new(atom!(6));
+        let h1 = Box::new(atom!{ 1 });
+        let h2 = Box::new(atom!{ 2 });
+        let h3 = Box::new(atom!{ 3 });
+        let h5 = Box::new(atom!{ 5 });
+        let h6 = Box::new(atom!{ 6 });
 
         // /[1 [98 89]] -> [98 89]
         let t = Box::new(cell!(
-            Box::new(atom!(98)),
-            Box::new(atom!(89)),
+            Box::new(atom!{ 98 }),
+            Box::new(atom!{ 89 }),
         ));
         let cell = Cell {
             head: h1.clone(),
@@ -308,12 +308,12 @@ mod tests {
         }
 
         // /[2 [292 1001]] -> 292
-        let th = Box::new(atom!(292));
+        let th = Box::new(atom!{ 292 });
         let cell = Cell {
             head: h2.clone(),
             tail: Box::new(cell!(
                 th.clone(),
-                Box::new(atom!(1001)),
+                Box::new(atom!{ 1001 }),
             )),
         };
         match cell.fas() {
@@ -328,7 +328,7 @@ mod tests {
         // /[2 107] -> error
         let cell = Cell {
             head: h2.clone(),
-            tail: Box::new(atom!(107)),
+            tail: Box::new(atom!{ 107 }),
         };
         match cell.fas() {
             Ok(_) => {
@@ -341,15 +341,15 @@ mod tests {
 
         // /[3 [[80 50] [19 95]]] -> [19 95]
         let tt = Box::new(cell!(
-            Box::new(atom!(19)),
-            Box::new(atom!(95)),
+            Box::new(atom!{ 19 }),
+            Box::new(atom!{ 95 }),
         ));
         let cell = Cell {
             head: h3.clone(),
             tail: Box::new(cell!(
                 Box::new(cell!(
-                    Box::new(atom!(80)),
-                    Box::new(atom!(50)),
+                    Box::new(atom!{ 80 }),
+                    Box::new(atom!{ 50 }),
                 )),
                 tt.clone(),
             )),
@@ -367,15 +367,15 @@ mod tests {
         // -> /[3 /[2 [[15 16] 17]]]
         // -> /[3 [15 16]]
         // -> 16
-        let tht = Box::new(atom!(16));
+        let tht = Box::new(atom!{ 16 });
         let cell = Cell {
             head: h5.clone(),
             tail: Box::new(cell!(
                 Box::new(cell!(
-                    Box::new(atom!(15)),
+                    Box::new(atom!{ 15 }),
                     tht.clone(),
                 )),
-                Box::new(atom!(17)),
+                Box::new(atom!{ 17 }),
             )),
         };
         match cell.fas() {
@@ -388,14 +388,14 @@ mod tests {
         }
 
         // /[(3 + 3) [4 [8 12]]] -> /[2 /[3 [4 [8 12]]]] -> 8
-        let tth = Box::new(atom!(8));
+        let tth = Box::new(atom!{ 8 });
         let cell = Cell {
             head: h6.clone(),
             tail: Box::new(cell!(
-                Box::new(atom!(4)),
+                Box::new(atom!{ 4 }),
                 Box::new(cell!(
                     tth.clone(),
-                    Box::new(atom!(12)),
+                    Box::new(atom!{ 12 }),
                 )),
             )),
         };
@@ -420,56 +420,56 @@ mod tests {
     fn partialeq_cell() {
         // [71 109] == [71 109]
         let lh = Cell {
-            head: Box::new(atom!(71)),
-            tail: Box::new(atom!(109)),
+            head: Box::new(atom!{ 71 }),
+            tail: Box::new(atom!{ 109 }),
         };
         let rh = Cell {
-            head: Box::new(atom!(71)),
-            tail: Box::new(atom!(109)),
+            head: Box::new(atom!{ 71 }),
+            tail: Box::new(atom!{ 109 }),
         };
         assert!(lh == rh);
 
         // [71 109] != [109 71]
         let lh = Cell {
-            head: Box::new(atom!(71)),
-            tail: Box::new(atom!(109)),
+            head: Box::new(atom!{ 71 }),
+            tail: Box::new(atom!{ 109 }),
         };
         let rh = Cell {
-            head: Box::new(atom!(109)),
-            tail: Box::new(atom!(71)),
+            head: Box::new(atom!{ 109 }),
+            tail: Box::new(atom!{ 71 }),
         };
         assert!(lh != rh);
 
         // [11 [12 13]] == [11 [12 13]]
         let lh = Cell {
-            head: Box::new(atom!(11)),
+            head: Box::new(atom!{ 11 }),
             tail: Box::new(cell!(
-                Box::new(atom!(12)),
-                Box::new(atom!(13)),
+                Box::new(atom!{ 12 }),
+                Box::new(atom!{ 13 }),
             )),
         };
         let rh = Cell {
-            head: Box::new(atom!(11)),
+            head: Box::new(atom!{ 11 }),
             tail: Box::new(cell!(
-                Box::new(atom!(12)),
-                Box::new(atom!(13)),
+                Box::new(atom!{ 12 }),
+                Box::new(atom!{ 13 }),
             )),
         };
         assert!(lh == rh);
 
         // [11 [12 13]] != [11 [13 12]]
         let lh = Cell {
-            head: Box::new(atom!(11)),
+            head: Box::new(atom!{ 11 }),
             tail: Box::new(cell!(
-                Box::new(atom!(12)),
-                Box::new(atom!(13)),
+                Box::new(atom!{ 12 }),
+                Box::new(atom!{ 13 }),
             )),
         };
         let rh = Cell {
-            head: Box::new(atom!(11)),
+            head: Box::new(atom!{ 11 }),
             tail: Box::new(cell!(
-                Box::new(atom!(13)),
-                Box::new(atom!(12)),
+                Box::new(atom!{ 13 }),
+                Box::new(atom!{ 12 }),
             )),
         };
         assert!(lh != rh);
@@ -478,67 +478,67 @@ mod tests {
     #[test]
     fn partialeq_noun() {
         // 500 == 500
-        let lh = atom!(500);
-        let rh = atom!(500);
+        let lh = atom!{ 500 };
+        let rh = atom!{ 500 };
         assert!(lh == rh);
 
         // 499 != 501
-        let lh = atom!(499);
-        let rh = atom!(501);
+        let lh = atom!{ 499 };
+        let rh = atom!{ 501 };
         assert!(lh != rh);
 
         // [0 5] == [0 5]
         let lh = cell!(
-            Box::new(atom!(0)),
-            Box::new(atom!(5)),
+            Box::new(atom!{ 0 }),
+            Box::new(atom!{ 5 }),
         );
         let rh = cell!(
-            Box::new(atom!(0)),
-            Box::new(atom!(5)),
+            Box::new(atom!{ 0 }),
+            Box::new(atom!{ 5 }),
         );
         assert!(lh == rh);
 
         // [0 0] == [0 5]
         let lh = cell!(
-            Box::new(atom!(0)),
-            Box::new(atom!(0)),
+            Box::new(atom!{ 0 }),
+            Box::new(atom!{ 0 }),
         );
         let rh = cell!(
-            Box::new(atom!(0)),
-            Box::new(atom!(5)),
+            Box::new(atom!{ 0 }),
+            Box::new(atom!{ 5 }),
         );
         assert!(lh != rh);
 
         // [[44 22] 88] == [[44 22] 88]
         let lh = cell!(
             Box::new(cell!(
-                Box::new(atom!(44)),
-                Box::new(atom!(22)),
+                Box::new(atom!{ 44 }),
+                Box::new(atom!{ 22 }),
             )),
-            Box::new(atom!(88)),
+            Box::new(atom!{ 88 }),
         );
         let rh = cell!(
             Box::new(cell!(
-                Box::new(atom!(44)),
-                Box::new(atom!(22)),
+                Box::new(atom!{ 44 }),
+                Box::new(atom!{ 22 }),
             )),
-            Box::new(atom!(88)),
+            Box::new(atom!{ 88 }),
         );
         assert!(lh == rh);
 
         // [[44 22] 88] != [44 [22 88]]
         let lh = cell!(
             Box::new(cell!(
-                Box::new(atom!(44)),
-                Box::new(atom!(22)),
+                Box::new(atom!{ 44 }),
+                Box::new(atom!{ 22 }),
             )),
-            Box::new(atom!(88)),
+            Box::new(atom!{ 88 }),
         );
         let rh = cell!(
-            Box::new(atom!(44)),
+            Box::new(atom!{ 44 }),
             Box::new(cell!(
-                Box::new(atom!(22)),
-                Box::new(atom!(88)),
+                Box::new(atom!{ 22 }),
+                Box::new(atom!{ 88 }),
             )),
         );
         assert!(lh != rh);
@@ -548,27 +548,27 @@ mod tests {
     fn tis_cell() {
         // [2 2] -> 0
         let cell = Cell {
-            head: Box::new(atom!(2)),
-            tail: Box::new(atom!(2)),
+            head: Box::new(atom!{ 2 }),
+            tail: Box::new(atom!{ 2 }),
         };
         assert_eq!(Loobean::Yes, cell.tis());
 
         // [7 6] -> 1
         let cell = Cell {
-            head: Box::new(atom!(7)),
-            tail: Box::new(atom!(6)),
+            head: Box::new(atom!{ 7 }),
+            tail: Box::new(atom!{ 6 }),
         };
         assert_eq!(Loobean::No, cell.tis());
 
         // [[2 7] [2 7]] -> 0
         let cell = Cell {
             head: Box::new(cell!(
-                Box::new(atom!(2)),
-                Box::new(atom!(7)),
+                Box::new(atom!{ 2 }),
+                Box::new(atom!{ 7 }),
             )),
             tail: Box::new(cell!(
-                Box::new(atom!(2)),
-                Box::new(atom!(7)),
+                Box::new(atom!{ 2 }),
+                Box::new(atom!{ 7 }),
             )),
         };
         assert_eq!(Loobean::Yes, cell.tis());
@@ -576,14 +576,14 @@ mod tests {
         // [[2 7] [2 [7 3]]] -> 1
         let cell = Cell {
             head: Box::new(Noun::Cell(Cell {
-                head: Box::new(atom!(2)),
-                tail: Box::new(atom!(7)),
+                head: Box::new(atom!{ 2 }),
+                tail: Box::new(atom!{ 7 }),
             })),
             tail: Box::new(Noun::Cell(Cell {
-                head: Box::new(atom!(2)),
+                head: Box::new(atom!{ 2 }),
                 tail: Box::new(Noun::Cell(Cell {
-                    head: Box::new(atom!(7)),
-                    tail: Box::new(atom!(3)),
+                    head: Box::new(atom!{ 7 }),
+                    tail: Box::new(atom!{ 3 }),
                 }))
             })),
         };
@@ -601,20 +601,20 @@ mod tests {
     fn wut_cell() {
         // ?[128 256] -> 0
         let cell = Cell {
-            head: Box::new(atom!(128)),
-            tail: Box::new(atom!(256)),
+            head: Box::new(atom!{ 128 }),
+            tail: Box::new(atom!{ 256 }),
         };
         assert_eq!(Loobean::Yes, cell.wut());
 
         // ?[[512 1024] [16 32]] -> 0
         let cell = Cell {
             head: Box::new(Noun::Cell(Cell {
-                head: Box::new(atom!(512)),
-                tail: Box::new(atom!(1024)),
+                head: Box::new(atom!{ 512 }),
+                tail: Box::new(atom!{ 1024 }),
             })),
             tail: Box::new(Noun::Cell(Cell {
-                head: Box::new(atom!(16)),
-                tail: Box::new(atom!(32)),
+                head: Box::new(atom!{ 16 }),
+                tail: Box::new(atom!{ 32 }),
             })),
         };
         assert_eq!(Loobean::Yes, cell.wut());
