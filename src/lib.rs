@@ -123,14 +123,14 @@ impl Clone for Noun {
 impl PartialEq for Noun {
     fn eq(&self, other: &Self) -> bool {
         if let (Noun::Atom(lh), Noun::Atom(rh)) = (&*self, &*other) {
-            return lh == rh
+            lh == rh
         }
-
-        if let (Noun::Cell(lh), Noun::Cell(rh)) = (&*self, &*other) {
-            return lh == rh
+        else if let (Noun::Cell(lh), Noun::Cell(rh)) = (&*self, &*other) {
+            lh == rh
         }
-
-        false
+        else {
+            false
+        }
     }
 }
 
@@ -165,29 +165,19 @@ impl Clone for Cell {
 
 impl PartialEq for Cell {
     fn eq(&self, other: &Self) -> bool {
-
-        // The heads of both self and other are atoms.
         if let (Noun::Atom(lh_head), Noun::Atom(rh_head))
             = (&*self.head, &*other.head)
         {
-            if lh_head != rh_head {
-                return false
-            }
-            return *self.tail == *other.tail
+            lh_head == rh_head && *self.tail == *other.tail
         }
-
-        // The heads of both self and other are cells.
-        if let (Noun::Cell(lh_head), Noun::Cell(rh_head))
+        else if let (Noun::Cell(lh_head), Noun::Cell(rh_head))
             = (&*self.head, &*other.head)
         {
-            if !Self::eq(lh_head, rh_head) {
-                return false
-            }
-
-            return *self.tail == *other.tail
+            Self::eq(lh_head, rh_head) && *self.tail == *other.tail
         }
-
-        false
+        else {
+            false
+        }
     }
 }
 
