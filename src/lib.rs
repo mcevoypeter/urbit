@@ -307,8 +307,11 @@ impl Tar for Cell {
                     }.fas(),
                     Atom(1) => Ok(*tail.tail),
                     Atom(2) => {
-                        if let Noun::Cell(tail_tail) = *tail.tail {
-                            Cell {
+                        match *tail.tail {
+                            Noun::Atom(_) => Err(Error {
+                                msg: "*[a 2 b] cannot be evaluated when b is an atom".to_string(),
+                            }),
+                            Noun::Cell(tail_tail) => Cell {
                                 head: Box::new(Cell {
                                     head: self.head.clone(),
                                     tail: tail_tail.head,
@@ -317,12 +320,7 @@ impl Tar for Cell {
                                     head: self.head,
                                     tail: tail_tail.tail,
                                 }.tar()?),
-                            }.tar()
-                        }
-                        else {
-                            Err(Error {
-                                msg: "*[a 2 b] cannot be evaluated when b is an atom".to_string(),
-                            })
+                            }.tar(),
                         }
                     },
                     Atom(3) => {
