@@ -201,50 +201,37 @@ impl Fas for Cell {
     fn fas(self) -> Result<Noun, Error> {
         if let Noun::Atom(head) = *self.head {
             match head {
+                Atom(0) => Err(Error {
+                    msg: "/[0 b] cannot be evaluated".to_string(),
+                }),
                 Atom(1) => Ok(*self.tail),
-                Atom(2) => {
-                    if let Noun::Cell(cell) = *self.tail {
-                        Ok(*cell.head)
-                    } else {
-                        Err(Error {
-                            msg: "/[2 a] cannot be evaluated when a is an atom".to_string(),
-                        })
-                    }
-                },
-                Atom(3) => {
-                    if let Noun::Cell(cell) = *self.tail {
-                        Ok(*cell.tail)
-                    } else {
-                        Err(Error {
-                            msg: "/[3 a] cannot be evaluated when a is an atom".to_string(),
-                        })
-                    }
-                },
                 Atom(n) => {
-                    if let Noun::Cell(_) = *self.tail {
-                        let tail = Cell {
-                            head: Box::new(atom!(n / 2)),
-                            tail: self.tail,
-                        }.fas()?;
-                        if 0 == n % 2 {
-                            Cell {
-                                head: Box::new(atom!(2)),
-                                tail: Box::new(tail),
-                            }.fas()
-                        } else {
-                            Cell {
-                                head: Box::new(atom!(3)),
-                                tail: Box::new(tail),
-                            }.fas()
+                    // XXX: is it true that b has to be a cell for /[(a + a) b] and
+                    // /[(a + a + 1) b]?
+                    if let Noun::Cell(tail) = *self.tail {
+                        match n {
+                            2 => Ok(*tail.head),
+                            3 => Ok(*tail.tail),
+                            _ => {
+                                Cell {
+                                    head: Box::new(atom!(2 + n % 2)),
+                                    tail: Box::new(Cell {
+                                        head: Box::new(atom!(n / 2)),
+                                        tail: Box::new(Noun::Cell(tail)),
+                                    }.fas()?),
+                                }.fas()
+                            },
                         }
-                    } else {
+                    }
+                    else {
                         Err(Error {
-                            msg: "/[n b] cannot be evaluated when b is an atom".to_string(),
+                            msg: "/[a b] cannot be evaluated when b is an atom".to_string(),
                         })
                     }
                 },
             }
-        } else {
+        }
+        else {
             Err(Error {
                 msg: "/[a b] cannot be evaluated when a is a cell".to_string(),
             })
