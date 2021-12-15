@@ -292,9 +292,10 @@ impl Tar for Cell {
         if let Noun::Cell(tail) = *self.tail {
             if let Noun::Atom(opcode) = *tail.head {
                 match opcode {
-                    Atom(0) => Err(Error {
-                        msg: "unimplemented".to_string(),
-                    }),
+                    Atom(0) => Cell {
+                        head: tail.tail,
+                        tail: self.head,
+                    }.fas(),
                     Atom(1) => Err(Error {
                         msg: "unimplemented".to_string(),
                     }),
@@ -591,7 +592,7 @@ mod tests {
                     assert_eq!(
                         cell!{ th, ttt, },
                         res
-                        );
+                    );
                 },
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
@@ -904,6 +905,38 @@ mod tests {
                 },
                 Err(_) => {
                     assert!(true);
+                },
+            }
+        }
+
+        // *[[[4 5] [6 14 15]] [0 7]] -> [14 15]
+        {
+            let htt = Box::new(cell! {
+                Box::new(atom!{ 14 }),
+                Box::new(atom!{ 15 }),
+            });
+            match (Cell {
+                head: Box::new(cell! {
+                    Box::new(cell! {
+                        Box::new(atom!{ 4 }),
+                        Box::new(atom!{ 5 }),
+                    }),
+                    Box::new(cell! {
+                        Box::new(atom!{ 6 }),
+                        htt.clone(),
+                    }),
+                }),
+                tail: Box::new(cell! {
+                    Box::new(atom!{ 0 }),
+                    Box::new(atom!{ 7 }),
+                }),
+            }.tar())
+            {
+                Ok(res) => {
+                    assert_eq!(*htt, res);
+                },
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
                 },
             }
         }
