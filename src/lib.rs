@@ -80,7 +80,7 @@ trait Fas {
 
 // #
 trait Hax {
-    fn hax(&self) {}
+    fn hax(self) -> Result<Noun, Error>;
 }
 
 // *
@@ -234,6 +234,54 @@ impl Fas for Cell {
         else {
             Err(Error {
                 msg: "/[a b] cannot be evaluated when a is a cell".to_string(),
+            })
+        }
+    }
+}
+
+impl Hax for Cell {
+    fn hax(self) -> Result<Noun, Error> {
+        if let (Noun::Atom(head), Noun::Cell(tail)) = (*self.head, *self.tail) {
+            match head {
+                Atom(0) => Err(Error {
+                    msg: "#[0 a b] cannot be evaluated".to_string(),
+                }),
+                Atom(1) => Ok(*tail.head),
+                Atom(n) if 0 == n % 2 => {
+                    Cell {
+                        head: Box::new(atom!{ n / 2 }),
+                        tail: Box::new(cell! {
+                            Box::new(cell! {
+                                Box::new(*tail.head),
+                                Box::new(Cell {
+                                    head: Box::new(atom!{ n + 1 }),
+                                    tail: Box::new(*tail.tail.clone()),
+                                }.fas()?),
+                            }),
+                            Box::new(*tail.tail),
+                        }),
+                    }.hax()
+                },
+                Atom(n) => {
+                    Cell {
+                        head: Box::new(atom!{ n / 2}),
+                        tail: Box::new(cell! {
+                            Box::new(cell! {
+                                Box::new(Cell {
+                                    head: Box::new(atom!{ n - 1 }),
+                                    tail: Box::new(*tail.tail.clone()),
+                                }.fas()?),
+                                Box::new(*tail.head),
+                            }),
+                            Box::new(*tail.tail),
+                        }),
+                    }.hax()
+                },
+            }
+        }
+        else {
+            Err(Error {
+                msg: "#[a b] cannot be evaluated when a is cell and/or b is an atom".to_string(),
             })
         }
     }
@@ -402,6 +450,147 @@ mod tests {
         match cell.fas() {
             Ok(res) => {
                 assert!(*tth == res)
+            },
+            Err(err) => {
+                assert!(false, "Unexpected failure: {}.", err.msg);
+            },
+        }
+    }
+
+    #[test]
+    fn hax_cell() {
+        // #[1 [22 80]] -> 22
+        let th = Box::new(atom!{ 22 });
+        match (Cell {
+            head: Box::new(atom!{ 1 }),
+            tail: Box::new(cell! {
+                    th.clone(),
+                    Box::new(atom!{ 80 }),
+            }),
+        }.hax())
+        {
+            Ok(res) => {
+                assert_eq!(*th, res);
+            },
+            Err(err) => {
+                assert!(false, "Unexpected failure: {}.", err.msg);
+            },
+        }
+
+        // #[2 11 [22 33]] -> [11 33]
+        let th = Box::new(atom!{ 11 });
+        let ttt = Box::new(atom!{ 33 });
+        match (Cell {
+            head: Box::new(atom!{ 2 }),
+            tail: Box::new(cell! {
+                th.clone(),
+                Box::new(cell! {
+                    Box::new(atom!{ 22 }),
+                    ttt.clone(),
+                }),
+            }),
+        }.hax())
+        {
+            Ok(res) => {
+                assert_eq!(
+                    cell!{ th, ttt, },
+                    res
+                );
+            },
+            Err(err) => {
+                assert!(false, "Unexpected failure: {}.", err.msg);
+            },
+        }
+
+        // #[3 11 [22 33]] -> [22 11]
+        let th = Box::new(atom!{ 11 });
+        let tth = Box::new(atom!{ 22 });
+        match (Cell {
+            head: Box::new(atom!{ 3 }),
+            tail: Box::new(cell! {
+                th.clone(),
+                Box::new(cell! {
+                    tth.clone(),
+                    Box::new(atom!{ 33 }),
+                }),
+            }),
+        }.hax())
+        {
+            Ok(res) => {
+                assert_eq!(
+                    cell!{ tth, th, },
+                    res
+                );
+            },
+            Err(err) => {
+                assert!(false, "Unexpected failure: {}.", err.msg);
+            },
+        }
+
+        // #[4 11 [[22 33] 44]] -> [[11 33] 44]
+        let th = Box::new(atom!{ 11 });
+        let ttht = Box::new(atom!{ 33 });
+        let ttt = Box::new(atom!{ 44 });
+        match (Cell {
+            head: Box::new(atom!{ 4 }),
+            tail: Box::new(cell! {
+                th.clone(),
+                Box::new(cell! {
+                    Box::new(cell! {
+                        Box::new(atom!{ 22 }),
+                        ttht.clone(),
+                    }),
+                    ttt.clone(),
+                }),
+            }),
+        }.hax())
+        {
+            Ok(res) => {
+                assert_eq!(
+                    cell!{
+                        Box::new(cell!{
+                            th,
+                            ttht,
+                        }),
+                        ttt,
+                    },
+                    res
+                );
+            },
+            Err(err) => {
+                assert!(false, "Unexpected failure: {}.", err.msg);
+            },
+        }
+
+        // #[5 11 [[22 33] 44] -> [[22 11] 44]
+        let th = Box::new(atom!{ 11 });
+        let tthh = Box::new(atom!{ 22 });
+        let ttt = Box::new(atom!{ 44 });
+        match (Cell {
+            head: Box::new(atom!{ 5 }),
+            tail: Box::new(cell! {
+                th.clone(),
+                Box::new(cell! {
+                    Box::new(cell! {
+                        tthh.clone(),
+                        Box::new(atom!{ 33 }),
+                    }),
+                    ttt.clone(),
+                }),
+            }),
+        }.hax())
+        {
+            Ok(res) => {
+                assert_eq!(
+                    cell!{
+                        Box::new(cell!{
+                            tthh,
+                            th,
+                        }),
+                        ttt,
+                    },
+                    res
+                );
             },
             Err(err) => {
                 assert!(false, "Unexpected failure: {}.", err.msg);
