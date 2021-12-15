@@ -5,14 +5,18 @@ enum Loobean {
     No,
 }
 
+#[derive(Debug)]
 enum Noun {
     Atom(Atom),
     Cell(Cell),
 }
 
+#[derive(Clone)]
+#[derive(Debug)]
 #[derive(PartialEq)]
 struct Atom(u64);
 
+#[derive(Debug)]
 struct Cell {
     head: Box<Noun>,
     tail: Box<Noun>,
@@ -48,6 +52,22 @@ trait Tar {
     fn tar(&self) {}
 }
 
+impl Clone for Noun {
+    fn clone(&self) -> Self {
+        match self {
+            Noun::Atom(atom) => {
+                Noun::Atom(Atom(atom.0))
+            },
+            Noun::Cell(cell) => {
+                Noun::Cell(Cell {
+                    head: cell.head.clone(),
+                    tail: cell.tail.clone(),
+                })
+            },
+        }
+    }
+}
+
 impl PartialEq for Noun {
     fn eq(&self, other: &Self) -> bool {
         if let (Noun::Atom(lh), Noun::Atom(rh)) = (&*self, &*other) {
@@ -71,6 +91,15 @@ impl Wut for Atom {
 impl Lus for Atom {
     fn lus(self) -> Atom {
         Atom(1 + self.0)
+    }
+}
+
+impl Clone for Cell {
+    fn clone(&self) -> Self {
+        Cell {
+            head: Box::new(*self.head.clone()),
+            tail: Box::new(*self.tail.clone()),
+        }
     }
 }
 
@@ -121,6 +150,40 @@ impl Tis for Cell {
 #[cfg(test)]
 mod tests {
     use crate::*;
+
+    #[test]
+    fn clone_atom() {
+        // Clone 777.
+        let atom = Atom(777);
+        assert_eq!(atom, atom.clone());
+    }
+
+    #[test]
+    fn clone_cell() {
+        // Clone [8 808].
+        let cell = Cell {
+            head: Box::new(Noun::Atom(Atom(8))),
+            tail: Box::new(Noun::Atom(Atom(808))),
+        };
+        assert_eq!(cell, cell.clone());
+    }
+
+    #[test]
+    fn clone_noun() {
+        // Clone 101010.
+        let noun = Noun::Atom(Atom(101010));
+        assert_eq!(noun, noun.clone());
+
+        // Clone [300 [400 500]].
+        let noun = Noun::Cell(Cell {
+            head: Box::new(Noun::Atom(Atom(300))),
+            tail: Box::new(Noun::Cell(Cell {
+                head: Box::new(Noun::Atom(Atom(400))),
+                tail: Box::new(Noun::Atom(Atom(500))),
+            })),
+        });
+        assert_eq!(noun, noun.clone());
+    }
 
     #[test]
     fn lus_atom() {
