@@ -333,9 +333,19 @@ impl Tar for Cell {
                             Noun::Cell(cell) => Ok(Noun::from_loobean(cell.wut())),
                         }
                     },
-                    Atom(4) => Err(Error {
-                        msg: "unimplemented".to_string(),
-                    }),
+                    Atom(4) => {
+                        match (Cell {
+                            head: self.head,
+                            tail: tail.tail,
+                        }.tar()?)
+                        {
+                            Noun::Atom(atom) => Ok(Noun::Atom(atom.lus())),
+                            Noun::Cell(_) => Err(Error {
+                                msg: "Cannot apply the + operator to a cell".to_string(),
+                            }),
+                        }
+
+                    },
                     Atom(5) => Err(Error {
                         msg: "unimplemented".to_string(),
                     }),
@@ -1045,6 +1055,28 @@ mod tests {
             {
                 Ok(res) => {
                     assert_eq!(atom!{ 0 }, res);
+                },
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                },
+            }
+        }
+
+        // *[57 [4 0 1]] -> 58
+        {
+            match (Cell {
+                head: Box::new(atom!{ 57 }),
+                tail: Box::new(cell! {
+                    Box::new(atom!{ 4 }),
+                    Box::new(cell!{
+                        Box::new(atom!{ 0 }),
+                        Box::new(atom!{ 1 }),
+                    }),
+                }),
+            }.tar())
+            {
+                Ok(res) => {
+                    assert_eq!(atom!{ 58 }, res);
                 },
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
