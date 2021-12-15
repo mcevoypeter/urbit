@@ -296,9 +296,7 @@ impl Tar for Cell {
                         head: tail.tail,
                         tail: self.head,
                     }.fas(),
-                    Atom(1) => Err(Error {
-                        msg: "unimplemented".to_string(),
-                    }),
+                    Atom(1) => Ok(*tail.tail),
                     Atom(2) => Err(Error {
                         msg: "unimplemented".to_string(),
                     }),
@@ -934,6 +932,29 @@ mod tests {
             {
                 Ok(res) => {
                     assert_eq!(*htt, res);
+                },
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                },
+            }
+        }
+
+        // *[42 [1 153 218]] -> [153 218]
+        {
+            let tt = Box::new(cell! {
+                Box::new(atom!{ 153 }),
+                Box::new(atom!{ 218 }),
+            });
+            match (Cell {
+                head: Box::new(atom!{ 42 }),
+                tail: Box::new(cell!{
+                    Box::new(atom!{ 1 }),
+                    tt.clone(),
+                }),
+            }.tar())
+            {
+                Ok(res) => {
+                    assert_eq!(*tt, res);
                 },
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
