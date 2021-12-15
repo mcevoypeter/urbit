@@ -54,8 +54,6 @@ macro_rules! cell {
     };
 }
 
-
-
 /*==============================================================================
  * Trait definitions
  */
@@ -90,15 +88,15 @@ trait Tar {
     fn tar(&self) {}
 }
 
+/*==============================================================================
+ * Implementations for Error struct
+ */
+
 impl fmt::Display for Error {
    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
        write!(f, "{}", self.msg)
    }
 }
-
-/*==============================================================================
- * Trait implementations for Error struct
- */
 
 impl error::Error for Error {}
 
@@ -118,6 +116,10 @@ impl Clone for Noun {
     }
 }
 
+/*==============================================================================
+ * Implementations for Noun enum
+ */
+
 impl PartialEq for Noun {
     fn eq(&self, other: &Self) -> bool {
         if let (Noun::Atom(lh), Noun::Atom(rh)) = (&*self, &*other) {
@@ -133,7 +135,7 @@ impl PartialEq for Noun {
 }
 
 /*==============================================================================
- * Trait implementations for Atom struct
+ * Implementations for Atom struct
  */
 
 impl Wut for Atom {
@@ -149,7 +151,7 @@ impl Lus for Atom {
 }
 
 /*==============================================================================
- * Trait implementations for Cell struct
+ * Implementations for Cell struct
  */
 
 impl Clone for Cell {
