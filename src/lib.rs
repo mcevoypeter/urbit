@@ -284,10 +284,10 @@ impl Tar for Cell {
     fn tar(self) -> Result<Noun, Error> {
         if let Noun::Cell(t) = *self.t {
             if let Noun::Atom(opcode) = *t.h {
-                match opcode {
-                    Atom(0) => Cell { h: t.t, t: self.h }.fas(),
-                    Atom(1) => Ok(*t.t),
-                    Atom(2) => {
+                match opcode.0 {
+                    0 => Cell { h: t.t, t: self.h }.fas(),
+                    1 => Ok(*t.t),
+                    2 => {
                         if let Noun::Cell(tt) = *t.t {
                             Cell {
                                 h: Cell {
@@ -305,11 +305,11 @@ impl Tar for Cell {
                             })
                         }
                     }
-                    Atom(3) => match (Cell { h: self.h, t: t.t }.tar()?) {
+                    3 => match (Cell { h: self.h, t: t.t }.tar()?) {
                         Noun::Atom(a) => Ok(Noun::from_loobean(a.wut())),
                         Noun::Cell(c) => Ok(Noun::from_loobean(c.wut())),
                     },
-                    Atom(4) => {
+                    4 => {
                         if let Noun::Atom(a) = (Cell { h: self.h, t: t.t }.tar()?) {
                             Ok(a.lus().into_noun())
                         } else {
@@ -318,7 +318,7 @@ impl Tar for Cell {
                             })
                         }
                     }
-                    Atom(5) => {
+                    5 => {
                         if let Noun::Cell(tt) = *t.t {
                             Ok(Cell {
                                 h: Cell {
@@ -336,7 +336,7 @@ impl Tar for Cell {
                             })
                         }
                     }
-                    Atom(6) => {
+                    6 => {
                         if let Noun::Cell(tt) = *t.t {
                             if let Noun::Cell(ttt) = *tt.t {
                                 Cell {
@@ -396,7 +396,7 @@ impl Tar for Cell {
                             })
                         }
                     }
-                    Atom(7) => {
+                    7 => {
                         if let Noun::Cell(tt) = *t.t {
                             Cell {
                                 h: Cell { h: self.h, t: tt.h }.tar()?.into_box(),
@@ -409,16 +409,16 @@ impl Tar for Cell {
                             })
                         }
                     }
-                    Atom(8) => Err(Error {
+                    8 => Err(Error {
                         msg: "unimplemented".to_string(),
                     }),
-                    Atom(9) => Err(Error {
+                    9 => Err(Error {
                         msg: "unimplemented".to_string(),
                     }),
-                    Atom(10) => Err(Error {
+                    10 => Err(Error {
                         msg: "unimplemented".to_string(),
                     }),
-                    Atom(11) => Err(Error {
+                    11 => Err(Error {
                         msg: "unimplemented".to_string(),
                     }),
                     _ => Err(Error {
