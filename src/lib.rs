@@ -614,6 +614,159 @@ mod tests {
     }
 
     #[test]
+    fn decrement() {
+        // [8 [1 0] 8 [1 6 [5 [0 7] 4 0 6] [0 6] 9 2 [0 2] [4 0 6] 0 7] 9 2 0 1]
+        let decrement = Cell {
+            h: Atom(8).into_noun().into_box(),
+            t: Cell {
+                h: Cell {
+                    h: Atom(1).into_noun().into_box(),
+                    t: Atom(0).into_noun().into_box(),
+                }
+                .into_noun()
+                .into_box(),
+                t: Cell {
+                    h: Atom(8).into_noun().into_box(),
+                    t: Cell {
+                        h: Cell {
+                            h: Atom(1).into_noun().into_box(),
+                            t: Cell {
+                                h: Atom(6).into_noun().into_box(),
+                                t: Cell {
+                                    h: Cell {
+                                        h: Atom(5).into_noun().into_box(),
+                                        t: Cell {
+                                            h: Cell {
+                                                h: Atom(0).into_noun().into_box(),
+                                                t: Atom(7).into_noun().into_box(),
+                                            }
+                                            .into_noun()
+                                            .into_box(),
+                                            t: Cell {
+                                                h: Atom(4).into_noun().into_box(),
+                                                t: Cell {
+                                                    h: Atom(0).into_noun().into_box(),
+                                                    t: Atom(6).into_noun().into_box(),
+                                                }
+                                                .into_noun()
+                                                .into_box(),
+                                            }
+                                            .into_noun()
+                                            .into_box(),
+                                        }
+                                        .into_noun()
+                                        .into_box(),
+                                    }
+                                    .into_noun()
+                                    .into_box(),
+                                    t: Cell {
+                                        h: Cell {
+                                            h: Atom(0).into_noun().into_box(),
+                                            t: Atom(6).into_noun().into_box(),
+                                        }
+                                        .into_noun()
+                                        .into_box(),
+                                        t: Cell {
+                                            h: Atom(9).into_noun().into_box(),
+                                            t: Cell {
+                                                h: Atom(2).into_noun().into_box(),
+                                                t: Cell {
+                                                    h: Cell {
+                                                        h: Atom(0).into_noun().into_box(),
+                                                        t: Atom(2).into_noun().into_box(),
+                                                    }
+                                                    .into_noun()
+                                                    .into_box(),
+                                                    t: Cell {
+                                                        h: Cell {
+                                                            h: Atom(4).into_noun().into_box(),
+                                                            t: Cell {
+                                                                h: Atom(0).into_noun().into_box(),
+                                                                t: Atom(6).into_noun().into_box(),
+                                                            }
+                                                            .into_noun()
+                                                            .into_box(),
+                                                        }
+                                                        .into_noun()
+                                                        .into_box(),
+                                                        t: Cell {
+                                                            h: Atom(0).into_noun().into_box(),
+                                                            t: Atom(7).into_noun().into_box(),
+                                                        }
+                                                        .into_noun()
+                                                        .into_box(),
+                                                    }
+                                                    .into_noun()
+                                                    .into_box(),
+                                                }
+                                                .into_noun()
+                                                .into_box(),
+                                            }
+                                            .into_noun()
+                                            .into_box(),
+                                        }
+                                        .into_noun()
+                                        .into_box(),
+                                    }
+                                    .into_noun()
+                                    .into_box(),
+                                }
+                                .into_noun()
+                                .into_box(),
+                            }
+                            .into_noun()
+                            .into_box(),
+                        }
+                        .into_noun()
+                        .into_box(),
+                        t: Cell {
+                            h: Atom(9).into_noun().into_box(),
+                            t: Cell {
+                                h: Atom(2).into_noun().into_box(),
+                                t: Cell {
+                                    h: Atom(0).into_noun().into_box(),
+                                    t: Atom(1).into_noun().into_box(),
+                                }
+                                .into_noun()
+                                .into_box(),
+                            }
+                            .into_noun()
+                            .into_box(),
+                        }
+                        .into_noun()
+                        .into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .into_noun()
+            .into_box(),
+        }
+        .into_noun()
+        .into_box();
+
+        // *[42 decrement] -> 41
+        {
+            match (Cell {
+                h: Atom(42).into_noun().into_box(),
+                t: decrement,
+            }
+            .tar())
+            {
+                Ok(res) => {
+                    assert_eq!(Atom(41).into_noun(), res);
+                }
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                }
+            }
+        }
+    }
+
+    #[test]
     fn fas_cell() {
         // /[1 [98 89]] -> [98 89]
         {
