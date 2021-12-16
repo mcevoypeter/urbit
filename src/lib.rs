@@ -191,8 +191,6 @@ impl Fas for Cell {
                 }),
                 Atom(1) => Ok(*self.t),
                 Atom(n) => {
-                    // XXX: is it true that b has to be a cell for /[(a + a) b] and
-                    // /[(a + a + 1) b]?
                     if let Noun::Cell(t) = *self.t {
                         match n {
                             2 => Ok(*t.h),
@@ -495,9 +493,37 @@ impl Tar for Cell {
                             })
                         }
                     }
-                    11 => Err(Error {
-                        msg: "unimplemented".to_string(),
-                    }),
+                    11 => {
+                        if let Noun::Cell(tt) = *t.t {
+                            match *tt.h {
+                                Noun::Atom(_) => Cell { h: self.h, t: tt.t }.tar(),
+                                Noun::Cell(c) => Cell {
+                                    h: Cell {
+                                        h: Cell {
+                                            h: self.h.clone(),
+                                            t: c.t,
+                                        }
+                                        .tar()?
+                                        .into_box(),
+                                        t: Cell { h: self.h, t: tt.t }.tar()?.into_box(),
+                                    }
+                                    .into_noun()
+                                    .into_box(),
+                                    t: Cell {
+                                        h: Atom(0).into_noun().into_box(),
+                                        t: Atom(3).into_noun().into_box(),
+                                    }
+                                    .into_noun()
+                                    .into_box(),
+                                }
+                                .tar(),
+                            }
+                        } else {
+                            Err(Error {
+                                msg: "*[a 11 b] cannot be evaluated when b is an atom".to_string(),
+                            })
+                        }
+                    }
                     _ => Err(Error {
                         msg: "unsupported opcode".to_string(),
                     }),
