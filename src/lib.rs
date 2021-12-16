@@ -1,3 +1,5 @@
+#![allow(unused_parens)]
+
 use std::{error,fmt};
 
 /*==============================================================================
@@ -296,50 +298,47 @@ impl Tar for Cell {
                     }.fas(),
                     Atom(1) => Ok(*tail.tail),
                     Atom(2) => {
-                        match *tail.tail {
-                            Noun::Atom(_) => Err(Error {
+                        if let Noun::Cell(tail_tail) = *tail.tail {
+                            Cell {
+                                head: Cell {
+                                    head: self.head.clone(),
+                                    tail: tail_tail.head,
+                                }.tar()?.into_box(),
+                                tail: Cell {
+                                    head: self.head,
+                                    tail: tail_tail.tail,
+                                }.tar()?.into_box(),
+                            }.tar()
+                        } else {
+                            Err(Error {
                                 msg: "*[a 2 b] cannot be evaluated when b is an atom".to_string(),
-                            }),
-                            Noun::Cell(tail_tail) => Cell {
-                                head: Cell {
-                                    head: self.head.clone(),
-                                    tail: tail_tail.head,
-                                }.tar()?.into_box(),
-                                tail: Cell {
-                                    head: self.head,
-                                    tail: tail_tail.tail,
-                                }.tar()?.into_box(),
-                            }.tar(),
+                            })
                         }
-                    },
-                    Atom(3) => {
-                        match (Cell {
+                    }
+                    Atom(3) => match (Cell {
                             head: self.head,
                             tail: tail.tail,
-                        }.tar()?)
-                        {
-                            Noun::Atom(atom) => Ok(Noun::from_loobean(atom.wut())),
-                            Noun::Cell(cell) => Ok(Noun::from_loobean(cell.wut())),
-                        }
-                    },
+                    }.tar()?)
+                    {
+                        Noun::Atom(atom) => Ok(Noun::from_loobean(atom.wut())),
+                        Noun::Cell(cell) => Ok(Noun::from_loobean(cell.wut())),
+                    }
                     Atom(4) => {
-                        match (Cell {
+                        if let Noun::Atom(atom) = (Cell {
                             head: self.head,
                             tail: tail.tail,
                         }.tar()?)
                         {
-                            Noun::Atom(atom) => Ok(Noun::Atom(atom.lus())),
-                            Noun::Cell(_) => Err(Error {
+                            Ok(atom.lus().into_noun())
+                        } else {
+                            Err(Error {
                                 msg: "Cannot apply the + operator to a cell".to_string(),
-                            }),
+                            })
                         }
-                    },
+                    }
                     Atom(5) => {
-                        match *tail.tail {
-                            Noun::Atom(_) => Err(Error {
-                                msg: "*[a 5 b] cannot be evaluated when b is an atom".to_string(),
-                            }),
-                            Noun::Cell(tail_tail) => Ok(Cell {
+                        if let Noun::Cell(tail_tail) = *tail.tail {
+                            Ok(Cell {
                                 head: Cell {
                                     head: self.head.clone(),
                                     tail: tail_tail.head,
@@ -348,9 +347,13 @@ impl Tar for Cell {
                                     head: self.head,
                                     tail: tail_tail.tail,
                                 }.tar()?.into_box(),
-                            }.into_noun()),
+                            }.into_noun())
+                        } else {
+                            Err(Error {
+                                msg: "*[a 5 b] cannot be evaluated when b is an atom".to_string(),
+                            })
                         }
-                    },
+                    }
                     Atom(6) => Err(Error {
                         msg: "unimplemented".to_string(),
                     }),
