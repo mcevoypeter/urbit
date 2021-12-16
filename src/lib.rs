@@ -346,9 +346,23 @@ impl Tar for Cell {
                         }
 
                     },
-                    Atom(5) => Err(Error {
-                        msg: "unimplemented".to_string(),
-                    }),
+                    Atom(5) => {
+                        match *tail.tail {
+                            Noun::Atom(_) => Err(Error {
+                                msg: "*[a 5 b] cannot be evaluated when b is an atom".to_string(),
+                            }),
+                            Noun::Cell(tail_tail) => Ok(cell! {
+                                Box::new(Cell {
+                                    head: self.head.clone(),
+                                    tail: tail_tail.head,
+                                }.tar()?),
+                                Box::new(Cell {
+                                    head: self.head,
+                                    tail: tail_tail.tail,
+                                }.tar()?),
+                            }),
+                        }
+                    },
                     Atom(6) => Err(Error {
                         msg: "unimplemented".to_string(),
                     }),
@@ -1077,6 +1091,43 @@ mod tests {
             {
                 Ok(res) => {
                     assert_eq!(atom!{ 58 }, res);
+                },
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                },
+            }
+        }
+
+        // *[[12 13] 5 [1 17] [0 3]] -> [17 13]
+        {
+            match (Cell {
+                head: Box::new(cell! {
+                    Box::new(atom!{ 12 }),
+                    Box::new(atom!{ 13 }),
+                }),
+                tail: Box::new(cell! {
+                    Box::new(atom!{ 5 }),
+                    Box::new(cell! {
+                        Box::new(cell! {
+                            Box::new(atom!{ 1 }),
+                            Box::new(atom!{ 17 }),
+                        }),
+                        Box::new(cell! {
+                            Box::new(atom!{ 0 }),
+                            Box::new(atom!{ 3 }),
+                        }),
+                    }),
+                }),
+            }.tar())
+            {
+                Ok(res) => {
+                    assert_eq!(
+                        cell! {
+                            Box::new(atom!{ 17 }),
+                            Box::new(atom!{ 13 }),
+                        },
+                        res
+                    );
                 },
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
