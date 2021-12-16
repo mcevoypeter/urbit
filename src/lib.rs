@@ -1,13 +1,12 @@
 #![allow(unused_parens)]
 
-use std::{error,fmt};
+use std::{error, fmt};
 
 /*==============================================================================
  * Struct and enum definitions
  */
 
-#[derive(Debug)]
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 enum Loobean {
     Yes,
     No,
@@ -24,9 +23,7 @@ enum Noun {
     Cell(Cell),
 }
 
-#[derive(Clone)]
-#[derive(Debug)]
-#[derive(PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 struct Atom(u64);
 
 #[derive(Debug)]
@@ -74,9 +71,9 @@ trait Tar {
  */
 
 impl fmt::Display for Error {
-   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-       write!(f, "{}", self.msg)
-   }
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.msg)
+    }
 }
 
 impl error::Error for Error {}
@@ -88,15 +85,11 @@ impl error::Error for Error {}
 impl Clone for Noun {
     fn clone(&self) -> Self {
         match self {
-            Noun::Atom(atom) => {
-                Noun::Atom(Atom(atom.0))
-            },
-            Noun::Cell(cell) => {
-                Noun::Cell(Cell {
-                    head: cell.head.clone(),
-                    tail: cell.tail.clone(),
-                })
-            },
+            Noun::Atom(atom) => Noun::Atom(Atom(atom.0)),
+            Noun::Cell(cell) => Noun::Cell(Cell {
+                head: cell.head.clone(),
+                tail: cell.tail.clone(),
+            }),
         }
     }
 }
@@ -105,11 +98,9 @@ impl PartialEq for Noun {
     fn eq(&self, other: &Self) -> bool {
         if let (Noun::Atom(lh), Noun::Atom(rh)) = (&*self, &*other) {
             lh == rh
-        }
-        else if let (Noun::Cell(lh), Noun::Cell(rh)) = (&*self, &*other) {
+        } else if let (Noun::Cell(lh), Noun::Cell(rh)) = (&*self, &*other) {
             lh == rh
-        }
-        else {
+        } else {
             false
         }
     }
@@ -165,17 +156,11 @@ impl Clone for Cell {
 
 impl PartialEq for Cell {
     fn eq(&self, other: &Self) -> bool {
-        if let (Noun::Atom(lh_head), Noun::Atom(rh_head))
-            = (&*self.head, &*other.head)
-        {
+        if let (Noun::Atom(lh_head), Noun::Atom(rh_head)) = (&*self.head, &*other.head) {
             lh_head == rh_head && *self.tail == *other.tail
-        }
-        else if let (Noun::Cell(lh_head), Noun::Cell(rh_head))
-            = (&*self.head, &*other.head)
-        {
+        } else if let (Noun::Cell(lh_head), Noun::Cell(rh_head)) = (&*self.head, &*other.head) {
             Self::eq(lh_head, rh_head) && *self.tail == *other.tail
-        }
-        else {
+        } else {
             false
         }
     }
@@ -212,26 +197,25 @@ impl Fas for Cell {
                         match n {
                             2 => Ok(*tail.head),
                             3 => Ok(*tail.tail),
-                            _ => {
-                                Cell {
-                                    head: Atom(2 + n % 2).into_noun().into_box(),
-                                    tail: Cell {
-                                        head: Atom(n / 2).into_noun().into_box(),
-                                        tail: Noun::Cell(tail).into_box(),
-                                    }.fas()?.into_box(),
-                                }.fas()
-                            },
+                            _ => Cell {
+                                head: Atom(2 + n % 2).into_noun().into_box(),
+                                tail: Cell {
+                                    head: Atom(n / 2).into_noun().into_box(),
+                                    tail: Noun::Cell(tail).into_box(),
+                                }
+                                .fas()?
+                                .into_box(),
+                            }
+                            .fas(),
                         }
-                    }
-                    else {
+                    } else {
                         Err(Error {
                             msg: "/[a b] cannot be evaluated when b is an atom".to_string(),
                         })
                     }
-                },
+                }
             }
-        }
-        else {
+        } else {
             Err(Error {
                 msg: "/[a b] cannot be evaluated when a is a cell".to_string(),
             })
@@ -247,39 +231,48 @@ impl Hax for Cell {
                     msg: "#[0 a b] cannot be evaluated".to_string(),
                 }),
                 Atom(1) => Ok(*tail.head),
-                Atom(n) if 0 == n % 2 => {
-                    Cell {
-                        head: Atom(n / 2).into_noun().into_box(),
-                        tail: Cell {
+                Atom(n) if 0 == n % 2 => Cell {
+                    head: Atom(n / 2).into_noun().into_box(),
+                    tail: Cell {
+                        head: Cell {
+                            head: tail.head,
+                            tail: Cell {
+                                head: Atom(n + 1).into_noun().into_box(),
+                                tail: tail.tail.clone(),
+                            }
+                            .fas()?
+                            .into_box(),
+                        }
+                        .into_noun()
+                        .into_box(),
+                        tail: tail.tail,
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .hax(),
+                Atom(n) => Cell {
+                    head: Atom(n / 2).into_noun().into_box(),
+                    tail: Cell {
+                        head: Cell {
                             head: Cell {
-                                head: tail.head,
-                                tail: Cell {
-                                    head: Atom(n + 1).into_noun().into_box(),
-                                    tail: tail.tail.clone(),
-                                }.fas()?.into_box(),
-                            }.into_noun().into_box(),
-                            tail: tail.tail,
-                        }.into_noun().into_box(),
-                    }.hax()
-                },
-                Atom(n) => {
-                    Cell {
-                        head: Atom(n / 2).into_noun().into_box(),
-                        tail: Cell {
-                            head: Cell {
-                                head: Cell {
-                                    head: Atom(n - 1).into_noun().into_box(),
-                                    tail: tail.tail.clone(),
-                                }.fas()?.into_box(),
-                                tail: tail.head,
-                            }.into_noun().into_box(),
-                            tail: tail.tail,
-                        }.into_noun().into_box(),
-                    }.hax()
-                },
+                                head: Atom(n - 1).into_noun().into_box(),
+                                tail: tail.tail.clone(),
+                            }
+                            .fas()?
+                            .into_box(),
+                            tail: tail.head,
+                        }
+                        .into_noun()
+                        .into_box(),
+                        tail: tail.tail,
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .hax(),
             }
-        }
-        else {
+        } else {
             Err(Error {
                 msg: "#[a b] cannot be evaluated when a is cell and/or b is an atom".to_string(),
             })
@@ -295,7 +288,8 @@ impl Tar for Cell {
                     Atom(0) => Cell {
                         head: tail.tail,
                         tail: self.head,
-                    }.fas(),
+                    }
+                    .fas(),
                     Atom(1) => Ok(*tail.tail),
                     Atom(2) => {
                         if let Noun::Cell(tail_tail) = *tail.tail {
@@ -303,12 +297,17 @@ impl Tar for Cell {
                                 head: Cell {
                                     head: self.head.clone(),
                                     tail: tail_tail.head,
-                                }.tar()?.into_box(),
+                                }
+                                .tar()?
+                                .into_box(),
                                 tail: Cell {
                                     head: self.head,
                                     tail: tail_tail.tail,
-                                }.tar()?.into_box(),
-                            }.tar()
+                                }
+                                .tar()?
+                                .into_box(),
+                            }
+                            .tar()
                         } else {
                             Err(Error {
                                 msg: "*[a 2 b] cannot be evaluated when b is an atom".to_string(),
@@ -316,18 +315,20 @@ impl Tar for Cell {
                         }
                     }
                     Atom(3) => match (Cell {
-                            head: self.head,
-                            tail: tail.tail,
-                    }.tar()?)
+                        head: self.head,
+                        tail: tail.tail,
+                    }
+                    .tar()?)
                     {
                         Noun::Atom(atom) => Ok(Noun::from_loobean(atom.wut())),
                         Noun::Cell(cell) => Ok(Noun::from_loobean(cell.wut())),
-                    }
+                    },
                     Atom(4) => {
                         if let Noun::Atom(atom) = (Cell {
                             head: self.head,
                             tail: tail.tail,
-                        }.tar()?)
+                        }
+                        .tar()?)
                         {
                             Ok(atom.lus().into_noun())
                         } else {
@@ -342,12 +343,17 @@ impl Tar for Cell {
                                 head: Cell {
                                     head: self.head.clone(),
                                     tail: tail_tail.head,
-                                }.tar()?.into_box(),
+                                }
+                                .tar()?
+                                .into_box(),
                                 tail: Cell {
                                     head: self.head,
                                     tail: tail_tail.tail,
-                                }.tar()?.into_box(),
-                            }.into_noun())
+                                }
+                                .tar()?
+                                .into_box(),
+                            }
+                            .into_noun())
                         } else {
                             Err(Error {
                                 msg: "*[a 5 b] cannot be evaluated when b is an atom".to_string(),
@@ -376,14 +382,12 @@ impl Tar for Cell {
                         msg: "unsupported opcode".to_string(),
                     }),
                 }
-            }
-            else {
+            } else {
                 Err(Error {
                     msg: "*[a b c] cannot be evaluated when b is a cell".to_string(),
                 })
             }
-        }
-        else {
+        } else {
             Err(Error {
                 msg: "*[a b] cannot be evaluated when b is an atom".to_string(),
             })
@@ -441,8 +445,11 @@ mod tests {
                 tail: Cell {
                     head: Atom(400).into_noun().into_box(),
                     tail: Atom(500).into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.into_noun();
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .into_noun();
             assert_eq!(noun, noun.clone());
         }
     }
@@ -454,18 +461,21 @@ mod tests {
             let t = Cell {
                 head: Atom(98).into_noun().into_box(),
                 tail: Atom(89).into_noun().into_box(),
-            }.into_noun().into_box();
+            }
+            .into_noun()
+            .into_box();
             match (Cell {
                 head: Atom(1).into_noun().into_box(),
                 tail: t.clone(),
-            }.fas())
+            }
+            .fas())
             {
                 Ok(res) => {
                     assert_eq!(*t, res);
-                },
+                }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
-                },
+                }
             }
         }
 
@@ -477,15 +487,18 @@ mod tests {
                 tail: Cell {
                     head: th.clone(),
                     tail: Atom(1001).into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.fas())
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .fas())
             {
                 Ok(res) => {
                     assert_eq!(*th, res)
-                },
+                }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
-                },
+                }
             }
         }
 
@@ -494,14 +507,15 @@ mod tests {
             match (Cell {
                 head: Atom(2).into_noun().into_box(),
                 tail: Atom(107).into_noun().into_box(),
-            }.fas())
+            }
+            .fas())
             {
                 Ok(_) => {
                     assert!(false, "Unexpected success.");
-                },
+                }
                 Err(_) => {
                     assert!(true);
-                },
+                }
             }
         }
 
@@ -510,24 +524,31 @@ mod tests {
             let tt = Cell {
                 head: Atom(19).into_noun().into_box(),
                 tail: Atom(95).into_noun().into_box(),
-            }.into_noun().into_box();
+            }
+            .into_noun()
+            .into_box();
             match (Cell {
                 head: Atom(3).into_noun().into_box(),
                 tail: Cell {
                     head: Cell {
                         head: Atom(80).into_noun().into_box(),
                         tail: Atom(50).into_noun().into_box(),
-                    }.into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
                     tail: tt.clone(),
-                }.into_noun().into_box(),
-            }.fas())
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .fas())
             {
                 Ok(res) => {
                     assert_eq!(*tt, res)
-                },
+                }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
-                },
+                }
             }
         }
 
@@ -540,17 +561,22 @@ mod tests {
                     head: Cell {
                         head: Atom(15).into_noun().into_box(),
                         tail: tht.clone(),
-                    }.into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
                     tail: Atom(17).into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.fas())
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .fas())
             {
                 Ok(res) => {
                     assert_eq!(*tht, res)
-                },
+                }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
-                },
+                }
             }
         }
 
@@ -564,16 +590,21 @@ mod tests {
                     tail: Cell {
                         head: tth.clone(),
                         tail: Atom(12).into_noun().into_box(),
-                    }.into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.fas())
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .fas())
             {
                 Ok(res) => {
                     assert!(*tth == res)
-                },
+                }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
-                },
+                }
             }
         }
 
@@ -586,16 +617,21 @@ mod tests {
                     tail: Cell {
                         head: Atom(25).into_noun().into_box(),
                         tail: Atom(99).into_noun().into_box(),
-                    }.into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.fas())
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .fas())
             {
                 Ok(_) => {
                     assert!(false, "Unexpected success.")
-                },
+                }
                 Err(_) => {
                     assert!(true);
-                },
+                }
             }
         }
     }
@@ -610,15 +646,18 @@ mod tests {
                 tail: Cell {
                     head: th.clone(),
                     tail: Atom(80).into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.hax())
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .hax())
             {
                 Ok(res) => {
                     assert_eq!(*th, res);
-                },
+                }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
-                },
+                }
             }
         }
 
@@ -633,22 +672,28 @@ mod tests {
                     tail: Cell {
                         head: Atom(22).into_noun().into_box(),
                         tail: ttt.clone(),
-                    }.into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.hax())
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .hax())
             {
                 Ok(res) => {
                     assert_eq!(
                         Cell {
                             head: th,
                             tail: ttt,
-                        }.into_noun(),
+                        }
+                        .into_noun(),
                         res
                     );
-                },
+                }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
-                },
+                }
             }
         }
 
@@ -663,22 +708,28 @@ mod tests {
                     tail: Cell {
                         head: tth.clone(),
                         tail: Atom(33).into_noun().into_box(),
-                    }.into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.hax())
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .hax())
             {
                 Ok(res) => {
                     assert_eq!(
                         Cell {
                             head: tth,
                             tail: th,
-                        }.into_noun(),
+                        }
+                        .into_noun(),
                         res
-                        );
-                },
+                    );
+                }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
-                },
+                }
             }
         }
 
@@ -695,11 +746,18 @@ mod tests {
                         head: Cell {
                             head: Atom(22).into_noun().into_box(),
                             tail: ttht.clone(),
-                        }.into_noun().into_box(),
+                        }
+                        .into_noun()
+                        .into_box(),
                         tail: ttt.clone(),
-                    }.into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.hax())
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .hax())
             {
                 Ok(res) => {
                     assert_eq!(
@@ -707,15 +765,18 @@ mod tests {
                             head: Cell {
                                 head: th,
                                 tail: ttht,
-                            }.into_noun().into_box(),
+                            }
+                            .into_noun()
+                            .into_box(),
                             tail: ttt,
-                        }.into_noun(),
+                        }
+                        .into_noun(),
                         res
-                        );
-                },
+                    );
+                }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
-                },
+                }
             }
         }
 
@@ -732,11 +793,18 @@ mod tests {
                         head: Cell {
                             head: tthh.clone(),
                             tail: Atom(33).into_noun().into_box(),
-                        }.into_noun().into_box(),
+                        }
+                        .into_noun()
+                        .into_box(),
                         tail: ttt.clone(),
-                    }.into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.hax())
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .hax())
             {
                 Ok(res) => {
                     assert_eq!(
@@ -744,15 +812,18 @@ mod tests {
                             head: Cell {
                                 head: tthh,
                                 tail: th,
-                            }.into_noun().into_box(),
+                            }
+                            .into_noun()
+                            .into_box(),
                             tail: ttt,
-                        }.into_noun(),
+                        }
+                        .into_noun(),
                         res
-                        );
-                },
+                    );
+                }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
-                },
+                }
             }
         }
     }
@@ -804,14 +875,18 @@ mod tests {
                     tail: Cell {
                         head: Atom(12).into_noun().into_box(),
                         tail: Atom(13).into_noun().into_box(),
-                    }.into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
                 },
                 Cell {
                     head: Atom(11).into_noun().into_box(),
                     tail: Cell {
                         head: Atom(12).into_noun().into_box(),
                         tail: Atom(13).into_noun().into_box(),
-                    }.into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
                 },
             );
         }
@@ -824,14 +899,18 @@ mod tests {
                     tail: Cell {
                         head: Atom(12).into_noun().into_box(),
                         tail: Atom(13).into_noun().into_box(),
-                    }.into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
                 },
                 Cell {
                     head: Atom(11).into_noun().into_box(),
                     tail: Cell {
                         head: Atom(13).into_noun().into_box(),
                         tail: Atom(12).into_noun().into_box(),
-                    }.into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
                 },
             );
         }
@@ -841,18 +920,12 @@ mod tests {
     fn partialeq_noun() {
         // 500 == 500
         {
-            assert_eq!(
-                Atom(500).into_noun(),
-                Atom(500).into_noun(),
-            );
+            assert_eq!(Atom(500).into_noun(), Atom(500).into_noun(),);
         }
 
         // 499 != 501
         {
-            assert_ne!(
-                Atom(499).into_noun(),
-                Atom(501).into_noun(),
-            );
+            assert_ne!(Atom(499).into_noun(), Atom(501).into_noun(),);
         }
 
         // [0 5] == [0 5]
@@ -861,11 +934,13 @@ mod tests {
                 Cell {
                     head: Atom(0).into_noun().into_box(),
                     tail: Atom(5).into_noun().into_box(),
-                }.into_noun(),
+                }
+                .into_noun(),
                 Cell {
                     head: Atom(0).into_noun().into_box(),
                     tail: Atom(5).into_noun().into_box(),
-                }.into_noun(),
+                }
+                .into_noun(),
             );
         }
 
@@ -875,11 +950,13 @@ mod tests {
                 Cell {
                     head: Atom(0).into_noun().into_box(),
                     tail: Atom(0).into_noun().into_box(),
-                }.into_noun(),
+                }
+                .into_noun(),
                 Cell {
                     head: Atom(0).into_noun().into_box(),
                     tail: Atom(5).into_noun().into_box(),
-                }.into_noun(),
+                }
+                .into_noun(),
             );
         }
 
@@ -890,16 +967,22 @@ mod tests {
                     head: Cell {
                         head: Atom(44).into_noun().into_box(),
                         tail: Atom(22).into_noun().into_box(),
-                    }.into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
                     tail: Atom(88).into_noun().into_box(),
-                }.into_noun(),
+                }
+                .into_noun(),
                 Cell {
                     head: Cell {
                         head: Atom(44).into_noun().into_box(),
                         tail: Atom(22).into_noun().into_box(),
-                    }.into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
                     tail: Atom(88).into_noun().into_box(),
-                }.into_noun(),
+                }
+                .into_noun(),
             );
         }
 
@@ -910,16 +993,22 @@ mod tests {
                     head: Cell {
                         head: Atom(44).into_noun().into_box(),
                         tail: Atom(22).into_noun().into_box(),
-                    }.into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
                     tail: Atom(88).into_noun().into_box(),
-                }.into_noun(),
+                }
+                .into_noun(),
                 Cell {
                     head: Atom(44).into_noun().into_box(),
                     tail: Cell {
                         head: Atom(22).into_noun().into_box(),
                         tail: Atom(88).into_noun().into_box(),
-                    }.into_noun().into_box(),
-                }.into_noun(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun(),
             );
         }
     }
@@ -931,14 +1020,15 @@ mod tests {
             match (Cell {
                 head: Atom(1).into_noun().into_box(),
                 tail: Atom(0).into_noun().into_box(),
-            }.tar())
+            }
+            .tar())
             {
                 Ok(_) => {
                     assert!(false, "Unexpected success.");
-                },
+                }
                 Err(_) => {
                     assert!(true);
-                },
+                }
             }
         }
 
@@ -950,17 +1040,22 @@ mod tests {
                     head: Cell {
                         head: Atom(0).into_noun().into_box(),
                         tail: Atom(0).into_noun().into_box(),
-                    }.into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
                     tail: Atom(4).into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.tar())
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .tar())
             {
                 Ok(_) => {
                     assert!(false, "Unexpected success.");
-                },
+                }
                 Err(_) => {
                     assert!(true);
-                },
+                }
             }
         }
 
@@ -969,30 +1064,41 @@ mod tests {
             let htt = Cell {
                 head: Atom(14).into_noun().into_box(),
                 tail: Atom(15).into_noun().into_box(),
-            }.into_noun().into_box();
+            }
+            .into_noun()
+            .into_box();
             match (Cell {
                 head: Cell {
                     head: Cell {
                         head: Atom(4).into_noun().into_box(),
                         tail: Atom(5).into_noun().into_box(),
-                    }.into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
                     tail: Cell {
                         head: Atom(6).into_noun().into_box(),
                         tail: htt.clone(),
-                    }.into_noun().into_box(),
-                }.into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
                 tail: Cell {
                     head: Atom(0).into_noun().into_box(),
                     tail: Atom(7).into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.tar())
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .tar())
             {
                 Ok(res) => {
                     assert_eq!(*htt, res);
-                },
+                }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
-                },
+                }
             }
         }
 
@@ -1001,21 +1107,26 @@ mod tests {
             let tt = Cell {
                 head: Atom(153).into_noun().into_box(),
                 tail: Atom(218).into_noun().into_box(),
-            }.into_noun().into_box();
+            }
+            .into_noun()
+            .into_box();
             match (Cell {
                 head: Atom(42).into_noun().into_box(),
                 tail: Cell {
                     head: Atom(1).into_noun().into_box(),
                     tail: tt.clone(),
-                }.into_noun().into_box(),
-            }.tar())
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .tar())
             {
                 Ok(res) => {
                     assert_eq!(*tt, res);
-                },
+                }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
-                },
+                }
             }
         }
 
@@ -1024,33 +1135,46 @@ mod tests {
             let ttttt = Cell {
                 head: Atom(153).into_noun().into_box(),
                 tail: Atom(218).into_noun().into_box(),
-            }.into_noun().into_box();
+            }
+            .into_noun()
+            .into_box();
             match (Cell {
                 head: Atom(77).into_noun().into_box(),
-                tail:Cell {
+                tail: Cell {
                     head: Atom(2).into_noun().into_box(),
                     tail: Cell {
                         head: Cell {
                             head: Atom(1).into_noun().into_box(),
                             tail: Atom(42).into_noun().into_box(),
-                        }.into_noun().into_box(),
+                        }
+                        .into_noun()
+                        .into_box(),
                         tail: Cell {
                             head: Atom(1).into_noun().into_box(),
                             tail: Cell {
                                 head: Atom(1).into_noun().into_box(),
                                 tail: ttttt.clone(),
-                            }.into_noun().into_box(),
-                        }.into_noun().into_box(),
-                    }.into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.tar())
+                            }
+                            .into_noun()
+                            .into_box(),
+                        }
+                        .into_noun()
+                        .into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .tar())
             {
                 Ok(res) => {
                     assert_eq!(*ttttt, res);
-                },
+                }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
-                },
+                }
             }
         }
 
@@ -1060,22 +1184,29 @@ mod tests {
                 head: Cell {
                     head: Atom(19).into_noun().into_box(),
                     tail: Atom(20).into_noun().into_box(),
-                }.into_noun().into_box(),
+                }
+                .into_noun()
+                .into_box(),
                 tail: Cell {
                     head: Atom(3).into_noun().into_box(),
                     tail: Cell {
                         head: Atom(0).into_noun().into_box(),
                         tail: Atom(1).into_noun().into_box(),
-                    }.into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.tar())
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .tar())
             {
                 Ok(res) => {
                     assert_eq!(Atom(0).into_noun(), res);
-                },
+                }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
-                },
+                }
             }
         }
 
@@ -1088,16 +1219,21 @@ mod tests {
                     tail: Cell {
                         head: Atom(0).into_noun().into_box(),
                         tail: Atom(1).into_noun().into_box(),
-                    }.into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.tar())
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .tar())
             {
                 Ok(res) => {
                     assert_eq!(Atom(58).into_noun(), res);
-                },
+                }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
-                },
+                }
             }
         }
 
@@ -1107,34 +1243,46 @@ mod tests {
                 head: Cell {
                     head: Atom(12).into_noun().into_box(),
                     tail: Atom(13).into_noun().into_box(),
-                }.into_noun().into_box(),
+                }
+                .into_noun()
+                .into_box(),
                 tail: Cell {
                     head: Atom(5).into_noun().into_box(),
                     tail: Cell {
                         head: Cell {
                             head: Atom(1).into_noun().into_box(),
                             tail: Atom(17).into_noun().into_box(),
-                        }.into_noun().into_box(),
+                        }
+                        .into_noun()
+                        .into_box(),
                         tail: Cell {
                             head: Atom(0).into_noun().into_box(),
                             tail: Atom(3).into_noun().into_box(),
-                        }.into_noun().into_box(),
-                    }.into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.tar())
+                        }
+                        .into_noun()
+                        .into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .tar())
             {
                 Ok(res) => {
                     assert_eq!(
                         Cell {
                             head: Atom(17).into_noun().into_box(),
                             tail: Atom(13).into_noun().into_box(),
-                        }.into_noun(),
+                        }
+                        .into_noun(),
                         res
                     );
-                },
+                }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
-                },
+                }
             }
         }
     }
@@ -1148,7 +1296,8 @@ mod tests {
                 Cell {
                     head: Atom(2).into_noun().into_box(),
                     tail: Atom(2).into_noun().into_box(),
-                }.tis(),
+                }
+                .tis(),
             );
         }
 
@@ -1159,7 +1308,8 @@ mod tests {
                 Cell {
                     head: Atom(7).into_noun().into_box(),
                     tail: Atom(6).into_noun().into_box(),
-                }.tis(),
+                }
+                .tis(),
             );
         }
 
@@ -1171,12 +1321,17 @@ mod tests {
                     head: Cell {
                         head: Atom(2).into_noun().into_box(),
                         tail: Atom(7).into_noun().into_box(),
-                    }.into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
                     tail: Cell {
                         head: Atom(2).into_noun().into_box(),
                         tail: Atom(7).into_noun().into_box(),
-                    }.into_noun().into_box(),
-                }.tis(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .tis(),
             );
         }
 
@@ -1188,15 +1343,22 @@ mod tests {
                     head: Cell {
                         head: Atom(2).into_noun().into_box(),
                         tail: Atom(7).into_noun().into_box(),
-                    }.into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
                     tail: Cell {
                         head: Atom(2).into_noun().into_box(),
                         tail: Cell {
                             head: Atom(7).into_noun().into_box(),
                             tail: Atom(3).into_noun().into_box(),
-                        }.into_noun().into_box(),
-                    }.into_noun().into_box(),
-                }.tis(),
+                        }
+                        .into_noun()
+                        .into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .tis(),
             );
         }
     }
@@ -1205,10 +1367,7 @@ mod tests {
     fn wut_atom() {
         // ?137 -> 1
         {
-            assert_eq!(
-                Loobean::No,
-                Atom(137).wut(),
-            );
+            assert_eq!(Loobean::No, Atom(137).wut(),);
         }
     }
 
@@ -1221,7 +1380,8 @@ mod tests {
                 Cell {
                     head: Atom(128).into_noun().into_box(),
                     tail: Atom(256).into_noun().into_box(),
-                }.wut(),
+                }
+                .wut(),
             );
         }
 
@@ -1233,12 +1393,17 @@ mod tests {
                     head: Cell {
                         head: Atom(512).into_noun().into_box(),
                         tail: Atom(1024).into_noun().into_box(),
-                    }.into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
                     tail: Cell {
                         head: Atom(16).into_noun().into_box(),
                         tail: Atom(32).into_noun().into_box(),
-                    }.into_noun().into_box(),
-                }.wut(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .wut(),
             );
         }
     }
