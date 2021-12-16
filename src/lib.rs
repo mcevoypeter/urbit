@@ -465,9 +465,36 @@ impl Tar for Cell {
                             })
                         }
                     }
-                    10 => Err(Error {
-                        msg: "unimplemented".to_string(),
-                    }),
+                    10 => {
+                        if let Noun::Cell(tt) = *t.t {
+                            if let Noun::Cell(tth) = *tt.h {
+                                Cell {
+                                    h: tth.h,
+                                    t: Cell {
+                                        h: Cell {
+                                            h: self.h.clone(),
+                                            t: tth.t,
+                                        }
+                                        .tar()?
+                                        .into_box(),
+                                        t: Cell { h: self.h, t: tt.t }.tar()?.into_box(),
+                                    }
+                                    .into_noun()
+                                    .into_box(),
+                                }
+                                .hax()
+                            } else {
+                                Err(Error {
+                                    msg: "*[a 10 b c] cannot be evaluated when b is an atom"
+                                        .to_string(),
+                                })
+                            }
+                        } else {
+                            Err(Error {
+                                msg: "*[a 10 b] cannot be evaluated when b is an atom".to_string(),
+                            })
+                        }
+                    }
                     11 => Err(Error {
                         msg: "unimplemented".to_string(),
                     }),
