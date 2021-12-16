@@ -28,8 +28,8 @@ struct Atom(u64);
 
 #[derive(Debug)]
 struct Cell {
-    head: Box<Noun>,
-    tail: Box<Noun>,
+    h: Box<Noun>,
+    t: Box<Noun>,
 }
 
 /*==============================================================================
@@ -85,10 +85,10 @@ impl error::Error for Error {}
 impl Clone for Noun {
     fn clone(&self) -> Self {
         match self {
-            Noun::Atom(atom) => Noun::Atom(Atom(atom.0)),
-            Noun::Cell(cell) => Noun::Cell(Cell {
-                head: cell.head.clone(),
-                tail: cell.tail.clone(),
+            Noun::Atom(a) => Noun::Atom(Atom(a.0)),
+            Noun::Cell(c) => Noun::Cell(Cell {
+                h: c.h.clone(),
+                t: c.t.clone(),
             }),
         }
     }
@@ -148,18 +148,18 @@ impl Atom {
 impl Clone for Cell {
     fn clone(&self) -> Self {
         Cell {
-            head: self.head.clone(),
-            tail: self.tail.clone(),
+            h: self.h.clone(),
+            t: self.t.clone(),
         }
     }
 }
 
 impl PartialEq for Cell {
     fn eq(&self, other: &Self) -> bool {
-        if let (Noun::Atom(lh_head), Noun::Atom(rh_head)) = (&*self.head, &*other.head) {
-            lh_head == rh_head && *self.tail == *other.tail
-        } else if let (Noun::Cell(lh_head), Noun::Cell(rh_head)) = (&*self.head, &*other.head) {
-            Self::eq(lh_head, rh_head) && *self.tail == *other.tail
+        if let (Noun::Atom(lh_h), Noun::Atom(rh_h)) = (&*self.h, &*other.h) {
+            lh_h == rh_h && *self.t == *other.t
+        } else if let (Noun::Cell(lh_h), Noun::Cell(rh_h)) = (&*self.h, &*other.h) {
+            Self::eq(lh_h, rh_h) && *self.t == *other.t
         } else {
             false
         }
@@ -174,7 +174,7 @@ impl Wut for Cell {
 
 impl Tis for Cell {
     fn tis(&self) -> Loobean {
-        if self.head == self.tail {
+        if self.h == self.t {
             Loobean::Yes
         } else {
             Loobean::No
@@ -184,24 +184,24 @@ impl Tis for Cell {
 
 impl Fas for Cell {
     fn fas(self) -> Result<Noun, Error> {
-        if let Noun::Atom(head) = *self.head {
-            match head {
+        if let Noun::Atom(h) = *self.h {
+            match h {
                 Atom(0) => Err(Error {
                     msg: "/[0 b] cannot be evaluated".to_string(),
                 }),
-                Atom(1) => Ok(*self.tail),
+                Atom(1) => Ok(*self.t),
                 Atom(n) => {
                     // XXX: is it true that b has to be a cell for /[(a + a) b] and
                     // /[(a + a + 1) b]?
-                    if let Noun::Cell(tail) = *self.tail {
+                    if let Noun::Cell(t) = *self.t {
                         match n {
-                            2 => Ok(*tail.head),
-                            3 => Ok(*tail.tail),
+                            2 => Ok(*t.h),
+                            3 => Ok(*t.t),
                             _ => Cell {
-                                head: Atom(2 + n % 2).into_noun().into_box(),
-                                tail: Cell {
-                                    head: Atom(n / 2).into_noun().into_box(),
-                                    tail: Noun::Cell(tail).into_box(),
+                                h: Atom(2 + n % 2).into_noun().into_box(),
+                                t: Cell {
+                                    h: Atom(n / 2).into_noun().into_box(),
+                                    t: Noun::Cell(t).into_box(),
                                 }
                                 .fas()?
                                 .into_box(),
@@ -225,47 +225,47 @@ impl Fas for Cell {
 
 impl Hax for Cell {
     fn hax(self) -> Result<Noun, Error> {
-        if let (Noun::Atom(head), Noun::Cell(tail)) = (*self.head, *self.tail) {
-            match head {
+        if let (Noun::Atom(h), Noun::Cell(t)) = (*self.h, *self.t) {
+            match h {
                 Atom(0) => Err(Error {
                     msg: "#[0 a b] cannot be evaluated".to_string(),
                 }),
-                Atom(1) => Ok(*tail.head),
+                Atom(1) => Ok(*t.h),
                 Atom(n) if 0 == n % 2 => Cell {
-                    head: Atom(n / 2).into_noun().into_box(),
-                    tail: Cell {
-                        head: Cell {
-                            head: tail.head,
-                            tail: Cell {
-                                head: Atom(n + 1).into_noun().into_box(),
-                                tail: tail.tail.clone(),
+                    h: Atom(n / 2).into_noun().into_box(),
+                    t: Cell {
+                        h: Cell {
+                            h: t.h,
+                            t: Cell {
+                                h: Atom(n + 1).into_noun().into_box(),
+                                t: t.t.clone(),
                             }
                             .fas()?
                             .into_box(),
                         }
                         .into_noun()
                         .into_box(),
-                        tail: tail.tail,
+                        t: t.t,
                     }
                     .into_noun()
                     .into_box(),
                 }
                 .hax(),
                 Atom(n) => Cell {
-                    head: Atom(n / 2).into_noun().into_box(),
-                    tail: Cell {
-                        head: Cell {
-                            head: Cell {
-                                head: Atom(n - 1).into_noun().into_box(),
-                                tail: tail.tail.clone(),
+                    h: Atom(n / 2).into_noun().into_box(),
+                    t: Cell {
+                        h: Cell {
+                            h: Cell {
+                                h: Atom(n - 1).into_noun().into_box(),
+                                t: t.t.clone(),
                             }
                             .fas()?
                             .into_box(),
-                            tail: tail.head,
+                            t: t.h,
                         }
                         .into_noun()
                         .into_box(),
-                        tail: tail.tail,
+                        t: t.t,
                     }
                     .into_noun()
                     .into_box(),
@@ -282,30 +282,21 @@ impl Hax for Cell {
 
 impl Tar for Cell {
     fn tar(self) -> Result<Noun, Error> {
-        if let Noun::Cell(tail) = *self.tail {
-            if let Noun::Atom(opcode) = *tail.head {
+        if let Noun::Cell(t) = *self.t {
+            if let Noun::Atom(opcode) = *t.h {
                 match opcode {
-                    Atom(0) => Cell {
-                        head: tail.tail,
-                        tail: self.head,
-                    }
-                    .fas(),
-                    Atom(1) => Ok(*tail.tail),
+                    Atom(0) => Cell { h: t.t, t: self.h }.fas(),
+                    Atom(1) => Ok(*t.t),
                     Atom(2) => {
-                        if let Noun::Cell(tail_tail) = *tail.tail {
+                        if let Noun::Cell(tt) = *t.t {
                             Cell {
-                                head: Cell {
-                                    head: self.head.clone(),
-                                    tail: tail_tail.head,
+                                h: Cell {
+                                    h: self.h.clone(),
+                                    t: tt.h,
                                 }
                                 .tar()?
                                 .into_box(),
-                                tail: Cell {
-                                    head: self.head,
-                                    tail: tail_tail.tail,
-                                }
-                                .tar()?
-                                .into_box(),
+                                t: Cell { h: self.h, t: tt.t }.tar()?.into_box(),
                             }
                             .tar()
                         } else {
@@ -314,23 +305,13 @@ impl Tar for Cell {
                             })
                         }
                     }
-                    Atom(3) => match (Cell {
-                        head: self.head,
-                        tail: tail.tail,
-                    }
-                    .tar()?)
-                    {
-                        Noun::Atom(atom) => Ok(Noun::from_loobean(atom.wut())),
-                        Noun::Cell(cell) => Ok(Noun::from_loobean(cell.wut())),
+                    Atom(3) => match (Cell { h: self.h, t: t.t }.tar()?) {
+                        Noun::Atom(a) => Ok(Noun::from_loobean(a.wut())),
+                        Noun::Cell(c) => Ok(Noun::from_loobean(c.wut())),
                     },
                     Atom(4) => {
-                        if let Noun::Atom(atom) = (Cell {
-                            head: self.head,
-                            tail: tail.tail,
-                        }
-                        .tar()?)
-                        {
-                            Ok(atom.lus().into_noun())
+                        if let Noun::Atom(a) = (Cell { h: self.h, t: t.t }.tar()?) {
+                            Ok(a.lus().into_noun())
                         } else {
                             Err(Error {
                                 msg: "Cannot apply the + operator to a cell".to_string(),
@@ -338,20 +319,15 @@ impl Tar for Cell {
                         }
                     }
                     Atom(5) => {
-                        if let Noun::Cell(tail_tail) = *tail.tail {
+                        if let Noun::Cell(tt) = *t.t {
                             Ok(Cell {
-                                head: Cell {
-                                    head: self.head.clone(),
-                                    tail: tail_tail.head,
+                                h: Cell {
+                                    h: self.h.clone(),
+                                    t: tt.h,
                                 }
                                 .tar()?
                                 .into_box(),
-                                tail: Cell {
-                                    head: self.head,
-                                    tail: tail_tail.tail,
-                                }
-                                .tar()?
-                                .into_box(),
+                                t: Cell { h: self.h, t: tt.t }.tar()?.into_box(),
                             }
                             .into_noun())
                         } else {
@@ -413,8 +389,8 @@ mod tests {
     fn clone_atom() {
         // Clone 777.
         {
-            let atom = Atom(777);
-            assert_eq!(atom, atom.clone());
+            let a = Atom(777);
+            assert_eq!(a, a.clone());
         }
     }
 
@@ -422,11 +398,11 @@ mod tests {
     fn clone_cell() {
         // Clone [8 808].
         {
-            let cell = Cell {
-                head: Atom(8).into_noun().into_box(),
-                tail: Atom(808).into_noun().into_box(),
+            let c = Cell {
+                h: Atom(8).into_noun().into_box(),
+                t: Atom(808).into_noun().into_box(),
             };
-            assert_eq!(cell, cell.clone());
+            assert_eq!(c, c.clone());
         }
     }
 
@@ -441,10 +417,10 @@ mod tests {
         // Clone [300 [400 500]].
         {
             let noun = Cell {
-                head: Atom(300).into_noun().into_box(),
-                tail: Cell {
-                    head: Atom(400).into_noun().into_box(),
-                    tail: Atom(500).into_noun().into_box(),
+                h: Atom(300).into_noun().into_box(),
+                t: Cell {
+                    h: Atom(400).into_noun().into_box(),
+                    t: Atom(500).into_noun().into_box(),
                 }
                 .into_noun()
                 .into_box(),
@@ -459,14 +435,14 @@ mod tests {
         // /[1 [98 89]] -> [98 89]
         {
             let t = Cell {
-                head: Atom(98).into_noun().into_box(),
-                tail: Atom(89).into_noun().into_box(),
+                h: Atom(98).into_noun().into_box(),
+                t: Atom(89).into_noun().into_box(),
             }
             .into_noun()
             .into_box();
             match (Cell {
-                head: Atom(1).into_noun().into_box(),
-                tail: t.clone(),
+                h: Atom(1).into_noun().into_box(),
+                t: t.clone(),
             }
             .fas())
             {
@@ -483,10 +459,10 @@ mod tests {
         {
             let th = Atom(292).into_noun().into_box();
             match (Cell {
-                head: Atom(2).into_noun().into_box(),
-                tail: Cell {
-                    head: th.clone(),
-                    tail: Atom(1001).into_noun().into_box(),
+                h: Atom(2).into_noun().into_box(),
+                t: Cell {
+                    h: th.clone(),
+                    t: Atom(1001).into_noun().into_box(),
                 }
                 .into_noun()
                 .into_box(),
@@ -505,8 +481,8 @@ mod tests {
         // /[2 107] -> crash
         {
             match (Cell {
-                head: Atom(2).into_noun().into_box(),
-                tail: Atom(107).into_noun().into_box(),
+                h: Atom(2).into_noun().into_box(),
+                t: Atom(107).into_noun().into_box(),
             }
             .fas())
             {
@@ -522,21 +498,21 @@ mod tests {
         // /[3 [[80 50] [19 95]]] -> [19 95]
         {
             let tt = Cell {
-                head: Atom(19).into_noun().into_box(),
-                tail: Atom(95).into_noun().into_box(),
+                h: Atom(19).into_noun().into_box(),
+                t: Atom(95).into_noun().into_box(),
             }
             .into_noun()
             .into_box();
             match (Cell {
-                head: Atom(3).into_noun().into_box(),
-                tail: Cell {
-                    head: Cell {
-                        head: Atom(80).into_noun().into_box(),
-                        tail: Atom(50).into_noun().into_box(),
+                h: Atom(3).into_noun().into_box(),
+                t: Cell {
+                    h: Cell {
+                        h: Atom(80).into_noun().into_box(),
+                        t: Atom(50).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
-                    tail: tt.clone(),
+                    t: tt.clone(),
                 }
                 .into_noun()
                 .into_box(),
@@ -556,15 +532,15 @@ mod tests {
         {
             let tht = Atom(16).into_noun().into_box();
             match (Cell {
-                head: Atom(5).into_noun().into_box(),
-                tail: Cell {
-                    head: Cell {
-                        head: Atom(15).into_noun().into_box(),
-                        tail: tht.clone(),
+                h: Atom(5).into_noun().into_box(),
+                t: Cell {
+                    h: Cell {
+                        h: Atom(15).into_noun().into_box(),
+                        t: tht.clone(),
                     }
                     .into_noun()
                     .into_box(),
-                    tail: Atom(17).into_noun().into_box(),
+                    t: Atom(17).into_noun().into_box(),
                 }
                 .into_noun()
                 .into_box(),
@@ -584,12 +560,12 @@ mod tests {
         {
             let tth = Atom(8).into_noun().into_box();
             match (Cell {
-                head: Atom(6).into_noun().into_box(),
-                tail: Cell {
-                    head: Atom(4).into_noun().into_box(),
-                    tail: Cell {
-                        head: tth.clone(),
-                        tail: Atom(12).into_noun().into_box(),
+                h: Atom(6).into_noun().into_box(),
+                t: Cell {
+                    h: Atom(4).into_noun().into_box(),
+                    t: Cell {
+                        h: tth.clone(),
+                        t: Atom(12).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
@@ -611,12 +587,12 @@ mod tests {
         // /[12 [531 25 99]] -> crash
         {
             match (Cell {
-                head: Atom(12).into_noun().into_box(),
-                tail: Cell {
-                    head: Atom(531).into_noun().into_box(),
-                    tail: Cell {
-                        head: Atom(25).into_noun().into_box(),
-                        tail: Atom(99).into_noun().into_box(),
+                h: Atom(12).into_noun().into_box(),
+                t: Cell {
+                    h: Atom(531).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(25).into_noun().into_box(),
+                        t: Atom(99).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
@@ -642,10 +618,10 @@ mod tests {
         {
             let th = Atom(22).into_noun().into_box();
             match (Cell {
-                head: Atom(1).into_noun().into_box(),
-                tail: Cell {
-                    head: th.clone(),
-                    tail: Atom(80).into_noun().into_box(),
+                h: Atom(1).into_noun().into_box(),
+                t: Cell {
+                    h: th.clone(),
+                    t: Atom(80).into_noun().into_box(),
                 }
                 .into_noun()
                 .into_box(),
@@ -666,12 +642,12 @@ mod tests {
             let th = Atom(11).into_noun().into_box();
             let ttt = Atom(33).into_noun().into_box();
             match (Cell {
-                head: Atom(2).into_noun().into_box(),
-                tail: Cell {
-                    head: th.clone(),
-                    tail: Cell {
-                        head: Atom(22).into_noun().into_box(),
-                        tail: ttt.clone(),
+                h: Atom(2).into_noun().into_box(),
+                t: Cell {
+                    h: th.clone(),
+                    t: Cell {
+                        h: Atom(22).into_noun().into_box(),
+                        t: ttt.clone(),
                     }
                     .into_noun()
                     .into_box(),
@@ -682,14 +658,7 @@ mod tests {
             .hax())
             {
                 Ok(res) => {
-                    assert_eq!(
-                        Cell {
-                            head: th,
-                            tail: ttt,
-                        }
-                        .into_noun(),
-                        res
-                    );
+                    assert_eq!(Cell { h: th, t: ttt }.into_noun(), res);
                 }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
@@ -702,12 +671,12 @@ mod tests {
             let th = Atom(11).into_noun().into_box();
             let tth = Atom(22).into_noun().into_box();
             match (Cell {
-                head: Atom(3).into_noun().into_box(),
-                tail: Cell {
-                    head: th.clone(),
-                    tail: Cell {
-                        head: tth.clone(),
-                        tail: Atom(33).into_noun().into_box(),
+                h: Atom(3).into_noun().into_box(),
+                t: Cell {
+                    h: th.clone(),
+                    t: Cell {
+                        h: tth.clone(),
+                        t: Atom(33).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
@@ -718,14 +687,7 @@ mod tests {
             .hax())
             {
                 Ok(res) => {
-                    assert_eq!(
-                        Cell {
-                            head: tth,
-                            tail: th,
-                        }
-                        .into_noun(),
-                        res
-                    );
+                    assert_eq!(Cell { h: tth, t: th }.into_noun(), res);
                 }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
@@ -739,17 +701,17 @@ mod tests {
             let ttht = Atom(33).into_noun().into_box();
             let ttt = Atom(44).into_noun().into_box();
             match (Cell {
-                head: Atom(4).into_noun().into_box(),
-                tail: Cell {
-                    head: th.clone(),
-                    tail: Cell {
-                        head: Cell {
-                            head: Atom(22).into_noun().into_box(),
-                            tail: ttht.clone(),
+                h: Atom(4).into_noun().into_box(),
+                t: Cell {
+                    h: th.clone(),
+                    t: Cell {
+                        h: Cell {
+                            h: Atom(22).into_noun().into_box(),
+                            t: ttht.clone(),
                         }
                         .into_noun()
                         .into_box(),
-                        tail: ttt.clone(),
+                        t: ttt.clone(),
                     }
                     .into_noun()
                     .into_box(),
@@ -762,13 +724,8 @@ mod tests {
                 Ok(res) => {
                     assert_eq!(
                         Cell {
-                            head: Cell {
-                                head: th,
-                                tail: ttht,
-                            }
-                            .into_noun()
-                            .into_box(),
-                            tail: ttt,
+                            h: Cell { h: th, t: ttht }.into_noun().into_box(),
+                            t: ttt,
                         }
                         .into_noun(),
                         res
@@ -786,17 +743,17 @@ mod tests {
             let tthh = Atom(22).into_noun().into_box();
             let ttt = Atom(44).into_noun().into_box();
             match (Cell {
-                head: Atom(5).into_noun().into_box(),
-                tail: Cell {
-                    head: th.clone(),
-                    tail: Cell {
-                        head: Cell {
-                            head: tthh.clone(),
-                            tail: Atom(33).into_noun().into_box(),
+                h: Atom(5).into_noun().into_box(),
+                t: Cell {
+                    h: th.clone(),
+                    t: Cell {
+                        h: Cell {
+                            h: tthh.clone(),
+                            t: Atom(33).into_noun().into_box(),
                         }
                         .into_noun()
                         .into_box(),
-                        tail: ttt.clone(),
+                        t: ttt.clone(),
                     }
                     .into_noun()
                     .into_box(),
@@ -809,13 +766,8 @@ mod tests {
                 Ok(res) => {
                     assert_eq!(
                         Cell {
-                            head: Cell {
-                                head: tthh,
-                                tail: th,
-                            }
-                            .into_noun()
-                            .into_box(),
-                            tail: ttt,
+                            h: Cell { h: tthh, t: th }.into_noun().into_box(),
+                            t: ttt,
                         }
                         .into_noun(),
                         res
@@ -832,8 +784,8 @@ mod tests {
     fn lus_atom() {
         // +999 -> 1000
         {
-            let atom = Atom(999);
-            assert_eq!(1000, atom.lus().0);
+            let a = Atom(999);
+            assert_eq!(1000, a.lus().0);
         }
     }
 
@@ -843,12 +795,12 @@ mod tests {
         {
             assert_eq!(
                 Cell {
-                    head: Atom(71).into_noun().into_box(),
-                    tail: Atom(109).into_noun().into_box(),
+                    h: Atom(71).into_noun().into_box(),
+                    t: Atom(109).into_noun().into_box(),
                 },
                 Cell {
-                    head: Atom(71).into_noun().into_box(),
-                    tail: Atom(109).into_noun().into_box(),
+                    h: Atom(71).into_noun().into_box(),
+                    t: Atom(109).into_noun().into_box(),
                 },
             );
         }
@@ -857,12 +809,12 @@ mod tests {
         {
             assert_ne!(
                 Cell {
-                    head: Atom(71).into_noun().into_box(),
-                    tail: Atom(109).into_noun().into_box(),
+                    h: Atom(71).into_noun().into_box(),
+                    t: Atom(109).into_noun().into_box(),
                 },
                 Cell {
-                    head: Atom(109).into_noun().into_box(),
-                    tail: Atom(71).into_noun().into_box(),
+                    h: Atom(109).into_noun().into_box(),
+                    t: Atom(71).into_noun().into_box(),
                 },
             );
         }
@@ -871,19 +823,19 @@ mod tests {
         {
             assert_eq!(
                 Cell {
-                    head: Atom(11).into_noun().into_box(),
-                    tail: Cell {
-                        head: Atom(12).into_noun().into_box(),
-                        tail: Atom(13).into_noun().into_box(),
+                    h: Atom(11).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(12).into_noun().into_box(),
+                        t: Atom(13).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
                 },
                 Cell {
-                    head: Atom(11).into_noun().into_box(),
-                    tail: Cell {
-                        head: Atom(12).into_noun().into_box(),
-                        tail: Atom(13).into_noun().into_box(),
+                    h: Atom(11).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(12).into_noun().into_box(),
+                        t: Atom(13).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
@@ -895,19 +847,19 @@ mod tests {
         {
             assert_ne!(
                 Cell {
-                    head: Atom(11).into_noun().into_box(),
-                    tail: Cell {
-                        head: Atom(12).into_noun().into_box(),
-                        tail: Atom(13).into_noun().into_box(),
+                    h: Atom(11).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(12).into_noun().into_box(),
+                        t: Atom(13).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
                 },
                 Cell {
-                    head: Atom(11).into_noun().into_box(),
-                    tail: Cell {
-                        head: Atom(13).into_noun().into_box(),
-                        tail: Atom(12).into_noun().into_box(),
+                    h: Atom(11).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(13).into_noun().into_box(),
+                        t: Atom(12).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
@@ -932,13 +884,13 @@ mod tests {
         {
             assert_eq!(
                 Cell {
-                    head: Atom(0).into_noun().into_box(),
-                    tail: Atom(5).into_noun().into_box(),
+                    h: Atom(0).into_noun().into_box(),
+                    t: Atom(5).into_noun().into_box(),
                 }
                 .into_noun(),
                 Cell {
-                    head: Atom(0).into_noun().into_box(),
-                    tail: Atom(5).into_noun().into_box(),
+                    h: Atom(0).into_noun().into_box(),
+                    t: Atom(5).into_noun().into_box(),
                 }
                 .into_noun(),
             );
@@ -948,13 +900,13 @@ mod tests {
         {
             assert_ne!(
                 Cell {
-                    head: Atom(0).into_noun().into_box(),
-                    tail: Atom(0).into_noun().into_box(),
+                    h: Atom(0).into_noun().into_box(),
+                    t: Atom(0).into_noun().into_box(),
                 }
                 .into_noun(),
                 Cell {
-                    head: Atom(0).into_noun().into_box(),
-                    tail: Atom(5).into_noun().into_box(),
+                    h: Atom(0).into_noun().into_box(),
+                    t: Atom(5).into_noun().into_box(),
                 }
                 .into_noun(),
             );
@@ -964,23 +916,23 @@ mod tests {
         {
             assert_eq!(
                 Cell {
-                    head: Cell {
-                        head: Atom(44).into_noun().into_box(),
-                        tail: Atom(22).into_noun().into_box(),
+                    h: Cell {
+                        h: Atom(44).into_noun().into_box(),
+                        t: Atom(22).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
-                    tail: Atom(88).into_noun().into_box(),
+                    t: Atom(88).into_noun().into_box(),
                 }
                 .into_noun(),
                 Cell {
-                    head: Cell {
-                        head: Atom(44).into_noun().into_box(),
-                        tail: Atom(22).into_noun().into_box(),
+                    h: Cell {
+                        h: Atom(44).into_noun().into_box(),
+                        t: Atom(22).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
-                    tail: Atom(88).into_noun().into_box(),
+                    t: Atom(88).into_noun().into_box(),
                 }
                 .into_noun(),
             );
@@ -990,20 +942,20 @@ mod tests {
         {
             assert_ne!(
                 Cell {
-                    head: Cell {
-                        head: Atom(44).into_noun().into_box(),
-                        tail: Atom(22).into_noun().into_box(),
+                    h: Cell {
+                        h: Atom(44).into_noun().into_box(),
+                        t: Atom(22).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
-                    tail: Atom(88).into_noun().into_box(),
+                    t: Atom(88).into_noun().into_box(),
                 }
                 .into_noun(),
                 Cell {
-                    head: Atom(44).into_noun().into_box(),
-                    tail: Cell {
-                        head: Atom(22).into_noun().into_box(),
-                        tail: Atom(88).into_noun().into_box(),
+                    h: Atom(44).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(22).into_noun().into_box(),
+                        t: Atom(88).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
@@ -1018,8 +970,8 @@ mod tests {
         // *[1 0] -> crash
         {
             match (Cell {
-                head: Atom(1).into_noun().into_box(),
-                tail: Atom(0).into_noun().into_box(),
+                h: Atom(1).into_noun().into_box(),
+                t: Atom(0).into_noun().into_box(),
             }
             .tar())
             {
@@ -1035,15 +987,15 @@ mod tests {
         // *[4 [0 0] 4] -> crash
         {
             match (Cell {
-                head: Atom(4).into_noun().into_box(),
-                tail: Cell {
-                    head: Cell {
-                        head: Atom(0).into_noun().into_box(),
-                        tail: Atom(0).into_noun().into_box(),
+                h: Atom(4).into_noun().into_box(),
+                t: Cell {
+                    h: Cell {
+                        h: Atom(0).into_noun().into_box(),
+                        t: Atom(0).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
-                    tail: Atom(4).into_noun().into_box(),
+                    t: Atom(4).into_noun().into_box(),
                 }
                 .into_noun()
                 .into_box(),
@@ -1062,31 +1014,31 @@ mod tests {
         // *[[[4 5] [6 14 15]] [0 7]] -> [14 15]
         {
             let htt = Cell {
-                head: Atom(14).into_noun().into_box(),
-                tail: Atom(15).into_noun().into_box(),
+                h: Atom(14).into_noun().into_box(),
+                t: Atom(15).into_noun().into_box(),
             }
             .into_noun()
             .into_box();
             match (Cell {
-                head: Cell {
-                    head: Cell {
-                        head: Atom(4).into_noun().into_box(),
-                        tail: Atom(5).into_noun().into_box(),
+                h: Cell {
+                    h: Cell {
+                        h: Atom(4).into_noun().into_box(),
+                        t: Atom(5).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
-                    tail: Cell {
-                        head: Atom(6).into_noun().into_box(),
-                        tail: htt.clone(),
+                    t: Cell {
+                        h: Atom(6).into_noun().into_box(),
+                        t: htt.clone(),
                     }
                     .into_noun()
                     .into_box(),
                 }
                 .into_noun()
                 .into_box(),
-                tail: Cell {
-                    head: Atom(0).into_noun().into_box(),
-                    tail: Atom(7).into_noun().into_box(),
+                t: Cell {
+                    h: Atom(0).into_noun().into_box(),
+                    t: Atom(7).into_noun().into_box(),
                 }
                 .into_noun()
                 .into_box(),
@@ -1105,16 +1057,16 @@ mod tests {
         // *[42 [1 153 218]] -> [153 218]
         {
             let tt = Cell {
-                head: Atom(153).into_noun().into_box(),
-                tail: Atom(218).into_noun().into_box(),
+                h: Atom(153).into_noun().into_box(),
+                t: Atom(218).into_noun().into_box(),
             }
             .into_noun()
             .into_box();
             match (Cell {
-                head: Atom(42).into_noun().into_box(),
-                tail: Cell {
-                    head: Atom(1).into_noun().into_box(),
-                    tail: tt.clone(),
+                h: Atom(42).into_noun().into_box(),
+                t: Cell {
+                    h: Atom(1).into_noun().into_box(),
+                    t: tt.clone(),
                 }
                 .into_noun()
                 .into_box(),
@@ -1133,27 +1085,27 @@ mod tests {
         // *[77 [2 [1 42] [1 1 153 218]]] -> [153 218]
         {
             let ttttt = Cell {
-                head: Atom(153).into_noun().into_box(),
-                tail: Atom(218).into_noun().into_box(),
+                h: Atom(153).into_noun().into_box(),
+                t: Atom(218).into_noun().into_box(),
             }
             .into_noun()
             .into_box();
             match (Cell {
-                head: Atom(77).into_noun().into_box(),
-                tail: Cell {
-                    head: Atom(2).into_noun().into_box(),
-                    tail: Cell {
-                        head: Cell {
-                            head: Atom(1).into_noun().into_box(),
-                            tail: Atom(42).into_noun().into_box(),
+                h: Atom(77).into_noun().into_box(),
+                t: Cell {
+                    h: Atom(2).into_noun().into_box(),
+                    t: Cell {
+                        h: Cell {
+                            h: Atom(1).into_noun().into_box(),
+                            t: Atom(42).into_noun().into_box(),
                         }
                         .into_noun()
                         .into_box(),
-                        tail: Cell {
-                            head: Atom(1).into_noun().into_box(),
-                            tail: Cell {
-                                head: Atom(1).into_noun().into_box(),
-                                tail: ttttt.clone(),
+                        t: Cell {
+                            h: Atom(1).into_noun().into_box(),
+                            t: Cell {
+                                h: Atom(1).into_noun().into_box(),
+                                t: ttttt.clone(),
                             }
                             .into_noun()
                             .into_box(),
@@ -1181,17 +1133,17 @@ mod tests {
         // *[[19 20] 3 0 1] -> 0
         {
             match (Cell {
-                head: Cell {
-                    head: Atom(19).into_noun().into_box(),
-                    tail: Atom(20).into_noun().into_box(),
+                h: Cell {
+                    h: Atom(19).into_noun().into_box(),
+                    t: Atom(20).into_noun().into_box(),
                 }
                 .into_noun()
                 .into_box(),
-                tail: Cell {
-                    head: Atom(3).into_noun().into_box(),
-                    tail: Cell {
-                        head: Atom(0).into_noun().into_box(),
-                        tail: Atom(1).into_noun().into_box(),
+                t: Cell {
+                    h: Atom(3).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(0).into_noun().into_box(),
+                        t: Atom(1).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
@@ -1213,12 +1165,12 @@ mod tests {
         // *[57 [4 0 1]] -> 58
         {
             match (Cell {
-                head: Atom(57).into_noun().into_box(),
-                tail: Cell {
-                    head: Atom(4).into_noun().into_box(),
-                    tail: Cell {
-                        head: Atom(0).into_noun().into_box(),
-                        tail: Atom(1).into_noun().into_box(),
+                h: Atom(57).into_noun().into_box(),
+                t: Cell {
+                    h: Atom(4).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(0).into_noun().into_box(),
+                        t: Atom(1).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
@@ -1240,24 +1192,24 @@ mod tests {
         // *[[12 13] 5 [1 17] [0 3]] -> [17 13]
         {
             match (Cell {
-                head: Cell {
-                    head: Atom(12).into_noun().into_box(),
-                    tail: Atom(13).into_noun().into_box(),
+                h: Cell {
+                    h: Atom(12).into_noun().into_box(),
+                    t: Atom(13).into_noun().into_box(),
                 }
                 .into_noun()
                 .into_box(),
-                tail: Cell {
-                    head: Atom(5).into_noun().into_box(),
-                    tail: Cell {
-                        head: Cell {
-                            head: Atom(1).into_noun().into_box(),
-                            tail: Atom(17).into_noun().into_box(),
+                t: Cell {
+                    h: Atom(5).into_noun().into_box(),
+                    t: Cell {
+                        h: Cell {
+                            h: Atom(1).into_noun().into_box(),
+                            t: Atom(17).into_noun().into_box(),
                         }
                         .into_noun()
                         .into_box(),
-                        tail: Cell {
-                            head: Atom(0).into_noun().into_box(),
-                            tail: Atom(3).into_noun().into_box(),
+                        t: Cell {
+                            h: Atom(0).into_noun().into_box(),
+                            t: Atom(3).into_noun().into_box(),
                         }
                         .into_noun()
                         .into_box(),
@@ -1273,8 +1225,8 @@ mod tests {
                 Ok(res) => {
                     assert_eq!(
                         Cell {
-                            head: Atom(17).into_noun().into_box(),
-                            tail: Atom(13).into_noun().into_box(),
+                            h: Atom(17).into_noun().into_box(),
+                            t: Atom(13).into_noun().into_box(),
                         }
                         .into_noun(),
                         res
@@ -1294,8 +1246,8 @@ mod tests {
             assert_eq!(
                 Loobean::Yes,
                 Cell {
-                    head: Atom(2).into_noun().into_box(),
-                    tail: Atom(2).into_noun().into_box(),
+                    h: Atom(2).into_noun().into_box(),
+                    t: Atom(2).into_noun().into_box(),
                 }
                 .tis(),
             );
@@ -1306,8 +1258,8 @@ mod tests {
             assert_eq!(
                 Loobean::No,
                 Cell {
-                    head: Atom(7).into_noun().into_box(),
-                    tail: Atom(6).into_noun().into_box(),
+                    h: Atom(7).into_noun().into_box(),
+                    t: Atom(6).into_noun().into_box(),
                 }
                 .tis(),
             );
@@ -1318,15 +1270,15 @@ mod tests {
             assert_eq!(
                 Loobean::Yes,
                 Cell {
-                    head: Cell {
-                        head: Atom(2).into_noun().into_box(),
-                        tail: Atom(7).into_noun().into_box(),
+                    h: Cell {
+                        h: Atom(2).into_noun().into_box(),
+                        t: Atom(7).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
-                    tail: Cell {
-                        head: Atom(2).into_noun().into_box(),
-                        tail: Atom(7).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(2).into_noun().into_box(),
+                        t: Atom(7).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
@@ -1340,17 +1292,17 @@ mod tests {
             assert_eq!(
                 Loobean::No,
                 Cell {
-                    head: Cell {
-                        head: Atom(2).into_noun().into_box(),
-                        tail: Atom(7).into_noun().into_box(),
+                    h: Cell {
+                        h: Atom(2).into_noun().into_box(),
+                        t: Atom(7).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
-                    tail: Cell {
-                        head: Atom(2).into_noun().into_box(),
-                        tail: Cell {
-                            head: Atom(7).into_noun().into_box(),
-                            tail: Atom(3).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(2).into_noun().into_box(),
+                        t: Cell {
+                            h: Atom(7).into_noun().into_box(),
+                            t: Atom(3).into_noun().into_box(),
                         }
                         .into_noun()
                         .into_box(),
@@ -1378,8 +1330,8 @@ mod tests {
             assert_eq!(
                 Loobean::Yes,
                 Cell {
-                    head: Atom(128).into_noun().into_box(),
-                    tail: Atom(256).into_noun().into_box(),
+                    h: Atom(128).into_noun().into_box(),
+                    t: Atom(256).into_noun().into_box(),
                 }
                 .wut(),
             );
@@ -1390,15 +1342,15 @@ mod tests {
             assert_eq!(
                 Loobean::Yes,
                 Cell {
-                    head: Cell {
-                        head: Atom(512).into_noun().into_box(),
-                        tail: Atom(1024).into_noun().into_box(),
+                    h: Cell {
+                        h: Atom(512).into_noun().into_box(),
+                        t: Atom(1024).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
-                    tail: Cell {
-                        head: Atom(16).into_noun().into_box(),
-                        tail: Atom(32).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(16).into_noun().into_box(),
+                        t: Atom(32).into_noun().into_box(),
                     }
                     .into_noun()
                     .into_box(),
