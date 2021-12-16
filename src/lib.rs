@@ -432,9 +432,39 @@ impl Tar for Cell {
                             })
                         }
                     }
-                    9 => Err(Error {
-                        msg: "unimplemented".to_string(),
-                    }),
+                    9 => {
+                        if let Noun::Cell(tt) = *t.t {
+                            Cell {
+                                h: Cell { h: self.h, t: tt.t }.tar()?.into_box(),
+                                t: Cell {
+                                    h: Atom(2).into_noun().into_box(),
+                                    t: Cell {
+                                        h: Cell {
+                                            h: Atom(0).into_noun().into_box(),
+                                            t: Atom(1).into_noun().into_box(),
+                                        }
+                                        .into_noun()
+                                        .into_box(),
+                                        t: Cell {
+                                            h: Atom(0).into_noun().into_box(),
+                                            t: tt.h,
+                                        }
+                                        .into_noun()
+                                        .into_box(),
+                                    }
+                                    .into_noun()
+                                    .into_box(),
+                                }
+                                .into_noun()
+                                .into_box(),
+                            }
+                            .tar()
+                        } else {
+                            Err(Error {
+                                msg: "*[a 9 b] cannot be evaluated when b is an atom".to_string(),
+                            })
+                        }
+                    }
                     10 => Err(Error {
                         msg: "unimplemented".to_string(),
                     }),
