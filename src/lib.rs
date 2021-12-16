@@ -336,9 +336,66 @@ impl Tar for Cell {
                             })
                         }
                     }
-                    Atom(6) => Err(Error {
-                        msg: "unimplemented".to_string(),
-                    }),
+                    Atom(6) => {
+                        if let Noun::Cell(tt) = *t.t {
+                            if let Noun::Cell(ttt) = *tt.t {
+                                Cell {
+                                    h: self.h.clone(),
+                                    t: Cell {
+                                        h: Cell { h: ttt.h, t: ttt.t }.into_noun().into_box(),
+                                        t: Cell {
+                                            h: Atom(0).into_noun().into_box(),
+                                            t: Cell {
+                                                h: Cell {
+                                                    h: Atom(2).into_noun().into_box(),
+                                                    t: Atom(3).into_noun().into_box(),
+                                                }
+                                                .into_noun()
+                                                .into_box(),
+                                                t: Cell {
+                                                    h: Atom(0).into_noun().into_box(),
+                                                    t: Cell {
+                                                        h: self.h,
+                                                        t: Cell {
+                                                            h: Atom(4).into_noun().into_box(),
+                                                            t: Cell {
+                                                                h: Atom(4).into_noun().into_box(),
+                                                                t: tt.h,
+                                                            }
+                                                            .into_noun()
+                                                            .into_box(),
+                                                        }
+                                                        .into_noun()
+                                                        .into_box(),
+                                                    }
+                                                    .tar()?
+                                                    .into_box(),
+                                                }
+                                                .into_noun()
+                                                .into_box(),
+                                            }
+                                            .tar()?
+                                            .into_box(),
+                                        }
+                                        .into_noun()
+                                        .into_box(),
+                                    }
+                                    .tar()?
+                                    .into_box(),
+                                }
+                                .tar()
+                            } else {
+                                Err(Error {
+                                    msg: "*[a 6 b c] cannot be evaluated when c is an atom"
+                                        .to_string(),
+                                })
+                            }
+                        } else {
+                            Err(Error {
+                                msg: "*[a 6 b] cannot be evaluated when b is an atom".to_string(),
+                            })
+                        }
+                    }
                     Atom(7) => Err(Error {
                         msg: "unimplemented".to_string(),
                     }),
@@ -1231,6 +1288,110 @@ mod tests {
                         .into_noun(),
                         res
                     );
+                }
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                }
+            }
+        }
+
+        // *[42 [6 [1 0] [4 0 1] [1 233]]] -> 43
+        {
+            match (Cell {
+                h: Atom(42).into_noun().into_box(),
+                t: Cell {
+                    h: Atom(6).into_noun().into_box(),
+                    t: Cell {
+                        h: Cell {
+                            h: Atom(1).into_noun().into_box(),
+                            t: Atom(0).into_noun().into_box(),
+                        }
+                        .into_noun()
+                        .into_box(),
+                        t: Cell {
+                            h: Cell {
+                                h: Atom(4).into_noun().into_box(),
+                                t: Cell {
+                                    h: Atom(0).into_noun().into_box(),
+                                    t: Atom(1).into_noun().into_box(),
+                                }
+                                .into_noun()
+                                .into_box(),
+                            }
+                            .into_noun()
+                            .into_box(),
+                            t: Cell {
+                                h: Atom(1).into_noun().into_box(),
+                                t: Atom(233).into_noun().into_box(),
+                            }
+                            .into_noun()
+                            .into_box(),
+                        }
+                        .into_noun()
+                        .into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .tar())
+            {
+                Ok(res) => {
+                    assert_eq!(Atom(43).into_noun(), res);
+                }
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                }
+            }
+        }
+
+        // *[42 [6 [1 1] [4 0 1] [1 233]]] -> 233
+        {
+            match (Cell {
+                h: Atom(42).into_noun().into_box(),
+                t: Cell {
+                    h: Atom(6).into_noun().into_box(),
+                    t: Cell {
+                        h: Cell {
+                            h: Atom(1).into_noun().into_box(),
+                            t: Atom(1).into_noun().into_box(),
+                        }
+                        .into_noun()
+                        .into_box(),
+                        t: Cell {
+                            h: Cell {
+                                h: Atom(4).into_noun().into_box(),
+                                t: Cell {
+                                    h: Atom(0).into_noun().into_box(),
+                                    t: Atom(1).into_noun().into_box(),
+                                }
+                                .into_noun()
+                                .into_box(),
+                            }
+                            .into_noun()
+                            .into_box(),
+                            t: Cell {
+                                h: Atom(1).into_noun().into_box(),
+                                t: Atom(233).into_noun().into_box(),
+                            }
+                            .into_noun()
+                            .into_box(),
+                        }
+                        .into_noun()
+                        .into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .tar())
+            {
+                Ok(res) => {
+                    assert_eq!(Atom(233).into_noun(), res);
                 }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
