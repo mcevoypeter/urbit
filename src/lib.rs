@@ -396,9 +396,19 @@ impl Tar for Cell {
                             })
                         }
                     }
-                    Atom(7) => Err(Error {
-                        msg: "unimplemented".to_string(),
-                    }),
+                    Atom(7) => {
+                        if let Noun::Cell(tt) = *t.t {
+                            Cell {
+                                h: Cell { h: self.h, t: tt.h }.tar()?.into_box(),
+                                t: tt.t,
+                            }
+                            .tar()
+                        } else {
+                            Err(Error {
+                                msg: "*[a 7 b] cannot be evaluated when b is an atom".to_string(),
+                            })
+                        }
+                    }
                     Atom(8) => Err(Error {
                         msg: "unimplemented".to_string(),
                     }),
@@ -1392,6 +1402,53 @@ mod tests {
             {
                 Ok(res) => {
                     assert_eq!(Atom(233).into_noun(), res);
+                }
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                }
+            }
+        }
+
+        // *[42 [7 [4 0 1] [4 0 1]]] -> 44
+        {
+            match (Cell {
+                h: Atom(42).into_noun().into_box(),
+                t: Cell {
+                    h: Atom(7).into_noun().into_box(),
+                    t: Cell {
+                        h: Cell {
+                            h: Atom(4).into_noun().into_box(),
+                            t: Cell {
+                                h: Atom(0).into_noun().into_box(),
+                                t: Atom(1).into_noun().into_box(),
+                            }
+                            .into_noun()
+                            .into_box(),
+                        }
+                        .into_noun()
+                        .into_box(),
+                        t: Cell {
+                            h: Atom(4).into_noun().into_box(),
+                            t: Cell {
+                                h: Atom(0).into_noun().into_box(),
+                                t: Atom(1).into_noun().into_box(),
+                            }
+                            .into_noun()
+                            .into_box(),
+                        }
+                        .into_noun()
+                        .into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .tar())
+            {
+                Ok(res) => {
+                    assert_eq!(Atom(44).into_noun(), res);
                 }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
