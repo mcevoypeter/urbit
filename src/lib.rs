@@ -1820,6 +1820,117 @@ mod tests {
                 }
             }
         }
+
+        // *[[[0 1] 137] 9 2 [0 1]] -> [[0 1] 137]
+        {
+            match (Cell {
+                h: Cell {
+                    h: Cell {
+                        h: Atom(0).into_noun().into_box(),
+                        t: Atom(1).into_noun().into_box(),
+                    }.into_noun().into_box(),
+                    t: Atom(137).into_noun().into_box(),
+                }.into_noun().into_box(),
+                t: Cell {
+                    h: Atom(9).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(2).into_noun().into_box(),
+                        t: Cell {
+                            h: Atom(0).into_noun().into_box(),
+                            t: Atom(1).into_noun().into_box(),
+                        }.into_noun().into_box(),
+                    }.into_noun().into_box(),
+                }.into_noun().into_box(),
+            }.tar())
+            {
+                Ok(res) => {
+                    assert_eq!(
+                        Cell {
+                            h: Cell {
+                                h: Atom(0).into_noun().into_box(),
+                                t: Atom(1).into_noun().into_box(),
+                            }.into_noun().into_box(),
+                            t: Atom(137).into_noun().into_box(),
+                        }.into_noun(),
+                        res
+                    );
+                }
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                }
+            }
+        }
+
+        // *[[[0 2] 137] 9 2 [0 1]] -> [0 2]
+        {
+            match (Cell {
+                h: Cell {
+                    h: Cell {
+                        h: Atom(0).into_noun().into_box(),
+                        t: Atom(2).into_noun().into_box(),
+                    }.into_noun().into_box(),
+                    t: Atom(137).into_noun().into_box(),
+                }.into_noun().into_box(),
+                t: Cell {
+                    h: Atom(9).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(2).into_noun().into_box(),
+                        t: Cell {
+                            h: Atom(0).into_noun().into_box(),
+                            t: Atom(1).into_noun().into_box(),
+                        }.into_noun().into_box(),
+                    }.into_noun().into_box(),
+                }.into_noun().into_box(),
+            }.tar())
+            {
+                Ok(res) => {
+                    assert_eq!(
+                        Cell {
+                            h: Atom(0).into_noun().into_box(),
+                            t: Atom(2).into_noun().into_box(),
+                        }.into_noun(),
+                        res
+                    );
+                }
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                }
+            }
+        }
+
+        // *[[[0 2] 137] 9 2 [0 1]] -> [0 2]
+        {
+            match (Cell {
+                h: Cell {
+                    h: Cell {
+                        h: Atom(0).into_noun().into_box(),
+                        t: Atom(3).into_noun().into_box(),
+                    }.into_noun().into_box(),
+                    t: Atom(137).into_noun().into_box(),
+                }.into_noun().into_box(),
+                t: Cell {
+                    h: Atom(9).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(2).into_noun().into_box(),
+                        t: Cell {
+                            h: Atom(0).into_noun().into_box(),
+                            t: Atom(1).into_noun().into_box(),
+                        }.into_noun().into_box(),
+                    }.into_noun().into_box(),
+                }.into_noun().into_box(),
+            }.tar())
+            {
+                Ok(res) => {
+                    assert_eq!(
+                        Atom(137).into_noun(),
+                        res
+                    );
+                }
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                }
+            }
+        }
     }
 
     #[test]
