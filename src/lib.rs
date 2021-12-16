@@ -106,6 +106,19 @@ impl PartialEq for Noun {
     }
 }
 
+impl fmt::Display for Noun {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Noun::Atom(a) => {
+                write!(f, "{}", a.0)
+            }
+            Noun::Cell(ref c) => {
+                write!(f, "[{} {}]", c.h, c.t)
+            }
+        }
+    }
+}
+
 impl Noun {
     fn from_loobean(loob: Loobean) -> Self {
         match loob {
