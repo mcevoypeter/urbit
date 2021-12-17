@@ -315,8 +315,8 @@ impl Hax for Cell {
 impl Tar for Cell {
     fn tar(self) -> Result<Noun, Error> {
         if let Noun::Cell(t) = *self.t {
-            if let Noun::Atom(opcode) = *t.h {
-                match opcode.0 {
+            if let Noun::Atom(Atom(opcode)) = *t.h {
+                match opcode {
                     0 => Cell { h: t.t, t: self.h }.fas(),
                     1 => Ok(*t.t),
                     2 => {
