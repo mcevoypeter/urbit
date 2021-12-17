@@ -1849,9 +1849,13 @@ mod tests {
                     h: Cell {
                         h: Atom(0).into_noun().into_box(),
                         t: Atom(1).into_noun().into_box(),
-                    }.into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
                     t: Atom(137).into_noun().into_box(),
-                }.into_noun().into_box(),
+                }
+                .into_noun()
+                .into_box(),
                 t: Cell {
                     h: Atom(9).into_noun().into_box(),
                     t: Cell {
@@ -1859,10 +1863,17 @@ mod tests {
                         t: Cell {
                             h: Atom(0).into_noun().into_box(),
                             t: Atom(1).into_noun().into_box(),
-                        }.into_noun().into_box(),
-                    }.into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.tar())
+                        }
+                        .into_noun()
+                        .into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .tar())
             {
                 Ok(res) => {
                     assert_eq!(
@@ -1870,9 +1881,12 @@ mod tests {
                             h: Cell {
                                 h: Atom(0).into_noun().into_box(),
                                 t: Atom(1).into_noun().into_box(),
-                            }.into_noun().into_box(),
+                            }
+                            .into_noun()
+                            .into_box(),
                             t: Atom(137).into_noun().into_box(),
-                        }.into_noun(),
+                        }
+                        .into_noun(),
                         res
                     );
                 }
@@ -1889,9 +1903,13 @@ mod tests {
                     h: Cell {
                         h: Atom(0).into_noun().into_box(),
                         t: Atom(2).into_noun().into_box(),
-                    }.into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
                     t: Atom(137).into_noun().into_box(),
-                }.into_noun().into_box(),
+                }
+                .into_noun()
+                .into_box(),
                 t: Cell {
                     h: Atom(9).into_noun().into_box(),
                     t: Cell {
@@ -1899,17 +1917,25 @@ mod tests {
                         t: Cell {
                             h: Atom(0).into_noun().into_box(),
                             t: Atom(1).into_noun().into_box(),
-                        }.into_noun().into_box(),
-                    }.into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.tar())
+                        }
+                        .into_noun()
+                        .into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .tar())
             {
                 Ok(res) => {
                     assert_eq!(
                         Cell {
                             h: Atom(0).into_noun().into_box(),
                             t: Atom(2).into_noun().into_box(),
-                        }.into_noun(),
+                        }
+                        .into_noun(),
                         res
                     );
                 }
@@ -1926,9 +1952,13 @@ mod tests {
                     h: Cell {
                         h: Atom(0).into_noun().into_box(),
                         t: Atom(3).into_noun().into_box(),
-                    }.into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
                     t: Atom(137).into_noun().into_box(),
-                }.into_noun().into_box(),
+                }
+                .into_noun()
+                .into_box(),
                 t: Cell {
                     h: Atom(9).into_noun().into_box(),
                     t: Cell {
@@ -1936,16 +1966,20 @@ mod tests {
                         t: Cell {
                             h: Atom(0).into_noun().into_box(),
                             t: Atom(1).into_noun().into_box(),
-                        }.into_noun().into_box(),
-                    }.into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.tar())
+                        }
+                        .into_noun()
+                        .into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .tar())
             {
                 Ok(res) => {
-                    assert_eq!(
-                        Atom(137).into_noun(),
-                        res
-                    );
+                    assert_eq!(Atom(137).into_noun(), res);
                 }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
@@ -1959,7 +1993,9 @@ mod tests {
                 h: Cell {
                     h: Atom(16).into_noun().into_box(),
                     t: Atom(32).into_noun().into_box(),
-                }.into_noun().into_box(),
+                }
+                .into_noun()
+                .into_box(),
                 t: Cell {
                     h: Atom(10).into_noun().into_box(),
                     t: Cell {
@@ -1968,15 +2004,26 @@ mod tests {
                             t: Cell {
                                 h: Atom(0).into_noun().into_box(),
                                 t: Atom(2).into_noun().into_box(),
-                            }.into_noun().into_box(),
-                        }.into_noun().into_box(),
+                            }
+                            .into_noun()
+                            .into_box(),
+                        }
+                        .into_noun()
+                        .into_box(),
                         t: Cell {
                             h: Atom(0).into_noun().into_box(),
                             t: Atom(3).into_noun().into_box(),
-                        }.into_noun().into_box(),
-                    }.into_noun().into_box(),
-                }.into_noun().into_box(),
-            }.tar())
+                        }
+                        .into_noun()
+                        .into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .tar())
             {
                 Ok(res) => {
                     assert_eq!(Atom(16).into_noun(), res);
