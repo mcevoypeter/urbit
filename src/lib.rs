@@ -1931,6 +1931,40 @@ mod tests {
                 }
             }
         }
+
+        // *[[16 32] 10 [1 0 2] 0 3] -> 16
+        {
+            match (Cell {
+                h: Cell {
+                    h: Atom(16).into_noun().into_box(),
+                    t: Atom(32).into_noun().into_box(),
+                }.into_noun().into_box(),
+                t: Cell {
+                    h: Atom(10).into_noun().into_box(),
+                    t: Cell {
+                        h: Cell {
+                            h: Atom(1).into_noun().into_box(),
+                            t: Cell {
+                                h: Atom(0).into_noun().into_box(),
+                                t: Atom(2).into_noun().into_box(),
+                            }.into_noun().into_box(),
+                        }.into_noun().into_box(),
+                        t: Cell {
+                            h: Atom(0).into_noun().into_box(),
+                            t: Atom(3).into_noun().into_box(),
+                        }.into_noun().into_box(),
+                    }.into_noun().into_box(),
+                }.into_noun().into_box(),
+            }.tar())
+            {
+                Ok(res) => {
+                    assert_eq!(Atom(16).into_noun(), res);
+                }
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                }
+            }
+        }
     }
 
     #[test]
