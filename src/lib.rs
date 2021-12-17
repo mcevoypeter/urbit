@@ -213,12 +213,12 @@ impl Tis for Cell {
 impl Fas for Cell {
     fn fas(self) -> Result<Noun, Error> {
         if let Noun::Atom(h) = *self.h {
-            match h {
-                Atom(0) => Err(Error {
+            match h.0 {
+                0 => Err(Error {
                     msg: "/[0 b] cannot be evaluated".to_string(),
                 }),
-                Atom(1) => Ok(*self.t),
-                Atom(n) => {
+                1 => Ok(*self.t),
+                n => {
                     if let Noun::Cell(t) = *self.t {
                         match n {
                             2 => Ok(*t.h),
@@ -252,12 +252,12 @@ impl Fas for Cell {
 impl Hax for Cell {
     fn hax(self) -> Result<Noun, Error> {
         if let (Noun::Atom(h), Noun::Cell(t)) = (*self.h, *self.t) {
-            match h {
-                Atom(0) => Err(Error {
+            match h.0 {
+                0 => Err(Error {
                     msg: "#[0 a b] cannot be evaluated".to_string(),
                 }),
-                Atom(1) => Ok(*t.h),
-                Atom(n) if 0 == n % 2 => Cell {
+                1 => Ok(*t.h),
+                n if 0 == n % 2 => Cell {
                     h: Atom(n / 2).into_noun().into_box(),
                     t: Cell {
                         h: Cell {
@@ -277,7 +277,7 @@ impl Hax for Cell {
                     .into_box(),
                 }
                 .hax(),
-                Atom(n) => Cell {
+                n => Cell {
                     h: Atom(n / 2).into_noun().into_box(),
                     t: Cell {
                         h: Cell {
