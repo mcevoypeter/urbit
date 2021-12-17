@@ -215,31 +215,37 @@ impl Fas for Cell {
         if let Noun::Atom(h) = *self.h {
             match h.0 {
                 0 => Err(Error {
-                    msg: "/[0 b] cannot be evaluated".to_string(),
+                    msg: "/[0 a] cannot be evaluated".to_string(),
                 }),
                 1 => Ok(*self.t),
-                n => {
+                2 => {
                     if let Noun::Cell(t) = *self.t {
-                        match n {
-                            2 => Ok(*t.h),
-                            3 => Ok(*t.t),
-                            _ => Cell {
-                                h: Atom(2 + n % 2).into_noun().into_box(),
-                                t: Cell {
-                                    h: Atom(n / 2).into_noun().into_box(),
-                                    t: Noun::Cell(t).into_box(),
-                                }
-                                .fas()?
-                                .into_box(),
-                            }
-                            .fas(),
-                        }
+                        Ok(*t.h)
                     } else {
                         Err(Error {
-                            msg: "/[a b] cannot be evaluated when b is an atom".to_string(),
+                            msg: "/[2 a] cannot be evaluated when a is an atom".to_string(),
                         })
                     }
                 }
+                3 => {
+                    if let Noun::Cell(t) = *self.t {
+                        Ok(*t.t)
+                    } else {
+                        Err(Error {
+                            msg: "/[3 a] cannot be evaluated when a is an atom".to_string(),
+                        })
+                    }
+                }
+                n => Cell {
+                    h: Atom(2 + n % 2).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(n / 2).into_noun().into_box(),
+                        t: self.t,
+                    }
+                    .fas()?
+                    .into_box(),
+                }
+                .fas(),
             }
         } else {
             Err(Error {
