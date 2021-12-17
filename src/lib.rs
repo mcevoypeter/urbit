@@ -67,6 +67,25 @@ trait Tar {
 }
 
 /*==============================================================================
+ * Implementations for Loobean enum
+ */
+
+impl Loobean {
+    #[allow(dead_code)]
+    fn into_boolean(self) -> bool {
+        Loobean::Yes == self
+    }
+
+    fn from_boolean(b: bool) -> Self {
+        if b {
+            Loobean::Yes
+        } else {
+            Loobean::No
+        }
+    }
+}
+
+/*==============================================================================
  * Implementations for Error struct
  */
 
@@ -187,11 +206,7 @@ impl Wut for Cell {
 
 impl Tis for Cell {
     fn tis(&self) -> Loobean {
-        if self.h == self.t {
-            Loobean::Yes
-        } else {
-            Loobean::No
-        }
+        Loobean::from_boolean(self.h == self.t)
     }
 }
 
