@@ -129,7 +129,7 @@ mod tests {
         }
 
         // [4 0 1]
-        let _increment = Cell {
+        let increment = Cell {
             h: Atom(4).into_noun().into_box(),
             t: Cell {
                 h: Atom(0).into_noun().into_box(),
@@ -293,22 +293,25 @@ mod tests {
 
         // *[107 decrement increment] -> [106 108]
         // TODO: resolve the stack overflow that occurs when this test is run.
-        /*
         {
             match (Cell {
                 h: Atom(107).into_noun().into_box(),
                 t: Cell {
                     h: decrement.clone(),
                     t: increment.clone(),
-                }.into_noun().into_box(),
-            }.tar())
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .tar())
             {
                 Ok(res) => {
                     assert_eq!(
                         Cell {
                             h: Atom(106).into_noun().into_box(),
                             t: Atom(108).into_noun().into_box(),
-                        }.into_noun(),
+                        }
+                        .into_noun(),
                         res
                     );
                 }
@@ -317,7 +320,6 @@ mod tests {
                 }
             }
         }
-        */
     }
 
     #[test]
