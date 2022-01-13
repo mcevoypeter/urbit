@@ -1,6 +1,10 @@
 use crate::nock::*;
 
-mod tree;
+#[cfg(feature = "iterative_tree")]
+mod iterative_tree;
+
+#[cfg(feature = "recursive_tree")]
+mod recursive_tree;
 
 /*==============================================================================
  * Nock operator trait definitions
