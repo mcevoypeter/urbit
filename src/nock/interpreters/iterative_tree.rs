@@ -90,57 +90,65 @@ impl Fas for Cell {
 
 impl Hax for Cell {
     fn hax(self) -> Result<Noun, Error> {
-        if let (Noun::Atom(Atom(h)), Noun::Cell(t)) = (*self.h, *self.t) {
-            match h {
-                0 => Err(Error {
-                    msg: "#[0 a b] cannot be evaluated".to_string(),
-                }),
-                1 => Ok(*t.h),
-                n if 0 == n % 2 => Cell {
-                    h: Atom(n / 2).into_noun().into_box(),
-                    t: Cell {
-                        h: Cell {
-                            h: t.h,
+        let mut c = self;
+        loop {
+            if let (Noun::Atom(h), Noun::Cell(t)) = (*c.h, *c.t) {
+                match h {
+                    Atom(0) => {
+                        break Err(Error {
+                            msg: "#[0 a b] cannot be evaluated".to_string(),
+                        })
+                    }
+                    Atom(1) => break Ok(*t.h),
+                    Atom(n) if 0 == n % 2 => {
+                        c = Cell {
+                            h: Atom(n / 2).into_noun().into_box(),
                             t: Cell {
-                                h: Atom(n + 1).into_noun().into_box(),
-                                t: t.t.clone(),
+                                h: Cell {
+                                    h: t.h,
+                                    t: Cell {
+                                        h: Atom(n + 1).into_noun().into_box(),
+                                        t: t.t.clone(),
+                                    }
+                                    .fas()?
+                                    .into_box(),
+                                }
+                                .into_noun()
+                                .into_box(),
+                                t: t.t,
                             }
-                            .fas()?
+                            .into_noun()
                             .into_box(),
                         }
-                        .into_noun()
-                        .into_box(),
-                        t: t.t,
                     }
-                    .into_noun()
-                    .into_box(),
-                }
-                .hax(),
-                n => Cell {
-                    h: Atom(n / 2).into_noun().into_box(),
-                    t: Cell {
-                        h: Cell {
-                            h: Cell {
-                                h: Atom(n - 1).into_noun().into_box(),
-                                t: t.t.clone(),
+                    Atom(n) => {
+                        c = Cell {
+                            h: Atom(n / 2).into_noun().into_box(),
+                            t: Cell {
+                                h: Cell {
+                                    h: Cell {
+                                        h: Atom(n - 1).into_noun().into_box(),
+                                        t: t.t.clone(),
+                                    }
+                                    .fas()?
+                                    .into_box(),
+                                    t: t.h,
+                                }
+                                .into_noun()
+                                .into_box(),
+                                t: t.t,
                             }
-                            .fas()?
+                            .into_noun()
                             .into_box(),
-                            t: t.h,
                         }
-                        .into_noun()
-                        .into_box(),
-                        t: t.t,
                     }
-                    .into_noun()
-                    .into_box(),
                 }
-                .hax(),
+            } else {
+                break Err(Error {
+                    msg: "#[a b] cannot be evaluated when a is cell and/or b is an atom"
+                        .to_string(),
+                });
             }
-        } else {
-            Err(Error {
-                msg: "#[a b] cannot be evaluated when a is cell and/or b is an atom".to_string(),
-            })
         }
     }
 }
