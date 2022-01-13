@@ -46,6 +46,92 @@ mod tests {
 
     #[test]
     fn decrement() {
+        // [[1 0] [0 1]] -> [1 0]
+        {
+            match (Cell {
+                h: Cell {
+                    h: Atom(1).into_noun().into_box(),
+                    t: Atom(0).into_noun().into_box(),
+                }
+                .into_noun()
+                .into_box(),
+                t: Cell {
+                    h: Atom(0).into_noun().into_box(),
+                    t: Atom(1).into_noun().into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .tar())
+            {
+                Ok(res) => {
+                    assert_eq!(
+                        Cell {
+                            h: Atom(1).into_noun().into_box(),
+                            t: Atom(0).into_noun().into_box(),
+                        }
+                        .into_noun(),
+                        res
+                    );
+                }
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                }
+            }
+        }
+
+        // [42 [1 0] [0 1]] -> [0 42]
+        {
+            match (Cell {
+                h: Atom(42).into_noun().into_box(),
+                t: Cell {
+                    h: Cell {
+                        h: Atom(1).into_noun().into_box(),
+                        t: Atom(0).into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                    t: Cell {
+                        h: Atom(0).into_noun().into_box(),
+                        t: Atom(1).into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .tar())
+            {
+                Ok(res) => {
+                    assert_eq!(
+                        Cell {
+                            h: Atom(0).into_noun().into_box(),
+                            t: Atom(42).into_noun().into_box(),
+                        }
+                        .into_noun(),
+                        res
+                    );
+                }
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                }
+            }
+        }
+
+        // [4 0 1]
+        let _increment = Cell {
+            h: Atom(4).into_noun().into_box(),
+            t: Cell {
+                h: Atom(0).into_noun().into_box(),
+                t: Atom(1).into_noun().into_box(),
+            }
+            .into_noun()
+            .into_box(),
+        }
+        .into_noun()
+        .into_box();
+
         // [8 [1 0] 8 [1 6 [5 [0 7] 4 0 6] [0 6] 9 2 [0 2] [4 0 6] 0 7] 9 2 0 1]
         let decrement = Cell {
             h: Atom(8).into_noun().into_box(),
@@ -183,7 +269,7 @@ mod tests {
         {
             match (Cell {
                 h: Atom(42).into_noun().into_box(),
-                t: decrement,
+                t: decrement.clone(),
             }
             .tar())
             {
@@ -195,6 +281,34 @@ mod tests {
                 }
             }
         }
+
+        // *[107 decrement increment] -> [106 108]
+        // TODO: resolve the stack overflow that occurs when this test is run.
+        /*
+        {
+            match (Cell {
+                h: Atom(107).into_noun().into_box(),
+                t: Cell {
+                    h: decrement.clone(),
+                    t: increment.clone(),
+                }.into_noun().into_box(),
+            }.tar())
+            {
+                Ok(res) => {
+                    assert_eq!(
+                        Cell {
+                            h: Atom(106).into_noun().into_box(),
+                            t: Atom(108).into_noun().into_box(),
+                        }.into_noun(),
+                        res
+                    );
+                }
+                Err(err) => {
+                    assert!(false, "Unexpected failure: {}.", err.msg);
+                }
+            }
+        }
+        */
     }
 
     #[test]
