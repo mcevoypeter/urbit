@@ -36,45 +36,54 @@ impl Tis for Cell {
 
 impl Fas for Cell {
     fn fas(self) -> Result<Noun, Error> {
-        if let Noun::Atom(Atom(h)) = *self.h {
-            match h {
-                0 => Err(Error {
-                    msg: "/[0 a] cannot be evaluated".to_string(),
-                }),
-                1 => Ok(*self.t),
-                2 => {
-                    if let Noun::Cell(t) = *self.t {
-                        Ok(*t.h)
-                    } else {
-                        Err(Error {
-                            msg: "/[2 a] cannot be evaluated when a is an atom".to_string(),
-                        })
+        let mut c = self;
+        loop {
+            match *c.h {
+                Noun::Atom(Atom(0)) => {
+                    break Err(Error {
+                        msg: "/[0 a] cannot be evaluated".to_string(),
+                    })
+                }
+                Noun::Atom(Atom(1)) => break Ok(*c.t),
+                Noun::Atom(Atom(2)) => {
+                    break {
+                        if let Noun::Cell(t) = *c.t {
+                            Ok(*t.h)
+                        } else {
+                            Err(Error {
+                                msg: "/[2 a] cannot be evaluated when a is an atom".to_string(),
+                            })
+                        }
                     }
                 }
-                3 => {
-                    if let Noun::Cell(t) = *self.t {
-                        Ok(*t.t)
-                    } else {
-                        Err(Error {
-                            msg: "/[3 a] cannot be evaluated when a is an atom".to_string(),
-                        })
+                Noun::Atom(Atom(3)) => {
+                    break {
+                        if let Noun::Cell(t) = *c.t {
+                            Ok(*t.t)
+                        } else {
+                            Err(Error {
+                                msg: "/[3 a] cannot be evaluated when a is an atom".to_string(),
+                            })
+                        }
                     }
                 }
-                n => Cell {
-                    h: Atom(2 + n % 2).into_noun().into_box(),
-                    t: Cell {
-                        h: Atom(n / 2).into_noun().into_box(),
-                        t: self.t,
+                Noun::Atom(Atom(n)) => {
+                    c = Cell {
+                        h: Atom(2 + n % 2).into_noun().into_box(),
+                        t: Cell {
+                            h: Atom(n / 2).into_noun().into_box(),
+                            t: c.t,
+                        }
+                        .fas()?
+                        .into_box(),
                     }
-                    .fas()?
-                    .into_box(),
                 }
-                .fas(),
+                Noun::Cell(_) => {
+                    break Err(Error {
+                        msg: "/[a b] cannot be evaluated when a is a cell".to_string(),
+                    })
+                }
             }
-        } else {
-            Err(Error {
-                msg: "/[a b] cannot be evaluated when a is a cell".to_string(),
-            })
         }
     }
 }
