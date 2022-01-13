@@ -1,6 +1,6 @@
 use std::{error, fmt};
 
-mod interpreter;
+mod interpreters;
 
 /*==============================================================================
  * Nock struct and enum definitions
@@ -30,40 +30,6 @@ enum Loobean {
 #[derive(Debug)]
 struct Error {
     msg: String,
-}
-
-/*==============================================================================
- * Nock operator trait definitions
- */
-
-// ?
-trait Wut {
-    fn wut(&self) -> Loobean;
-}
-
-// +
-trait Lus {
-    fn lus(self) -> Atom;
-}
-
-// =
-trait Tis {
-    fn tis(&self) -> Loobean;
-}
-
-// /
-trait Fas {
-    fn fas(self) -> Result<Noun, Error>;
-}
-
-// #
-trait Hax {
-    fn hax(self) -> Result<Noun, Error>;
-}
-
-// *
-trait Tar {
-    fn tar(self) -> Result<Noun, Error>;
 }
 
 /*==============================================================================
@@ -191,3 +157,233 @@ impl fmt::Display for Error {
 }
 
 impl error::Error for Error {}
+
+/*==============================================================================
+ * Tests
+ */
+
+#[cfg(test)]
+mod tests {
+    use crate::nock::*;
+
+    #[test]
+    fn clone_atom() {
+        // Clone 777.
+        {
+            let a = Atom(777);
+            assert_eq!(a, a.clone());
+        }
+    }
+
+    #[test]
+    fn clone_cell() {
+        // Clone [8 808].
+        {
+            let c = Cell {
+                h: Atom(8).into_noun().into_box(),
+                t: Atom(808).into_noun().into_box(),
+            };
+            assert_eq!(c, c.clone());
+        }
+    }
+
+    #[test]
+    fn clone_noun() {
+        // Clone 101010.
+        {
+            let noun = Atom(101010).into_noun();
+            assert_eq!(noun, noun.clone());
+        }
+
+        // Clone [300 [400 500]].
+        {
+            let noun = Cell {
+                h: Atom(300).into_noun().into_box(),
+                t: Cell {
+                    h: Atom(400).into_noun().into_box(),
+                    t: Atom(500).into_noun().into_box(),
+                }
+                .into_noun()
+                .into_box(),
+            }
+            .into_noun();
+            assert_eq!(noun, noun.clone());
+        }
+    }
+
+    #[test]
+    fn partialeq_cell() {
+        // [71 109] == [71 109]
+        {
+            assert_eq!(
+                Cell {
+                    h: Atom(71).into_noun().into_box(),
+                    t: Atom(109).into_noun().into_box(),
+                },
+                Cell {
+                    h: Atom(71).into_noun().into_box(),
+                    t: Atom(109).into_noun().into_box(),
+                },
+            );
+        }
+
+        // [71 109] != [109 71]
+        {
+            assert_ne!(
+                Cell {
+                    h: Atom(71).into_noun().into_box(),
+                    t: Atom(109).into_noun().into_box(),
+                },
+                Cell {
+                    h: Atom(109).into_noun().into_box(),
+                    t: Atom(71).into_noun().into_box(),
+                },
+            );
+        }
+
+        // [11 [12 13]] == [11 [12 13]]
+        {
+            assert_eq!(
+                Cell {
+                    h: Atom(11).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(12).into_noun().into_box(),
+                        t: Atom(13).into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                },
+                Cell {
+                    h: Atom(11).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(12).into_noun().into_box(),
+                        t: Atom(13).into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                },
+            );
+        }
+
+        // [11 [12 13]] != [11 [13 12]]
+        {
+            assert_ne!(
+                Cell {
+                    h: Atom(11).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(12).into_noun().into_box(),
+                        t: Atom(13).into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                },
+                Cell {
+                    h: Atom(11).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(13).into_noun().into_box(),
+                        t: Atom(12).into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                },
+            );
+        }
+    }
+
+    #[test]
+    fn partialeq_noun() {
+        // 500 == 500
+        {
+            assert_eq!(Atom(500).into_noun(), Atom(500).into_noun(),);
+        }
+
+        // 499 != 501
+        {
+            assert_ne!(Atom(499).into_noun(), Atom(501).into_noun(),);
+        }
+
+        // [0 5] == [0 5]
+        {
+            assert_eq!(
+                Cell {
+                    h: Atom(0).into_noun().into_box(),
+                    t: Atom(5).into_noun().into_box(),
+                }
+                .into_noun(),
+                Cell {
+                    h: Atom(0).into_noun().into_box(),
+                    t: Atom(5).into_noun().into_box(),
+                }
+                .into_noun(),
+            );
+        }
+
+        // [0 0] == [0 5]
+        {
+            assert_ne!(
+                Cell {
+                    h: Atom(0).into_noun().into_box(),
+                    t: Atom(0).into_noun().into_box(),
+                }
+                .into_noun(),
+                Cell {
+                    h: Atom(0).into_noun().into_box(),
+                    t: Atom(5).into_noun().into_box(),
+                }
+                .into_noun(),
+            );
+        }
+
+        // [[44 22] 88] == [[44 22] 88]
+        {
+            assert_eq!(
+                Cell {
+                    h: Cell {
+                        h: Atom(44).into_noun().into_box(),
+                        t: Atom(22).into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                    t: Atom(88).into_noun().into_box(),
+                }
+                .into_noun(),
+                Cell {
+                    h: Cell {
+                        h: Atom(44).into_noun().into_box(),
+                        t: Atom(22).into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                    t: Atom(88).into_noun().into_box(),
+                }
+                .into_noun(),
+            );
+        }
+
+        // [[44 22] 88] != [44 [22 88]]
+        {
+            assert_ne!(
+                Cell {
+                    h: Cell {
+                        h: Atom(44).into_noun().into_box(),
+                        t: Atom(22).into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                    t: Atom(88).into_noun().into_box(),
+                }
+                .into_noun(),
+                Cell {
+                    h: Atom(44).into_noun().into_box(),
+                    t: Cell {
+                        h: Atom(22).into_noun().into_box(),
+                        t: Atom(88).into_noun().into_box(),
+                    }
+                    .into_noun()
+                    .into_box(),
+                }
+                .into_noun(),
+            );
+        }
+    }
+}
