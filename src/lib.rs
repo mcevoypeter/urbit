@@ -352,7 +352,7 @@ impl Tar for Cell {
                     }
                     5 => {
                         if let Noun::Cell(tt) = *t.t {
-                            Ok(Cell {
+                            Ok(Noun::from_loobean(Cell {
                                 h: Cell {
                                     h: self.h.clone(),
                                     t: tt.h,
@@ -360,8 +360,7 @@ impl Tar for Cell {
                                 .tar()?
                                 .into_box(),
                                 t: Cell { h: self.h, t: tt.t }.tar()?.into_box(),
-                            }
-                            .into_noun())
+                            }.tis()))
                         } else {
                             Err(Error {
                                 msg: "*[a 5 b] cannot be evaluated when b is an atom".to_string(),
@@ -1546,7 +1545,7 @@ mod tests {
             }
         }
 
-        // *[[12 13] 5 [1 17] [0 3]] -> [17 13]
+        // *[[12 13] 5 [1 17] [0 3]] -> 1
         {
             match (Cell {
                 h: Cell {
@@ -1581,11 +1580,7 @@ mod tests {
             {
                 Ok(res) => {
                     assert_eq!(
-                        Cell {
-                            h: Atom(17).into_noun().into_box(),
-                            t: Atom(13).into_noun().into_box(),
-                        }
-                        .into_noun(),
+                        Atom(1).into_noun(),
                         res
                     );
                 }
