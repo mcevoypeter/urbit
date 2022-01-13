@@ -36,18 +36,18 @@ impl Tis for Cell {
 
 impl Fas for Cell {
     fn fas(self) -> Result<Noun, Error> {
-        let mut c = self;
+        let mut s = self;
         loop {
-            match *c.h {
+            match *s.h {
                 Noun::Atom(Atom(0)) => {
                     break Err(Error {
                         msg: "/[0 a] cannot be evaluated".to_string(),
                     })
                 }
-                Noun::Atom(Atom(1)) => break Ok(*c.t),
+                Noun::Atom(Atom(1)) => break Ok(*s.t),
                 Noun::Atom(Atom(2)) => {
                     break {
-                        if let Noun::Cell(t) = *c.t {
+                        if let Noun::Cell(t) = *s.t {
                             Ok(*t.h)
                         } else {
                             Err(Error {
@@ -58,7 +58,7 @@ impl Fas for Cell {
                 }
                 Noun::Atom(Atom(3)) => {
                     break {
-                        if let Noun::Cell(t) = *c.t {
+                        if let Noun::Cell(t) = *s.t {
                             Ok(*t.t)
                         } else {
                             Err(Error {
@@ -68,11 +68,11 @@ impl Fas for Cell {
                     }
                 }
                 Noun::Atom(Atom(n)) => {
-                    c = Cell {
+                    s = Cell {
                         h: Atom(2 + n % 2).into_noun().into_box(),
                         t: Cell {
                             h: Atom(n / 2).into_noun().into_box(),
-                            t: c.t,
+                            t: s.t,
                         }
                         .fas()?
                         .into_box(),
@@ -90,9 +90,9 @@ impl Fas for Cell {
 
 impl Hax for Cell {
     fn hax(self) -> Result<Noun, Error> {
-        let mut c = self;
+        let mut s = self;
         loop {
-            if let (Noun::Atom(h), Noun::Cell(t)) = (*c.h, *c.t) {
+            if let (Noun::Atom(h), Noun::Cell(t)) = (*s.h, *s.t) {
                 match h {
                     Atom(0) => {
                         break Err(Error {
@@ -101,7 +101,7 @@ impl Hax for Cell {
                     }
                     Atom(1) => break Ok(*t.h),
                     Atom(n) if 0 == n % 2 => {
-                        c = Cell {
+                        s = Cell {
                             h: Atom(n / 2).into_noun().into_box(),
                             t: Cell {
                                 h: Cell {
@@ -122,7 +122,7 @@ impl Hax for Cell {
                         }
                     }
                     Atom(n) => {
-                        c = Cell {
+                        s = Cell {
                             h: Atom(n / 2).into_noun().into_box(),
                             t: Cell {
                                 h: Cell {
