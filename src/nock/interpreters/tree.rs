@@ -138,7 +138,6 @@ impl Hax for Cell {
 
 impl Tar for Cell {
     fn tar(self) -> Result<Noun, Error> {
-        println!("{:?}", &self);
         if let Noun::Cell(t) = *self.t {
             match *t.h {
                 Noun::Atom(Atom(0)) => Cell { h: t.t, t: self.h }.fas(),
