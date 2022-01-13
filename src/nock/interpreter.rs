@@ -176,15 +176,18 @@ impl Tar for Cell {
                     }
                     5 => {
                         if let Noun::Cell(tt) = *t.t {
-                            Ok(Noun::from_loobean(Cell {
-                                h: Cell {
-                                    h: self.h.clone(),
-                                    t: tt.h,
+                            Ok(Noun::from_loobean(
+                                Cell {
+                                    h: Cell {
+                                        h: self.h.clone(),
+                                        t: tt.h,
+                                    }
+                                    .tar()?
+                                    .into_box(),
+                                    t: Cell { h: self.h, t: tt.t }.tar()?.into_box(),
                                 }
-                                .tar()?
-                                .into_box(),
-                                t: Cell { h: self.h, t: tt.t }.tar()?.into_box(),
-                            }.tis()))
+                                .tis(),
+                            ))
                         } else {
                             Err(Error {
                                 msg: "*[a 5 b] cannot be evaluated when b is an atom".to_string(),
@@ -1397,10 +1400,7 @@ mod tests {
             .tar())
             {
                 Ok(res) => {
-                    assert_eq!(
-                        Atom(1).into_noun(),
-                        res
-                    );
+                    assert_eq!(Atom(1).into_noun(), res);
                 }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
