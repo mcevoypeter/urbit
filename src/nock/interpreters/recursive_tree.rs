@@ -36,13 +36,13 @@ impl Tis for Cell {
 
 impl Fas for Cell {
     fn fas(self) -> Result<Noun, Error> {
-        if let Noun::Atom(Atom(h)) = *self.h {
+        if let Noun::Atom(h) = *self.h {
             match h {
-                0 => Err(Error {
+                Atom(0) => Err(Error {
                     msg: "/[0 a] cannot be evaluated".to_string(),
                 }),
-                1 => Ok(*self.t),
-                2 => {
+                Atom(1) => Ok(*self.t),
+                Atom(2) => {
                     if let Noun::Cell(t) = *self.t {
                         Ok(*t.h)
                     } else {
@@ -51,7 +51,7 @@ impl Fas for Cell {
                         })
                     }
                 }
-                3 => {
+                Atom(3) => {
                     if let Noun::Cell(t) = *self.t {
                         Ok(*t.t)
                     } else {
@@ -60,7 +60,7 @@ impl Fas for Cell {
                         })
                     }
                 }
-                n => Cell {
+                Atom(n) => Cell {
                     h: Atom(2 + n % 2).into_noun().into_box(),
                     t: Cell {
                         h: Atom(n / 2).into_noun().into_box(),
@@ -81,13 +81,13 @@ impl Fas for Cell {
 
 impl Hax for Cell {
     fn hax(self) -> Result<Noun, Error> {
-        if let (Noun::Atom(Atom(h)), Noun::Cell(t)) = (*self.h, *self.t) {
+        if let (Noun::Atom(h), Noun::Cell(t)) = (*self.h, *self.t) {
             match h {
-                0 => Err(Error {
+                Atom(0) => Err(Error {
                     msg: "#[0 a b] cannot be evaluated".to_string(),
                 }),
-                1 => Ok(*t.h),
-                n if 0 == n % 2 => Cell {
+                Atom(1) => Ok(*t.h),
+                Atom(n) if 0 == n % 2 => Cell {
                     h: Atom(n / 2).into_noun().into_box(),
                     t: Cell {
                         h: Cell {
@@ -107,7 +107,7 @@ impl Hax for Cell {
                     .into_box(),
                 }
                 .hax(),
-                n => Cell {
+                Atom(n) => Cell {
                     h: Atom(n / 2).into_noun().into_box(),
                     t: Cell {
                         h: Cell {
