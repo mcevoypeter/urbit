@@ -1,4 +1,3 @@
-# oxnock
+# urbit-rs
 
-An implementation of the [Nock specification](https://urbit.org/docs/nock/definition) in Rust.
-
+A work-in-progress implementation of [Urbit](https://urbit.org) in Rust.
