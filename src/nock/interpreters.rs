@@ -1,5 +1,10 @@
 use crate::nock::*;
 
+#[cfg(all(feature = "iterative_tree", feature = "recursive_tree"))]
+compile_error!(
+    "feature \"iterative_tree\" and \"recursive_tree\" cannot be enabled at the same time"
+);
+
 #[cfg(feature = "iterative_tree")]
 mod iterative_tree;
 
