@@ -1,5 +1,5 @@
 [package]
-name = "urbit-rs"
+name = "vere"
 version = "0.1.0"
 edition = "2021"
 
