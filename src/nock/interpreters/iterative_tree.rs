@@ -3,36 +3,8 @@
 use crate::nock::interpreters::*;
 
 /*==============================================================================
- * Nock operator trait implementations for Atom struct
- */
-
-impl Wut for Atom {
-    fn wut(&self) -> Loobean {
-        Loobean::No
-    }
-}
-
-impl Lus for Atom {
-    fn lus(self) -> Atom {
-        Atom(1 + self.0)
-    }
-}
-
-/*==============================================================================
  * Nock operator trait implementations for Cell struct
  */
-
-impl Wut for Cell {
-    fn wut(&self) -> Loobean {
-        Loobean::Yes
-    }
-}
-
-impl Tis for Cell {
-    fn tis(&self) -> Loobean {
-        Loobean::from_boolean(self.h == self.t)
-    }
-}
 
 impl Fas for Cell {
     fn fas(self) -> Result<Noun, Error> {
