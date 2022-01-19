@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 
 [features]
-default = []
+default = ["iterative_tree"]
 # Interpreter type
 iterative_tree = []
 recursive_tree = []
