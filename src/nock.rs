@@ -7,22 +7,22 @@ mod interpreters;
  */
 
 #[derive(Debug)]
-enum Noun {
+pub enum Noun {
     Atom(Atom),
     Cell(Cell),
 }
 
 #[derive(Clone, Debug, PartialEq)]
-struct Atom(u64);
+pub struct Atom(u64);
 
 #[derive(Debug)]
-struct Cell {
+pub struct Cell {
     h: Box<Noun>,
     t: Box<Noun>,
 }
 
 #[derive(Debug, PartialEq)]
-enum Loobean {
+pub enum Loobean {
     Yes,
     No,
 }
