@@ -1,9 +1,4 @@
-/*=================================================================================================
- * Traits
- */
-
-/// The snapshot interface.
-trait Snapshot {}
+use crate::storage::Snapshot;
 
 /*=================================================================================================
  * Structs
@@ -25,8 +20,6 @@ impl Snapshot for UrSnapshot {}
 
 #[cfg(test)]
 mod tests {
-    use crate::snapshot::*;
-
     #[test]
     fn it_works() {
         assert!(true);

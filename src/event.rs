@@ -42,11 +42,8 @@ impl Event for UrEvent {
 
 #[cfg(test)]
 mod tests {
-    use crate::event::*;
-
     #[test]
     fn it_works() {
         assert!(true)
     }
 }
-
