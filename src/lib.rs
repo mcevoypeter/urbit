@@ -1,8 +1,13 @@
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
-    }
+mod event;
+mod event_log;
+mod snapshot;
+
+/*=================================================================================================
+ * Structs
+ */
+
+/// A Vere-specific error encapsulating an informative error message.
+#[derive(Debug)]
+pub struct Error {
+    msg: String,
 }
