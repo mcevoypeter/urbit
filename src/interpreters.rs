@@ -1,4 +1,4 @@
-use crate::nock::*;
+use crate::*;
 
 #[cfg(all(feature = "iterative_tree", feature = "recursive_tree"))]
 compile_error!(
@@ -83,7 +83,7 @@ impl Tis for Cell {
 
 #[cfg(test)]
 mod tests {
-    use crate::nock::interpreters::*;
+    use crate::interpreters::*;
 
     #[test]
     fn decrement() {
