@@ -6,27 +6,35 @@ mod interpreters;
  * Nock struct and enum definitions
  */
 
+/// An atom or a cell.
+///
+/// This wraps the Atom and Cell structs to support functions that need to return a noun but don't
+/// know whether that noun is an atom or a cell.
 #[derive(Debug)]
 pub enum Noun {
     Atom(Atom),
     Cell(Cell),
 }
 
+/// An unsigned integer.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Atom(u64);
 
+/// A pair of heap-allocated nouns.
 #[derive(Debug)]
 pub struct Cell {
     h: Box<Noun>,
     t: Box<Noun>,
 }
 
+/// A Nock-specific boolean where 0 is yes/true and 1 is no/false.
 #[derive(Debug, PartialEq)]
 pub enum Loobean {
     Yes,
     No,
 }
 
+/// A Nock-specific error encapsulating an informative error message.
 #[derive(Debug)]
 struct Error {
     msg: String,
@@ -124,11 +132,13 @@ impl Cell {}
  */
 
 impl Loobean {
+    /// Convert a boolean into a Loobean.
     #[allow(dead_code)]
     fn into_boolean(self) -> bool {
         Loobean::Yes == self
     }
 
+    /// Convert a Loobean into a boolean.
     fn from_boolean(b: bool) -> Self {
         if b {
             Loobean::Yes
