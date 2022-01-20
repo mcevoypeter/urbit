@@ -36,7 +36,7 @@ pub enum Loobean {
 
 /// A Nock-specific error encapsulating an informative error message.
 #[derive(Debug)]
-struct Error {
+pub struct Error {
     msg: String,
 }
 

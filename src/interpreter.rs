@@ -68,7 +68,7 @@ trait Hax {
 /// The * Nock operator.
 ///
 /// Apply the Nock interpreter function.
-trait Tar {
+pub trait Tar {
     fn tar(self) -> Result<Noun, Error>;
 }
 
