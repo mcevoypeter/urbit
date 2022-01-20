@@ -1,6 +1,6 @@
 #![allow(unused_parens)]
 
-use crate::interpreters::*;
+use crate::interpreter::*;
 
 /*==============================================================================
  * Nock operator trait implementations for Cell struct

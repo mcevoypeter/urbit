@@ -110,7 +110,7 @@ impl Tis for Cell {
 
 #[cfg(test)]
 mod tests {
-    use crate::interpreters::*;
+    use crate::interpreter::*;
 
     #[test]
     fn decrement() {

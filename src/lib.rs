@@ -1,6 +1,6 @@
 use std::{error, fmt};
 
-mod interpreters;
+mod interpreter;
 
 /*==============================================================================
  * Nock struct and enum definitions
