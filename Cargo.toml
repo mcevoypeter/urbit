@@ -11,3 +11,4 @@ keywords = ["urbit"]
 
 [dependencies]
 lmdb = "0.6.0"
+nock = { git = "https://github.com/mcevoypeter/nock" }
