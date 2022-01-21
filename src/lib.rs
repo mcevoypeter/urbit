@@ -82,6 +82,16 @@ impl fmt::Display for Noun {
 }
 
 impl Noun {
+    #[allow(dead_code)]
+    pub fn new_atom(v: u64) -> Self {
+        Noun::Atom(Atom(v))
+    }
+
+    #[allow(dead_code)]
+    pub fn new_cell(h: Box<Self>, t: Box<Self>) -> Self {
+        Noun::Cell(Cell { h, t })
+    }
+
     fn from_loobean(loob: Loobean) -> Self {
         match loob {
             Loobean::Yes => Noun::Atom(Atom(0)),
