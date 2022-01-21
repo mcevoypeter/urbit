@@ -108,7 +108,11 @@ impl Noun {
  * General implementations for Atom struct
  */
 
-impl Atom {}
+impl Atom {
+    pub fn new(v: u64) -> Self {
+        Atom(v)
+    }
+}
 
 /*==============================================================================
  * General implementations for Cell struct
@@ -135,7 +139,11 @@ impl PartialEq for Cell {
     }
 }
 
-impl Cell {}
+impl Cell {
+    pub fn new(h: Box<Noun>, t: Box<Noun>) -> Self {
+        Cell { h, t }
+    }
+}
 
 /*==============================================================================
  * General implementations for Loobean enum
