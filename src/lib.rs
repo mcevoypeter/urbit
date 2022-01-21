@@ -89,7 +89,7 @@ impl Noun {
         }
     }
 
-    fn into_box(self) -> Box<Self> {
+    pub fn into_box(self) -> Box<Self> {
         Box::new(self)
     }
 }
