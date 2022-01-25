@@ -92,8 +92,8 @@ impl Noun {
         Noun::Cell(Cell { h, t })
     }
 
-    fn from_loobean(loob: Loobean) -> Self {
-        match loob {
+    fn from_loobean(l: Loobean) -> Self {
+        match l {
             Loobean::Yes => Noun::Atom(Atom(0)),
             Loobean::No => Noun::Atom(Atom(1)),
         }
