@@ -40,15 +40,10 @@ impl Fas for Cell {
                     }
                 }
                 Noun::Atom(Atom(n)) => {
-                    s = Cell {
-                        h: Noun::Atom(Atom(2 + n % 2)).into_box(),
-                        t: Cell {
-                            h: Noun::Atom(Atom(n / 2)).into_box(),
-                            t: s.t,
-                        }
-                        .fas()?
-                        .into_box(),
-                    }
+                    s = Cell::new(
+                        Box::new(Noun::new_atom(2 + n % 2)),
+                        Box::new(Cell::new(Box::new(Noun::new_atom(n / 2)), s.t).fas()?),
+                    )
                 }
                 Noun::Cell(_) => {
                     break Err(Error {
@@ -73,42 +68,34 @@ impl Hax for Cell {
                     }
                     Atom(1) => break Ok(*t.h),
                     Atom(n) if 0 == n % 2 => {
-                        s = Cell {
-                            h: Noun::Atom(Atom(n / 2)).into_box(),
-                            t: Noun::Cell(Cell {
-                                h: Noun::Cell(Cell {
-                                    h: t.h,
-                                    t: Cell {
-                                        h: Noun::Atom(Atom(n + 1)).into_box(),
-                                        t: t.t.clone(),
-                                    }
-                                    .fas()?
-                                    .into_box(),
-                                })
-                                .into_box(),
-                                t: t.t,
-                            })
-                            .into_box(),
-                        }
+                        s = Cell::new(
+                            Box::new(Noun::new_atom(n / 2)),
+                            Box::new(Noun::new_cell(
+                                Box::new(Noun::new_cell(
+                                    t.h,
+                                    Box::new(
+                                        Cell::new(Box::new(Noun::new_atom(n + 1)), t.t.clone())
+                                            .fas()?,
+                                    ),
+                                )),
+                                t.t,
+                            )),
+                        )
                     }
                     Atom(n) => {
-                        s = Cell {
-                            h: Noun::Atom(Atom(n / 2)).into_box(),
-                            t: Noun::Cell(Cell {
-                                h: Noun::Cell(Cell {
-                                    h: Cell {
-                                        h: Noun::Atom(Atom(n - 1)).into_box(),
-                                        t: t.t.clone(),
-                                    }
-                                    .fas()?
-                                    .into_box(),
-                                    t: t.h,
-                                })
-                                .into_box(),
-                                t: t.t,
-                            })
-                            .into_box(),
-                        }
+                        s = Cell::new(
+                            Box::new(Noun::new_atom(n / 2)),
+                            Box::new(Noun::new_cell(
+                                Box::new(Noun::new_cell(
+                                    Box::new(
+                                        Cell::new(Box::new(Noun::new_atom(n - 1)), t.t.clone())
+                                            .fas()?,
+                                    ),
+                                    t.h,
+                                )),
+                                t.t,
+                            )),
+                        )
                     }
                 }
             } else {
@@ -127,19 +114,14 @@ impl Tar for Cell {
         loop {
             if let Noun::Cell(t) = *s.t {
                 match *t.h {
-                    Noun::Atom(Atom(0)) => break Cell { h: t.t, t: s.h }.fas(),
+                    Noun::Atom(Atom(0)) => break Cell::new(t.t, s.h).fas(),
                     Noun::Atom(Atom(1)) => break Ok(*t.t),
                     Noun::Atom(Atom(2)) => {
                         if let Noun::Cell(tt) = *t.t {
-                            s = Cell {
-                                h: Cell {
-                                    h: s.h.clone(),
-                                    t: tt.h,
-                                }
-                                .tar()?
-                                .into_box(),
-                                t: Cell { h: s.h, t: tt.t }.tar()?.into_box(),
-                            }
+                            s = Cell::new(
+                                Box::new(Cell::new(s.h.clone(), tt.h).tar()?),
+                                Box::new(Cell::new(s.h, tt.t).tar()?),
+                            )
                         } else {
                             break Err(Error {
                                 msg: "*[a 2 b] cannot be evaluated when b is an atom".to_string(),
@@ -148,7 +130,7 @@ impl Tar for Cell {
                     }
                     Noun::Atom(Atom(3)) => {
                         break {
-                            match (Cell { h: s.h, t: t.t }.tar()?) {
+                            match Cell::new(s.h, t.t).tar()? {
                                 Noun::Atom(a) => Ok(Noun::from_loobean(a.wut())),
                                 Noun::Cell(c) => Ok(Noun::from_loobean(c.wut())),
                             }
@@ -156,7 +138,7 @@ impl Tar for Cell {
                     }
                     Noun::Atom(Atom(4)) => {
                         break {
-                            if let Noun::Atom(a) = (Cell { h: s.h, t: t.t }.tar()?) {
+                            if let Noun::Atom(a) = Cell::new(s.h, t.t).tar()? {
                                 Ok(Noun::Atom(a.lus()))
                             } else {
                                 Err(Error {
@@ -169,15 +151,10 @@ impl Tar for Cell {
                         break {
                             if let Noun::Cell(tt) = *t.t {
                                 Ok(Noun::from_loobean(
-                                    Cell {
-                                        h: Cell {
-                                            h: s.h.clone(),
-                                            t: tt.h,
-                                        }
-                                        .tar()?
-                                        .into_box(),
-                                        t: Cell { h: s.h, t: tt.t }.tar()?.into_box(),
-                                    }
+                                    Cell::new(
+                                        Box::new(Cell::new(s.h.clone(), tt.h).tar()?),
+                                        Box::new(Cell::new(s.h, tt.t).tar()?),
+                                    )
                                     .tis(),
                                 ))
                             } else {
@@ -191,45 +168,45 @@ impl Tar for Cell {
                     Noun::Atom(Atom(6)) => {
                         if let Noun::Cell(tt) = *t.t {
                             if let Noun::Cell(ttt) = *tt.t {
-                                s = Cell {
-                                    h: s.h.clone(),
-                                    t: Cell {
-                                        h: Noun::Cell(Cell { h: ttt.h, t: ttt.t }).into_box(),
-                                        t: Noun::Cell(Cell {
-                                            h: Noun::Atom(Atom(0)).into_box(),
-                                            t: Cell {
-                                                h: Noun::Cell(Cell {
-                                                    h: Noun::Atom(Atom(2)).into_box(),
-                                                    t: Noun::Atom(Atom(3)).into_box(),
-                                                })
-                                                .into_box(),
-                                                t: Noun::Cell(Cell {
-                                                    h: Noun::Atom(Atom(0)).into_box(),
-                                                    t: Cell {
-                                                        h: s.h,
-                                                        t: Noun::Cell(Cell {
-                                                            h: Noun::Atom(Atom(4)).into_box(),
-                                                            t: Noun::Cell(Cell {
-                                                                h: Noun::Atom(Atom(4)).into_box(),
-                                                                t: tt.h,
-                                                            })
-                                                            .into_box(),
-                                                        })
-                                                        .into_box(),
-                                                    }
-                                                    .tar()?
-                                                    .into_box(),
-                                                })
-                                                .into_box(),
-                                            }
-                                            .tar()?
-                                            .into_box(),
-                                        })
-                                        .into_box(),
-                                    }
-                                    .tar()?
-                                    .into_box(),
-                                }
+                                s = Cell::new(
+                                    s.h.clone(),
+                                    Box::new(
+                                        Cell::new(
+                                            Box::new(Noun::new_cell(ttt.h, ttt.t)),
+                                            Box::new(Noun::new_cell(
+                                                Box::new(Noun::new_atom(0)),
+                                                Box::new(
+                                                    Cell::new(
+                                                        Box::new(Noun::new_cell(
+                                                            Box::new(Noun::new_atom(2)),
+                                                            Box::new(Noun::new_atom(3)),
+                                                        )),
+                                                        Box::new(Noun::new_cell(
+                                                            Box::new(Noun::new_atom(0)),
+                                                            Box::new(
+                                                                Cell::new(
+                                                                    s.h,
+                                                                    Box::new(Noun::new_cell(
+                                                                        Box::new(Noun::new_atom(4)),
+                                                                        Box::new(Noun::new_cell(
+                                                                            Box::new(
+                                                                                Noun::new_atom(4),
+                                                                            ),
+                                                                            tt.h,
+                                                                        )),
+                                                                    )),
+                                                                )
+                                                                .tar()?,
+                                                            ),
+                                                        )),
+                                                    )
+                                                    .tar()?,
+                                                ),
+                                            )),
+                                        )
+                                        .tar()?,
+                                    ),
+                                )
                             } else {
                                 break Err(Error {
                                     msg: "*[a 6 b c] cannot be evaluated when c is an atom"
@@ -244,10 +221,7 @@ impl Tar for Cell {
                     }
                     Noun::Atom(Atom(7)) => {
                         if let Noun::Cell(tt) = *t.t {
-                            s = Cell {
-                                h: Cell { h: s.h, t: tt.h }.tar()?.into_box(),
-                                t: tt.t,
-                            }
+                            s = Cell::new(Box::new(Cell::new(s.h, tt.h).tar()?), tt.t)
                         } else {
                             break Err(Error {
                                 msg: "*[a 7 b] cannot be evaluated when b is an atom".to_string(),
@@ -256,19 +230,13 @@ impl Tar for Cell {
                     }
                     Noun::Atom(Atom(8)) => {
                         if let Noun::Cell(tt) = *t.t {
-                            s = Cell {
-                                h: Noun::Cell(Cell {
-                                    h: Cell {
-                                        h: s.h.clone(),
-                                        t: tt.h,
-                                    }
-                                    .tar()?
-                                    .into_box(),
-                                    t: s.h,
-                                })
-                                .into_box(),
-                                t: tt.t,
-                            }
+                            s = Cell::new(
+                                Box::new(Noun::new_cell(
+                                    Box::new(Cell::new(s.h.clone(), tt.h).tar()?),
+                                    s.h,
+                                )),
+                                tt.t,
+                            )
                         } else {
                             break Err(Error {
                                 msg: "*[a 8 b] cannot be evaluated when b is an atom".to_string(),
@@ -277,26 +245,19 @@ impl Tar for Cell {
                     }
                     Noun::Atom(Atom(9)) => {
                         if let Noun::Cell(tt) = *t.t {
-                            s = Cell {
-                                h: Cell { h: s.h, t: tt.t }.tar()?.into_box(),
-                                t: Noun::Cell(Cell {
-                                    h: Noun::Atom(Atom(2)).into_box(),
-                                    t: Noun::Cell(Cell {
-                                        h: Noun::Cell(Cell {
-                                            h: Noun::Atom(Atom(0)).into_box(),
-                                            t: Noun::Atom(Atom(1)).into_box(),
-                                        })
-                                        .into_box(),
-                                        t: Noun::Cell(Cell {
-                                            h: Noun::Atom(Atom(0)).into_box(),
-                                            t: tt.h,
-                                        })
-                                        .into_box(),
-                                    })
-                                    .into_box(),
-                                })
-                                .into_box(),
-                            }
+                            s = Cell::new(
+                                Box::new(Cell::new(s.h, tt.t).tar()?),
+                                Box::new(Noun::new_cell(
+                                    Box::new(Noun::new_atom(2)),
+                                    Box::new(Noun::new_cell(
+                                        Box::new(Noun::new_cell(
+                                            Box::new(Noun::new_atom(0)),
+                                            Box::new(Noun::new_atom(1)),
+                                        )),
+                                        Box::new(Noun::new_cell(Box::new(Noun::new_atom(0)), tt.h)),
+                                    )),
+                                )),
+                            )
                         } else {
                             break Err(Error {
                                 msg: "*[a 9 b] cannot be evaluated when b is an atom".to_string(),
@@ -306,19 +267,13 @@ impl Tar for Cell {
                     Noun::Atom(Atom(10)) => {
                         break if let Noun::Cell(tt) = *t.t {
                             if let Noun::Cell(tth) = *tt.h {
-                                Cell {
-                                    h: tth.h,
-                                    t: Noun::Cell(Cell {
-                                        h: Cell {
-                                            h: s.h.clone(),
-                                            t: tth.t,
-                                        }
-                                        .tar()?
-                                        .into_box(),
-                                        t: Cell { h: s.h, t: tt.t }.tar()?.into_box(),
-                                    })
-                                    .into_box(),
-                                }
+                                Cell::new(
+                                    tth.h,
+                                    Box::new(Noun::new_cell(
+                                        Box::new(Cell::new(s.h.clone(), tth.t).tar()?),
+                                        Box::new(Cell::new(s.h, tt.t).tar()?),
+                                    )),
+                                )
                                 .hax()
                             } else {
                                 Err(Error {
@@ -335,25 +290,18 @@ impl Tar for Cell {
                     Noun::Atom(Atom(11)) => {
                         if let Noun::Cell(tt) = *t.t {
                             match *tt.h {
-                                Noun::Atom(_) => break Cell { h: s.h, t: tt.t }.tar(),
+                                Noun::Atom(_) => break Cell::new(s.h, tt.t).tar(),
                                 Noun::Cell(c) => {
-                                    s = Cell {
-                                        h: Noun::Cell(Cell {
-                                            h: Cell {
-                                                h: s.h.clone(),
-                                                t: c.t,
-                                            }
-                                            .tar()?
-                                            .into_box(),
-                                            t: Cell { h: s.h, t: tt.t }.tar()?.into_box(),
-                                        })
-                                        .into_box(),
-                                        t: Noun::Cell(Cell {
-                                            h: Noun::Atom(Atom(0)).into_box(),
-                                            t: Noun::Atom(Atom(3)).into_box(),
-                                        })
-                                        .into_box(),
-                                    }
+                                    s = Cell::new(
+                                        Box::new(Noun::new_cell(
+                                            Box::new(Cell::new(s.h.clone(), c.t).tar()?),
+                                            Box::new(Cell::new(s.h, tt.t).tar()?),
+                                        )),
+                                        Box::new(Noun::new_cell(
+                                            Box::new(Noun::new_atom(0)),
+                                            Box::new(Noun::new_atom(3)),
+                                        )),
+                                    )
                                 }
                             }
                         } else {
@@ -368,15 +316,10 @@ impl Tar for Cell {
                         })
                     }
                     Noun::Cell(th) => {
-                        break Ok(Noun::Cell(Cell {
-                            h: Cell {
-                                h: s.h.clone(),
-                                t: Noun::Cell(th).into_box(),
-                            }
-                            .tar()?
-                            .into_box(),
-                            t: Cell { h: s.h, t: t.t }.tar()?.into_box(),
-                        }))
+                        break Ok(Noun::new_cell(
+                            Box::new(Cell::new(s.h.clone(), Box::new(Noun::Cell(th))).tar()?),
+                            Box::new(Cell::new(s.h, t.t).tar()?),
+                        ))
                     }
                 }
             } else {

@@ -116,26 +116,21 @@ mod tests {
     fn decrement() {
         // [[1 0] [0 1]] -> [1 0]
         {
-            match (Cell {
-                h: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(1)).into_box(),
-                    t: Noun::Atom(Atom(0)).into_box(),
-                })
-                .into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(0)).into_box(),
-                    t: Noun::Atom(Atom(1)).into_box(),
-                })
-                .into_box(),
-            }
-            .tar())
+            match Cell::new(
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(1)),
+                    Box::new(Noun::new_atom(0)),
+                )),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(0)),
+                    Box::new(Noun::new_atom(1)),
+                )),
+            )
+            .tar()
             {
                 Ok(res) => {
                     assert_eq!(
-                        Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(1)).into_box(),
-                            t: Noun::Atom(Atom(0)).into_box(),
-                        }),
+                        Noun::new_cell(Box::new(Noun::new_atom(1)), Box::new(Noun::new_atom(0)),),
                         res
                     );
                 }
@@ -147,30 +142,24 @@ mod tests {
 
         // [42 [1 0] [0 1]] -> [0 42]
         {
-            match (Cell {
-                h: Noun::Atom(Atom(42)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(1)).into_box(),
-                        t: Noun::Atom(Atom(0)).into_box(),
-                    })
-                    .into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(0)).into_box(),
-                        t: Noun::Atom(Atom(1)).into_box(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .tar())
+            match Cell::new(
+                Box::new(Noun::new_atom(42)),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(1)),
+                        Box::new(Noun::new_atom(0)),
+                    )),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(0)),
+                        Box::new(Noun::new_atom(1)),
+                    )),
+                )),
+            )
+            .tar()
             {
                 Ok(res) => {
                     assert_eq!(
-                        Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(0)).into_box(),
-                            t: Noun::Atom(Atom(42)).into_box(),
-                        }),
+                        Noun::new_cell(Box::new(Noun::new_atom(0)), Box::new(Noun::new_atom(42)),),
                         res
                     );
                 }
@@ -181,133 +170,100 @@ mod tests {
         }
 
         // [4 0 1]
-        let increment = Noun::Cell(Cell {
-            h: Noun::Atom(Atom(4)).into_box(),
-            t: Noun::Cell(Cell {
-                h: Noun::Atom(Atom(0)).into_box(),
-                t: Noun::Atom(Atom(1)).into_box(),
-            })
-            .into_box(),
-        })
-        .into_box();
+        let increment = Box::new(Noun::new_cell(
+            Box::new(Noun::new_atom(4)),
+            Box::new(Noun::new_cell(
+                Box::new(Noun::new_atom(0)),
+                Box::new(Noun::new_atom(1)),
+            )),
+        ));
 
         // [8 [1 0] 8 [1 6 [5 [0 7] 4 0 6] [0 6] 9 2 [0 2] [4 0 6] 0 7] 9 2 0 1]
-        let decrement = Noun::Cell(Cell {
-            h: Noun::Atom(Atom(8)).into_box(),
-            t: Noun::Cell(Cell {
-                h: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(1)).into_box(),
-                    t: Noun::Atom(Atom(0)).into_box(),
-                })
-                .into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(8)).into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(1)).into_box(),
-                            t: Noun::Cell(Cell {
-                                h: Noun::Atom(Atom(6)).into_box(),
-                                t: Noun::Cell(Cell {
-                                    h: Noun::Cell(Cell {
-                                        h: Noun::Atom(Atom(5)).into_box(),
-                                        t: Noun::Cell(Cell {
-                                            h: Noun::Cell(Cell {
-                                                h: Noun::Atom(Atom(0)).into_box(),
-                                                t: Noun::Atom(Atom(7)).into_box(),
-                                            })
-                                            .into_box(),
-                                            t: Noun::Cell(Cell {
-                                                h: Noun::Atom(Atom(4)).into_box(),
-                                                t: Noun::Cell(Cell {
-                                                    h: Noun::Atom(Atom(0)).into_box(),
-                                                    t: Noun::Atom(Atom(6)).into_box(),
-                                                })
-                                                .into_box(),
-                                            })
-                                            .into_box(),
-                                        })
-                                        .into_box(),
-                                    })
-                                    .into_box(),
-                                    t: Noun::Cell(Cell {
-                                        h: Noun::Cell(Cell {
-                                            h: Noun::Atom(Atom(0)).into_box(),
-                                            t: Noun::Atom(Atom(6)).into_box(),
-                                        })
-                                        .into_box(),
-                                        t: Noun::Cell(Cell {
-                                            h: Noun::Atom(Atom(9)).into_box(),
-                                            t: Noun::Cell(Cell {
-                                                h: Noun::Atom(Atom(2)).into_box(),
-                                                t: Noun::Cell(Cell {
-                                                    h: Noun::Cell(Cell {
-                                                        h: Noun::Atom(Atom(0)).into_box(),
-                                                        t: Noun::Atom(Atom(2)).into_box(),
-                                                    })
-                                                    .into_box(),
-                                                    t: Noun::Cell(Cell {
-                                                        h: Noun::Cell(Cell {
-                                                            h: Noun::Atom(Atom(4)).into_box(),
-                                                            t: Noun::Cell(Cell {
-                                                                h: Noun::Atom(Atom(0)).into_box(),
-                                                                t: Noun::Atom(Atom(6)).into_box(),
-                                                            })
-                                                            .into_box(),
-                                                        })
-                                                        .into_box(),
-                                                        t: Noun::Cell(Cell {
-                                                            h: Noun::Atom(Atom(0)).into_box(),
-                                                            t: Noun::Atom(Atom(7)).into_box(),
-                                                        })
-                                                        .into_box(),
-                                                    })
-                                                    .into_box(),
-                                                })
-                                                .into_box(),
-                                            })
-                                            .into_box(),
-                                        })
-                                        .into_box(),
-                                    })
-                                    .into_box(),
-                                })
-                                .into_box(),
-                            })
-                            .into_box(),
-                        })
-                        .into_box(),
-                        t: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(9)).into_box(),
-                            t: Noun::Cell(Cell {
-                                h: Noun::Atom(Atom(2)).into_box(),
-                                t: Noun::Cell(Cell {
-                                    h: Noun::Atom(Atom(0)).into_box(),
-                                    t: Noun::Atom(Atom(1)).into_box(),
-                                })
-                                .into_box(),
-                            })
-                            .into_box(),
-                        })
-                        .into_box(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            })
-            .into_box(),
-        })
-        .into_box();
+        let decrement = Box::new(Noun::new_cell(
+            Box::new(Noun::new_atom(8)),
+            Box::new(Noun::new_cell(
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(1)),
+                    Box::new(Noun::new_atom(0)),
+                )),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(8)),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(1)),
+                            Box::new(Noun::new_cell(
+                                Box::new(Noun::new_atom(6)),
+                                Box::new(Noun::new_cell(
+                                    Box::new(Noun::new_cell(
+                                        Box::new(Noun::new_atom(5)),
+                                        Box::new(Noun::new_cell(
+                                            Box::new(Noun::new_cell(
+                                                Box::new(Noun::new_atom(0)),
+                                                Box::new(Noun::new_atom(7)),
+                                            )),
+                                            Box::new(Noun::new_cell(
+                                                Box::new(Noun::new_atom(4)),
+                                                Box::new(Noun::new_cell(
+                                                    Box::new(Noun::new_atom(0)),
+                                                    Box::new(Noun::new_atom(6)),
+                                                )),
+                                            )),
+                                        )),
+                                    )),
+                                    Box::new(Noun::new_cell(
+                                        Box::new(Noun::new_cell(
+                                            Box::new(Noun::new_atom(0)),
+                                            Box::new(Noun::new_atom(6)),
+                                        )),
+                                        Box::new(Noun::new_cell(
+                                            Box::new(Noun::new_atom(9)),
+                                            Box::new(Noun::new_cell(
+                                                Box::new(Noun::new_atom(2)),
+                                                Box::new(Noun::new_cell(
+                                                    Box::new(Noun::new_cell(
+                                                        Box::new(Noun::new_atom(0)),
+                                                        Box::new(Noun::new_atom(2)),
+                                                    )),
+                                                    Box::new(Noun::new_cell(
+                                                        Box::new(Noun::new_cell(
+                                                            Box::new(Noun::new_atom(4)),
+                                                            Box::new(Noun::new_cell(
+                                                                Box::new(Noun::new_atom(0)),
+                                                                Box::new(Noun::new_atom(6)),
+                                                            )),
+                                                        )),
+                                                        Box::new(Noun::new_cell(
+                                                            Box::new(Noun::new_atom(0)),
+                                                            Box::new(Noun::new_atom(7)),
+                                                        )),
+                                                    )),
+                                                )),
+                                            )),
+                                        )),
+                                    )),
+                                )),
+                            )),
+                        )),
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(9)),
+                            Box::new(Noun::new_cell(
+                                Box::new(Noun::new_atom(2)),
+                                Box::new(Noun::new_cell(
+                                    Box::new(Noun::new_atom(0)),
+                                    Box::new(Noun::new_atom(1)),
+                                )),
+                            )),
+                        )),
+                    )),
+                )),
+            )),
+        ));
 
         // *[42 decrement] -> 41
         {
-            match (Cell {
-                h: Noun::Atom(Atom(42)).into_box(),
-                t: decrement.clone(),
-            }
-            .tar())
-            {
+            match Cell::new(Box::new(Noun::new_atom(42)), decrement.clone()).tar() {
                 Ok(res) => {
-                    assert_eq!(Noun::Atom(Atom(41)), res);
+                    assert_eq!(Noun::new_atom(41), res);
                 }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
@@ -318,22 +274,18 @@ mod tests {
         // *[107 decrement increment] -> [106 108]
         // TODO: resolve the stack overflow that occurs when this test is run.
         {
-            match (Cell {
-                h: Noun::Atom(Atom(107)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: decrement.clone(),
-                    t: increment.clone(),
-                })
-                .into_box(),
-            }
-            .tar())
+            match Cell::new(
+                Box::new(Noun::new_atom(107)),
+                Box::new(Noun::new_cell(decrement.clone(), increment.clone())),
+            )
+            .tar()
             {
                 Ok(res) => {
                     assert_eq!(
-                        Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(106)).into_box(),
-                            t: Noun::Atom(Atom(108)).into_box(),
-                        }),
+                        Noun::new_cell(
+                            Box::new(Noun::new_atom(106)),
+                            Box::new(Noun::new_atom(108)),
+                        ),
                         res
                     );
                 }
@@ -348,17 +300,9 @@ mod tests {
     fn fas_cell() {
         // /[1 [98 89]] -> [98 89]
         {
-            let t = Noun::Cell(Cell {
-                h: Noun::Atom(Atom(98)).into_box(),
-                t: Noun::Atom(Atom(89)).into_box(),
-            })
-            .into_box();
-            match (Cell {
-                h: Noun::Atom(Atom(1)).into_box(),
-                t: t.clone(),
-            }
-            .fas())
-            {
+            let t = Noun::new_cell(Box::new(Noun::new_atom(98)), Box::new(Noun::new_atom(89)))
+                .into_box();
+            match Cell::new(Box::new(Noun::new_atom(1)), t.clone()).fas() {
                 Ok(res) => {
                     assert_eq!(*t, res);
                 }
@@ -370,16 +314,12 @@ mod tests {
 
         // /[2 [292 1001]] -> 292
         {
-            let th = Noun::Atom(Atom(292)).into_box();
-            match (Cell {
-                h: Noun::Atom(Atom(2)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: th.clone(),
-                    t: Noun::Atom(Atom(1001)).into_box(),
-                })
-                .into_box(),
-            }
-            .fas())
+            let th = Box::new(Noun::new_atom(292));
+            match Cell::new(
+                Box::new(Noun::new_atom(2)),
+                Box::new(Noun::new_cell(th.clone(), Box::new(Noun::new_atom(1001)))),
+            )
+            .fas()
             {
                 Ok(res) => {
                     assert_eq!(*th, res)
@@ -392,12 +332,7 @@ mod tests {
 
         // /[2 107] -> crash
         {
-            match (Cell {
-                h: Noun::Atom(Atom(2)).into_box(),
-                t: Noun::Atom(Atom(107)).into_box(),
-            }
-            .fas())
-            {
+            match Cell::new(Box::new(Noun::new_atom(2)), Box::new(Noun::new_atom(107))).fas() {
                 Ok(_) => {
                     assert!(false, "Unexpected success.");
                 }
@@ -409,24 +344,19 @@ mod tests {
 
         // /[3 [[80 50] [19 95]]] -> [19 95]
         {
-            let tt = Noun::Cell(Cell {
-                h: Noun::Atom(Atom(19)).into_box(),
-                t: Noun::Atom(Atom(95)).into_box(),
-            })
-            .into_box();
-            match (Cell {
-                h: Noun::Atom(Atom(3)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(80)).into_box(),
-                        t: Noun::Atom(Atom(50)).into_box(),
-                    })
-                    .into_box(),
-                    t: tt.clone(),
-                })
-                .into_box(),
-            }
-            .fas())
+            let tt = Noun::new_cell(Box::new(Noun::new_atom(19)), Box::new(Noun::new_atom(95)))
+                .into_box();
+            match Cell::new(
+                Box::new(Noun::new_atom(3)),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(80)),
+                        Box::new(Noun::new_atom(50)),
+                    )),
+                    tt.clone(),
+                )),
+            )
+            .fas()
             {
                 Ok(res) => {
                     assert_eq!(*tt, res)
@@ -439,20 +369,15 @@ mod tests {
 
         // /[5 [[15 16] 17]] -> 16
         {
-            let tht = Noun::Atom(Atom(16)).into_box();
-            match (Cell {
-                h: Noun::Atom(Atom(5)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(15)).into_box(),
-                        t: tht.clone(),
-                    })
-                    .into_box(),
-                    t: Noun::Atom(Atom(17)).into_box(),
-                })
-                .into_box(),
-            }
-            .fas())
+            let tht = Box::new(Noun::new_atom(16));
+            match Cell::new(
+                Box::new(Noun::new_atom(5)),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_cell(Box::new(Noun::new_atom(15)), tht.clone())),
+                    Box::new(Noun::new_atom(17)),
+                )),
+            )
+            .fas()
             {
                 Ok(res) => {
                     assert_eq!(*tht, res)
@@ -465,20 +390,15 @@ mod tests {
 
         // /[6 [4 [8 12]]] -> 8
         {
-            let tth = Noun::Atom(Atom(8)).into_box();
-            match (Cell {
-                h: Noun::Atom(Atom(6)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(4)).into_box(),
-                    t: Noun::Cell(Cell {
-                        h: tth.clone(),
-                        t: Noun::Atom(Atom(12)).into_box(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .fas())
+            let tth = Box::new(Noun::new_atom(8));
+            match Cell::new(
+                Box::new(Noun::new_atom(6)),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(4)),
+                    Box::new(Noun::new_cell(tth.clone(), Box::new(Noun::new_atom(12)))),
+                )),
+            )
+            .fas()
             {
                 Ok(res) => {
                     assert!(*tth == res)
@@ -491,19 +411,17 @@ mod tests {
 
         // /[12 [531 25 99]] -> crash
         {
-            match (Cell {
-                h: Noun::Atom(Atom(12)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(531)).into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(25)).into_box(),
-                        t: Noun::Atom(Atom(99)).into_box(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .fas())
+            match Cell::new(
+                Box::new(Noun::new_atom(12)),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(531)),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(25)),
+                        Box::new(Noun::new_atom(99)),
+                    )),
+                )),
+            )
+            .fas()
             {
                 Ok(_) => {
                     assert!(false, "Unexpected success.")
@@ -519,16 +437,12 @@ mod tests {
     fn hax_cell() {
         // #[1 [22 80]] -> 22
         {
-            let th = Noun::Atom(Atom(22)).into_box();
-            match (Cell {
-                h: Noun::Atom(Atom(1)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: th.clone(),
-                    t: Noun::Atom(Atom(80)).into_box(),
-                })
-                .into_box(),
-            }
-            .hax())
+            let th = Box::new(Noun::new_atom(22));
+            match Cell::new(
+                Box::new(Noun::new_atom(1)),
+                Box::new(Noun::new_cell(th.clone(), Box::new(Noun::new_atom(80)))),
+            )
+            .hax()
             {
                 Ok(res) => {
                     assert_eq!(*th, res);
@@ -541,24 +455,19 @@ mod tests {
 
         // #[2 11 [22 33]] -> [11 33]
         {
-            let th = Noun::Atom(Atom(11)).into_box();
-            let ttt = Noun::Atom(Atom(33)).into_box();
-            match (Cell {
-                h: Noun::Atom(Atom(2)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: th.clone(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(22)).into_box(),
-                        t: ttt.clone(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .hax())
+            let th = Box::new(Noun::new_atom(11));
+            let ttt = Box::new(Noun::new_atom(33));
+            match Cell::new(
+                Box::new(Noun::new_atom(2)),
+                Box::new(Noun::new_cell(
+                    th.clone(),
+                    Box::new(Noun::new_cell(Box::new(Noun::new_atom(22)), ttt.clone())),
+                )),
+            )
+            .hax()
             {
                 Ok(res) => {
-                    assert_eq!(Noun::Cell(Cell { h: th, t: ttt }), res);
+                    assert_eq!(Noun::new_cell(th, ttt), res);
                 }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
@@ -568,24 +477,19 @@ mod tests {
 
         // #[3 11 [22 33]] -> [22 11]
         {
-            let th = Noun::Atom(Atom(11)).into_box();
-            let tth = Noun::Atom(Atom(22)).into_box();
-            match (Cell {
-                h: Noun::Atom(Atom(3)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: th.clone(),
-                    t: Noun::Cell(Cell {
-                        h: tth.clone(),
-                        t: Noun::Atom(Atom(33)).into_box(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .hax())
+            let th = Box::new(Noun::new_atom(11));
+            let tth = Box::new(Noun::new_atom(22));
+            match Cell::new(
+                Box::new(Noun::new_atom(3)),
+                Box::new(Noun::new_cell(
+                    th.clone(),
+                    Box::new(Noun::new_cell(tth.clone(), Box::new(Noun::new_atom(33)))),
+                )),
+            )
+            .hax()
             {
                 Ok(res) => {
-                    assert_eq!(Noun::Cell(Cell { h: tth, t: th }), res);
+                    assert_eq!(Noun::new_cell(tth, th), res);
                 }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
@@ -595,33 +499,24 @@ mod tests {
 
         // #[4 11 [[22 33] 44]] -> [[11 33] 44]
         {
-            let th = Noun::Atom(Atom(11)).into_box();
-            let ttht = Noun::Atom(Atom(33)).into_box();
-            let ttt = Noun::Atom(Atom(44)).into_box();
-            match (Cell {
-                h: Noun::Atom(Atom(4)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: th.clone(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(22)).into_box(),
-                            t: ttht.clone(),
-                        })
-                        .into_box(),
-                        t: ttt.clone(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .hax())
+            let th = Box::new(Noun::new_atom(11));
+            let ttht = Box::new(Noun::new_atom(33));
+            let ttt = Box::new(Noun::new_atom(44));
+            match Cell::new(
+                Box::new(Noun::new_atom(4)),
+                Box::new(Noun::new_cell(
+                    th.clone(),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_cell(Box::new(Noun::new_atom(22)), ttht.clone())),
+                        ttt.clone(),
+                    )),
+                )),
+            )
+            .hax()
             {
                 Ok(res) => {
                     assert_eq!(
-                        Noun::Cell(Cell {
-                            h: Noun::Cell(Cell { h: th, t: ttht }).into_box(),
-                            t: ttt,
-                        }),
+                        Noun::new_cell(Box::new(Noun::new_cell(th, ttht)), ttt,),
                         res
                     );
                 }
@@ -633,33 +528,24 @@ mod tests {
 
         // #[5 11 [[22 33] 44] -> [[22 11] 44]
         {
-            let th = Noun::Atom(Atom(11)).into_box();
-            let tthh = Noun::Atom(Atom(22)).into_box();
-            let ttt = Noun::Atom(Atom(44)).into_box();
-            match (Cell {
-                h: Noun::Atom(Atom(5)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: th.clone(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Cell(Cell {
-                            h: tthh.clone(),
-                            t: Noun::Atom(Atom(33)).into_box(),
-                        })
-                        .into_box(),
-                        t: ttt.clone(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .hax())
+            let th = Box::new(Noun::new_atom(11));
+            let tthh = Box::new(Noun::new_atom(22));
+            let ttt = Box::new(Noun::new_atom(44));
+            match Cell::new(
+                Box::new(Noun::new_atom(5)),
+                Box::new(Noun::new_cell(
+                    th.clone(),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_cell(tthh.clone(), Box::new(Noun::new_atom(33)))),
+                        ttt.clone(),
+                    )),
+                )),
+            )
+            .hax()
             {
                 Ok(res) => {
                     assert_eq!(
-                        Noun::Cell(Cell {
-                            h: Noun::Cell(Cell { h: tthh, t: th }).into_box(),
-                            t: ttt,
-                        }),
+                        Noun::new_cell(Box::new(Noun::new_cell(tthh, th)), ttt,),
                         res
                     );
                 }
@@ -683,12 +569,7 @@ mod tests {
     fn tar_cell() {
         // *[1 0] -> crash
         {
-            match (Cell {
-                h: Noun::Atom(Atom(1)).into_box(),
-                t: Noun::Atom(Atom(0)).into_box(),
-            }
-            .tar())
-            {
+            match Cell::new(Box::new(Noun::new_atom(1)), Box::new(Noun::new_atom(0))).tar() {
                 Ok(_) => {
                     assert!(false, "Unexpected success.");
                 }
@@ -700,19 +581,17 @@ mod tests {
 
         // *[4 [0 0] 4] -> crash
         {
-            match (Cell {
-                h: Noun::Atom(Atom(4)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(0)).into_box(),
-                        t: Noun::Atom(Atom(0)).into_box(),
-                    })
-                    .into_box(),
-                    t: Noun::Atom(Atom(4)).into_box(),
-                })
-                .into_box(),
-            }
-            .tar())
+            match Cell::new(
+                Box::new(Noun::new_atom(4)),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(0)),
+                        Box::new(Noun::new_atom(0)),
+                    )),
+                    Box::new(Noun::new_atom(4)),
+                )),
+            )
+            .tar()
             {
                 Ok(_) => {
                     assert!(false, "Unexpected success.");
@@ -725,32 +604,22 @@ mod tests {
 
         // *[[[4 5] [6 14 15]] [0 7]] -> [14 15]
         {
-            let htt = Noun::Cell(Cell {
-                h: Noun::Atom(Atom(14)).into_box(),
-                t: Noun::Atom(Atom(15)).into_box(),
-            })
-            .into_box();
-            match (Cell {
-                h: Noun::Cell(Cell {
-                    h: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(4)).into_box(),
-                        t: Noun::Atom(Atom(5)).into_box(),
-                    })
-                    .into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(6)).into_box(),
-                        t: htt.clone(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(0)).into_box(),
-                    t: Noun::Atom(Atom(7)).into_box(),
-                })
-                .into_box(),
-            }
-            .tar())
+            let htt = Noun::new_cell(Box::new(Noun::new_atom(14)), Box::new(Noun::new_atom(15)))
+                .into_box();
+            match Cell::new(
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(4)),
+                        Box::new(Noun::new_atom(5)),
+                    )),
+                    Box::new(Noun::new_cell(Box::new(Noun::new_atom(6)), htt.clone())),
+                )),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(0)),
+                    Box::new(Noun::new_atom(7)),
+                )),
+            )
+            .tar()
             {
                 Ok(res) => {
                     assert_eq!(*htt, res);
@@ -763,20 +632,13 @@ mod tests {
 
         // *[42 [1 153 218]] -> [153 218]
         {
-            let tt = Noun::Cell(Cell {
-                h: Noun::Atom(Atom(153)).into_box(),
-                t: Noun::Atom(Atom(218)).into_box(),
-            })
-            .into_box();
-            match (Cell {
-                h: Noun::Atom(Atom(42)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(1)).into_box(),
-                    t: tt.clone(),
-                })
-                .into_box(),
-            }
-            .tar())
+            let tt = Noun::new_cell(Box::new(Noun::new_atom(153)), Box::new(Noun::new_atom(218)))
+                .into_box();
+            match Cell::new(
+                Box::new(Noun::new_atom(42)),
+                Box::new(Noun::new_cell(Box::new(Noun::new_atom(1)), tt.clone())),
+            )
+            .tar()
             {
                 Ok(res) => {
                     assert_eq!(*tt, res);
@@ -789,36 +651,26 @@ mod tests {
 
         // *[77 [2 [1 42] [1 1 153 218]]] -> [153 218]
         {
-            let ttttt = Noun::Cell(Cell {
-                h: Noun::Atom(Atom(153)).into_box(),
-                t: Noun::Atom(Atom(218)).into_box(),
-            })
-            .into_box();
-            match (Cell {
-                h: Noun::Atom(Atom(77)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(2)).into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(1)).into_box(),
-                            t: Noun::Atom(Atom(42)).into_box(),
-                        })
-                        .into_box(),
-                        t: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(1)).into_box(),
-                            t: Noun::Cell(Cell {
-                                h: Noun::Atom(Atom(1)).into_box(),
-                                t: ttttt.clone(),
-                            })
-                            .into_box(),
-                        })
-                        .into_box(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .tar())
+            let ttttt =
+                Noun::new_cell(Box::new(Noun::new_atom(153)), Box::new(Noun::new_atom(218)))
+                    .into_box();
+            match Cell::new(
+                Box::new(Noun::new_atom(77)),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(2)),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(1)),
+                            Box::new(Noun::new_atom(42)),
+                        )),
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(1)),
+                            Box::new(Noun::new_cell(Box::new(Noun::new_atom(1)), ttttt.clone())),
+                        )),
+                    )),
+                )),
+            )
+            .tar()
             {
                 Ok(res) => {
                     assert_eq!(*ttttt, res);
@@ -831,26 +683,23 @@ mod tests {
 
         // *[[19 20] 3 0 1] -> 0
         {
-            match (Cell {
-                h: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(19)).into_box(),
-                    t: Noun::Atom(Atom(20)).into_box(),
-                })
-                .into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(3)).into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(0)).into_box(),
-                        t: Noun::Atom(Atom(1)).into_box(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .tar())
+            match Cell::new(
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(19)),
+                    Box::new(Noun::new_atom(20)),
+                )),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(3)),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(0)),
+                        Box::new(Noun::new_atom(1)),
+                    )),
+                )),
+            )
+            .tar()
             {
                 Ok(res) => {
-                    assert_eq!(Noun::Atom(Atom(0)), res);
+                    assert_eq!(Noun::new_atom(0), res);
                 }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
@@ -860,22 +709,20 @@ mod tests {
 
         // *[57 [4 0 1]] -> 58
         {
-            match (Cell {
-                h: Noun::Atom(Atom(57)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(4)).into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(0)).into_box(),
-                        t: Noun::Atom(Atom(1)).into_box(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .tar())
+            match Cell::new(
+                Box::new(Noun::new_atom(57)),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(4)),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(0)),
+                        Box::new(Noun::new_atom(1)),
+                    )),
+                )),
+            )
+            .tar()
             {
                 Ok(res) => {
-                    assert_eq!(Noun::Atom(Atom(58)), res);
+                    assert_eq!(Noun::new_atom(58), res);
                 }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
@@ -885,34 +732,29 @@ mod tests {
 
         // *[[12 13] 5 [1 17] [0 3]] -> 1
         {
-            match (Cell {
-                h: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(12)).into_box(),
-                    t: Noun::Atom(Atom(13)).into_box(),
-                })
-                .into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(5)).into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(1)).into_box(),
-                            t: Noun::Atom(Atom(17)).into_box(),
-                        })
-                        .into_box(),
-                        t: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(0)).into_box(),
-                            t: Noun::Atom(Atom(3)).into_box(),
-                        })
-                        .into_box(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .tar())
+            match Cell::new(
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(12)),
+                    Box::new(Noun::new_atom(13)),
+                )),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(5)),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(1)),
+                            Box::new(Noun::new_atom(17)),
+                        )),
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(0)),
+                            Box::new(Noun::new_atom(3)),
+                        )),
+                    )),
+                )),
+            )
+            .tar()
             {
                 Ok(res) => {
-                    assert_eq!(Noun::Atom(Atom(1)), res);
+                    assert_eq!(Noun::new_atom(1), res);
                 }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
@@ -922,42 +764,35 @@ mod tests {
 
         // *[42 [6 [1 0] [4 0 1] [1 233]]] -> 43
         {
-            match (Cell {
-                h: Noun::Atom(Atom(42)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(6)).into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(1)).into_box(),
-                            t: Noun::Atom(Atom(0)).into_box(),
-                        })
-                        .into_box(),
-                        t: Noun::Cell(Cell {
-                            h: Noun::Cell(Cell {
-                                h: Noun::Atom(Atom(4)).into_box(),
-                                t: Noun::Cell(Cell {
-                                    h: Noun::Atom(Atom(0)).into_box(),
-                                    t: Noun::Atom(Atom(1)).into_box(),
-                                })
-                                .into_box(),
-                            })
-                            .into_box(),
-                            t: Noun::Cell(Cell {
-                                h: Noun::Atom(Atom(1)).into_box(),
-                                t: Noun::Atom(Atom(233)).into_box(),
-                            })
-                            .into_box(),
-                        })
-                        .into_box(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .tar())
+            match Cell::new(
+                Box::new(Noun::new_atom(42)),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(6)),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(1)),
+                            Box::new(Noun::new_atom(0)),
+                        )),
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_cell(
+                                Box::new(Noun::new_atom(4)),
+                                Box::new(Noun::new_cell(
+                                    Box::new(Noun::new_atom(0)),
+                                    Box::new(Noun::new_atom(1)),
+                                )),
+                            )),
+                            Box::new(Noun::new_cell(
+                                Box::new(Noun::new_atom(1)),
+                                Box::new(Noun::new_atom(233)),
+                            )),
+                        )),
+                    )),
+                )),
+            )
+            .tar()
             {
                 Ok(res) => {
-                    assert_eq!(Noun::Atom(Atom(43)), res);
+                    assert_eq!(Noun::new_atom(43), res);
                 }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
@@ -967,42 +802,35 @@ mod tests {
 
         // *[42 [6 [1 1] [4 0 1] [1 233]]] -> 233
         {
-            match (Cell {
-                h: Noun::Atom(Atom(42)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(6)).into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(1)).into_box(),
-                            t: Noun::Atom(Atom(1)).into_box(),
-                        })
-                        .into_box(),
-                        t: Noun::Cell(Cell {
-                            h: Noun::Cell(Cell {
-                                h: Noun::Atom(Atom(4)).into_box(),
-                                t: Noun::Cell(Cell {
-                                    h: Noun::Atom(Atom(0)).into_box(),
-                                    t: Noun::Atom(Atom(1)).into_box(),
-                                })
-                                .into_box(),
-                            })
-                            .into_box(),
-                            t: Noun::Cell(Cell {
-                                h: Noun::Atom(Atom(1)).into_box(),
-                                t: Noun::Atom(Atom(233)).into_box(),
-                            })
-                            .into_box(),
-                        })
-                        .into_box(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .tar())
+            match Cell::new(
+                Box::new(Noun::new_atom(42)),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(6)),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(1)),
+                            Box::new(Noun::new_atom(1)),
+                        )),
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_cell(
+                                Box::new(Noun::new_atom(4)),
+                                Box::new(Noun::new_cell(
+                                    Box::new(Noun::new_atom(0)),
+                                    Box::new(Noun::new_atom(1)),
+                                )),
+                            )),
+                            Box::new(Noun::new_cell(
+                                Box::new(Noun::new_atom(1)),
+                                Box::new(Noun::new_atom(233)),
+                            )),
+                        )),
+                    )),
+                )),
+            )
+            .tar()
             {
                 Ok(res) => {
-                    assert_eq!(Noun::Atom(Atom(233)), res);
+                    assert_eq!(Noun::new_atom(233), res);
                 }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
@@ -1012,38 +840,32 @@ mod tests {
 
         // *[42 [7 [4 0 1] [4 0 1]]] -> 44
         {
-            match (Cell {
-                h: Noun::Atom(Atom(42)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(7)).into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(4)).into_box(),
-                            t: Noun::Cell(Cell {
-                                h: Noun::Atom(Atom(0)).into_box(),
-                                t: Noun::Atom(Atom(1)).into_box(),
-                            })
-                            .into_box(),
-                        })
-                        .into_box(),
-                        t: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(4)).into_box(),
-                            t: Noun::Cell(Cell {
-                                h: Noun::Atom(Atom(0)).into_box(),
-                                t: Noun::Atom(Atom(1)).into_box(),
-                            })
-                            .into_box(),
-                        })
-                        .into_box(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .tar())
+            match Cell::new(
+                Box::new(Noun::new_atom(42)),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(7)),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(4)),
+                            Box::new(Noun::new_cell(
+                                Box::new(Noun::new_atom(0)),
+                                Box::new(Noun::new_atom(1)),
+                            )),
+                        )),
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(4)),
+                            Box::new(Noun::new_cell(
+                                Box::new(Noun::new_atom(0)),
+                                Box::new(Noun::new_atom(1)),
+                            )),
+                        )),
+                    )),
+                )),
+            )
+            .tar()
             {
                 Ok(res) => {
-                    assert_eq!(Noun::Atom(Atom(44)), res);
+                    assert_eq!(Noun::new_atom(44), res);
                 }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
@@ -1053,38 +875,30 @@ mod tests {
 
         // *[42 [8 [4 0 1] [0 1]]] -> [43 42]
         {
-            match (Cell {
-                h: Noun::Atom(Atom(42)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(8)).into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(4)).into_box(),
-                            t: Noun::Cell(Cell {
-                                h: Noun::Atom(Atom(0)).into_box(),
-                                t: Noun::Atom(Atom(1)).into_box(),
-                            })
-                            .into_box(),
-                        })
-                        .into_box(),
-                        t: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(0)).into_box(),
-                            t: Noun::Atom(Atom(1)).into_box(),
-                        })
-                        .into_box(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .tar())
+            match Cell::new(
+                Box::new(Noun::new_atom(42)),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(8)),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(4)),
+                            Box::new(Noun::new_cell(
+                                Box::new(Noun::new_atom(0)),
+                                Box::new(Noun::new_atom(1)),
+                            )),
+                        )),
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(0)),
+                            Box::new(Noun::new_atom(1)),
+                        )),
+                    )),
+                )),
+            )
+            .tar()
             {
                 Ok(res) => {
                     assert_eq!(
-                        Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(43)).into_box(),
-                            t: Noun::Atom(Atom(42)).into_box(),
-                        }),
+                        Noun::new_cell(Box::new(Noun::new_atom(43)), Box::new(Noun::new_atom(42)),),
                         res
                     );
                 }
@@ -1096,38 +910,32 @@ mod tests {
 
         // *[422 [8 [4 0 1] [4 0 3]]] -> 43
         {
-            match (Cell {
-                h: Noun::Atom(Atom(42)).into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(8)).into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(4)).into_box(),
-                            t: Noun::Cell(Cell {
-                                h: Noun::Atom(Atom(0)).into_box(),
-                                t: Noun::Atom(Atom(1)).into_box(),
-                            })
-                            .into_box(),
-                        })
-                        .into_box(),
-                        t: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(4)).into_box(),
-                            t: Noun::Cell(Cell {
-                                h: Noun::Atom(Atom(0)).into_box(),
-                                t: Noun::Atom(Atom(3)).into_box(),
-                            })
-                            .into_box(),
-                        })
-                        .into_box(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .tar())
+            match Cell::new(
+                Box::new(Noun::new_atom(42)),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(8)),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(4)),
+                            Box::new(Noun::new_cell(
+                                Box::new(Noun::new_atom(0)),
+                                Box::new(Noun::new_atom(1)),
+                            )),
+                        )),
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(4)),
+                            Box::new(Noun::new_cell(
+                                Box::new(Noun::new_atom(0)),
+                                Box::new(Noun::new_atom(3)),
+                            )),
+                        )),
+                    )),
+                )),
+            )
+            .tar()
             {
                 Ok(res) => {
-                    assert_eq!(Noun::Atom(Atom(43)), res);
+                    assert_eq!(Noun::new_atom(43), res);
                 }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
@@ -1137,42 +945,36 @@ mod tests {
 
         // *[[[0 1] 137] 9 2 [0 1]] -> [[0 1] 137]
         {
-            match (Cell {
-                h: Noun::Cell(Cell {
-                    h: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(0)).into_box(),
-                        t: Noun::Atom(Atom(1)).into_box(),
-                    })
-                    .into_box(),
-                    t: Noun::Atom(Atom(137)).into_box(),
-                })
-                .into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(9)).into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(2)).into_box(),
-                        t: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(0)).into_box(),
-                            t: Noun::Atom(Atom(1)).into_box(),
-                        })
-                        .into_box(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .tar())
+            match Cell::new(
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(0)),
+                        Box::new(Noun::new_atom(1)),
+                    )),
+                    Box::new(Noun::new_atom(137)),
+                )),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(9)),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(2)),
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(0)),
+                            Box::new(Noun::new_atom(1)),
+                        )),
+                    )),
+                )),
+            )
+            .tar()
             {
                 Ok(res) => {
                     assert_eq!(
-                        Noun::Cell(Cell {
-                            h: Noun::Cell(Cell {
-                                h: Noun::Atom(Atom(0)).into_box(),
-                                t: Noun::Atom(Atom(1)).into_box(),
-                            })
-                            .into_box(),
-                            t: Noun::Atom(Atom(137)).into_box(),
-                        }),
+                        Noun::new_cell(
+                            Box::new(Noun::new_cell(
+                                Box::new(Noun::new_atom(0)),
+                                Box::new(Noun::new_atom(1)),
+                            )),
+                            Box::new(Noun::new_atom(137)),
+                        ),
                         res
                     );
                 }
@@ -1184,38 +986,30 @@ mod tests {
 
         // *[[[0 2] 137] 9 2 [0 1]] -> [0 2]
         {
-            match (Cell {
-                h: Noun::Cell(Cell {
-                    h: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(0)).into_box(),
-                        t: Noun::Atom(Atom(2)).into_box(),
-                    })
-                    .into_box(),
-                    t: Noun::Atom(Atom(137)).into_box(),
-                })
-                .into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(9)).into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(2)).into_box(),
-                        t: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(0)).into_box(),
-                            t: Noun::Atom(Atom(1)).into_box(),
-                        })
-                        .into_box(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .tar())
+            match Cell::new(
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(0)),
+                        Box::new(Noun::new_atom(2)),
+                    )),
+                    Box::new(Noun::new_atom(137)),
+                )),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(9)),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(2)),
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(0)),
+                            Box::new(Noun::new_atom(1)),
+                        )),
+                    )),
+                )),
+            )
+            .tar()
             {
                 Ok(res) => {
                     assert_eq!(
-                        Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(0)).into_box(),
-                            t: Noun::Atom(Atom(2)).into_box(),
-                        }),
+                        Noun::new_cell(Box::new(Noun::new_atom(0)), Box::new(Noun::new_atom(2)),),
                         res
                     );
                 }
@@ -1227,34 +1021,29 @@ mod tests {
 
         // *[[[0 2] 137] 9 2 [0 1]] -> [0 2]
         {
-            match (Cell {
-                h: Noun::Cell(Cell {
-                    h: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(0)).into_box(),
-                        t: Noun::Atom(Atom(3)).into_box(),
-                    })
-                    .into_box(),
-                    t: Noun::Atom(Atom(137)).into_box(),
-                })
-                .into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(9)).into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(2)).into_box(),
-                        t: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(0)).into_box(),
-                            t: Noun::Atom(Atom(1)).into_box(),
-                        })
-                        .into_box(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .tar())
+            match Cell::new(
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(0)),
+                        Box::new(Noun::new_atom(3)),
+                    )),
+                    Box::new(Noun::new_atom(137)),
+                )),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(9)),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(2)),
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(0)),
+                            Box::new(Noun::new_atom(1)),
+                        )),
+                    )),
+                )),
+            )
+            .tar()
             {
                 Ok(res) => {
-                    assert_eq!(Noun::Atom(Atom(137)), res);
+                    assert_eq!(Noun::new_atom(137), res);
                 }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
@@ -1264,38 +1053,32 @@ mod tests {
 
         // *[[16 32] 10 [1 0 2] 0 3] -> 16
         {
-            match (Cell {
-                h: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(16)).into_box(),
-                    t: Noun::Atom(Atom(32)).into_box(),
-                })
-                .into_box(),
-                t: Noun::Cell(Cell {
-                    h: Noun::Atom(Atom(10)).into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(1)).into_box(),
-                            t: Noun::Cell(Cell {
-                                h: Noun::Atom(Atom(0)).into_box(),
-                                t: Noun::Atom(Atom(2)).into_box(),
-                            })
-                            .into_box(),
-                        })
-                        .into_box(),
-                        t: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(0)).into_box(),
-                            t: Noun::Atom(Atom(3)).into_box(),
-                        })
-                        .into_box(),
-                    })
-                    .into_box(),
-                })
-                .into_box(),
-            }
-            .tar())
+            match Cell::new(
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(16)),
+                    Box::new(Noun::new_atom(32)),
+                )),
+                Box::new(Noun::new_cell(
+                    Box::new(Noun::new_atom(10)),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(1)),
+                            Box::new(Noun::new_cell(
+                                Box::new(Noun::new_atom(0)),
+                                Box::new(Noun::new_atom(2)),
+                            )),
+                        )),
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(0)),
+                            Box::new(Noun::new_atom(3)),
+                        )),
+                    )),
+                )),
+            )
+            .tar()
             {
                 Ok(res) => {
-                    assert_eq!(Noun::Atom(Atom(16)), res);
+                    assert_eq!(Noun::new_atom(16), res);
                 }
                 Err(err) => {
                     assert!(false, "Unexpected failure: {}.", err.msg);
@@ -1310,11 +1093,7 @@ mod tests {
         {
             assert_eq!(
                 Loobean::Yes,
-                Cell {
-                    h: Noun::Atom(Atom(2)).into_box(),
-                    t: Noun::Atom(Atom(2)).into_box(),
-                }
-                .tis(),
+                Cell::new(Box::new(Noun::new_atom(2)), Box::new(Noun::new_atom(2)),).tis(),
             );
         }
 
@@ -1322,11 +1101,7 @@ mod tests {
         {
             assert_eq!(
                 Loobean::No,
-                Cell {
-                    h: Noun::Atom(Atom(7)).into_box(),
-                    t: Noun::Atom(Atom(6)).into_box(),
-                }
-                .tis(),
+                Cell::new(Box::new(Noun::new_atom(7)), Box::new(Noun::new_atom(6)),).tis(),
             );
         }
 
@@ -1334,18 +1109,16 @@ mod tests {
         {
             assert_eq!(
                 Loobean::Yes,
-                Cell {
-                    h: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(2)).into_box(),
-                        t: Noun::Atom(Atom(7)).into_box(),
-                    })
-                    .into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(2)).into_box(),
-                        t: Noun::Atom(Atom(7)).into_box(),
-                    })
-                    .into_box(),
-                }
+                Cell::new(
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(2)),
+                        Box::new(Noun::new_atom(7)),
+                    )),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(2)),
+                        Box::new(Noun::new_atom(7)),
+                    )),
+                )
                 .tis(),
             );
         }
@@ -1354,22 +1127,19 @@ mod tests {
         {
             assert_eq!(
                 Loobean::No,
-                Cell {
-                    h: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(2)).into_box(),
-                        t: Noun::Atom(Atom(7)).into_box(),
-                    })
-                    .into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(2)).into_box(),
-                        t: Noun::Cell(Cell {
-                            h: Noun::Atom(Atom(7)).into_box(),
-                            t: Noun::Atom(Atom(3)).into_box(),
-                        })
-                        .into_box(),
-                    })
-                    .into_box(),
-                }
+                Cell::new(
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(2)),
+                        Box::new(Noun::new_atom(7)),
+                    )),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(2)),
+                        Box::new(Noun::new_cell(
+                            Box::new(Noun::new_atom(7)),
+                            Box::new(Noun::new_atom(3)),
+                        )),
+                    )),
+                )
                 .tis(),
             );
         }
@@ -1389,11 +1159,7 @@ mod tests {
         {
             assert_eq!(
                 Loobean::Yes,
-                Cell {
-                    h: Noun::Atom(Atom(128)).into_box(),
-                    t: Noun::Atom(Atom(256)).into_box(),
-                }
-                .wut(),
+                Cell::new(Box::new(Noun::new_atom(128)), Box::new(Noun::new_atom(256)),).wut(),
             );
         }
 
@@ -1401,18 +1167,16 @@ mod tests {
         {
             assert_eq!(
                 Loobean::Yes,
-                Cell {
-                    h: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(512)).into_box(),
-                        t: Noun::Atom(Atom(1024)).into_box(),
-                    })
-                    .into_box(),
-                    t: Noun::Cell(Cell {
-                        h: Noun::Atom(Atom(16)).into_box(),
-                        t: Noun::Atom(Atom(32)).into_box(),
-                    })
-                    .into_box(),
-                }
+                Cell::new(
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(512)),
+                        Box::new(Noun::new_atom(1024)),
+                    )),
+                    Box::new(Noun::new_cell(
+                        Box::new(Noun::new_atom(16)),
+                        Box::new(Noun::new_atom(32)),
+                    )),
+                )
                 .wut(),
             );
         }
