@@ -1,10 +1,59 @@
 use std::{error, fmt};
 
-pub mod interpreter;
+pub mod tree;
 
-/*==============================================================================
- * Nock struct and enum definitions
- */
+/// The ? Nock operator.
+///
+/// Determine if a noun is a cell or an atom.
+///
+/// ```console
+/// ?[x] -> 0 if x is a cell
+/// ?[x] -> 1 if x is an atom
+/// ```
+trait Wut {
+    fn wut(&self) -> Loobean;
+}
+
+/// The + Nock operator.
+///
+/// Increment an atom.
+///
+/// ```console
+/// +[x] -> 1 + x   if x is an atom
+/// +[x] -> *crash* if x is a cell
+/// ```
+trait Lus {
+    fn lus(self) -> Atom;
+}
+
+/// The = Nock Operator.
+///
+/// Determine if two nouns are equal.
+///
+/// ```console
+/// =[x y] -> 0 if x and y are the same noun
+/// =[x y] -> 1 otherwise
+/// ```
+trait Tis {
+    fn tis(&self) -> Loobean;
+}
+
+/// The / Nock operator.
+trait Fas {
+    fn fas(self) -> Result<Noun, Error>;
+}
+
+/// The # Nock operator.
+trait Hax {
+    fn hax(self) -> Result<Noun, Error>;
+}
+
+/// The * Nock operator.
+///
+/// Apply the Nock interpreter function.
+pub trait Tar {
+    fn tar(self) -> Result<Noun, Error>;
+}
 
 /// An atom or a cell.
 ///
@@ -15,34 +64,6 @@ pub enum Noun {
     Atom(Atom),
     Cell(Cell),
 }
-
-/// An unsigned integer.
-#[derive(Clone, Debug, PartialEq)]
-pub struct Atom(u64);
-
-/// A pair of heap-allocated nouns.
-#[derive(Debug)]
-pub struct Cell {
-    h: Box<Noun>,
-    t: Box<Noun>,
-}
-
-/// A Nock-specific boolean where 0 is yes/true and 1 is no/false.
-#[derive(Debug, PartialEq)]
-pub enum Loobean {
-    Yes,
-    No,
-}
-
-/// A Nock-specific error encapsulating an informative error message.
-#[derive(Debug)]
-pub struct Error {
-    msg: String,
-}
-
-/*==============================================================================
- * General implementations for Noun enum
- */
 
 impl Clone for Noun {
     fn clone(&self) -> Self {
@@ -104,9 +125,9 @@ impl Noun {
     }
 }
 
-/*==============================================================================
- * General implementations for Atom struct
- */
+/// An unsigned integer.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Atom(u64);
 
 impl Atom {
     pub fn new(v: u64) -> Self {
@@ -114,9 +135,12 @@ impl Atom {
     }
 }
 
-/*==============================================================================
- * General implementations for Cell struct
- */
+/// A pair of heap-allocated nouns.
+#[derive(Debug)]
+pub struct Cell {
+    h: Box<Noun>,
+    t: Box<Noun>,
+}
 
 impl Clone for Cell {
     fn clone(&self) -> Self {
@@ -145,9 +169,12 @@ impl Cell {
     }
 }
 
-/*==============================================================================
- * General implementations for Loobean enum
- */
+/// A Nock-specific boolean where 0 is yes/true and 1 is no/false.
+#[derive(Debug, PartialEq)]
+pub enum Loobean {
+    Yes,
+    No,
+}
 
 impl Loobean {
     /// Convert a boolean into a Loobean.
@@ -166,9 +193,11 @@ impl Loobean {
     }
 }
 
-/*==============================================================================
- * General implementations for Error struct
- */
+/// A Nock-specific error encapsulating an informative error message.
+#[derive(Debug)]
+pub struct Error {
+    msg: String,
+}
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -178,13 +207,9 @@ impl fmt::Display for Error {
 
 impl error::Error for Error {}
 
-/*==============================================================================
- * Tests
- */
-
 #[cfg(test)]
 mod tests {
-    use crate::*;
+    use super::*;
 
     #[test]
     fn clone_atom() {
@@ -199,10 +224,7 @@ mod tests {
     fn clone_cell() {
         // Clone [8 808].
         {
-            let c = Cell::new(
-                Box::new(Noun::new_atom(8)),
-                Box::new(Noun::new_atom(808))
-            );
+            let c = Cell::new(Box::new(Noun::new_atom(8)), Box::new(Noun::new_atom(808)));
             assert_eq!(c, c.clone());
         }
     }
@@ -221,8 +243,8 @@ mod tests {
                 Box::new(Noun::new_atom(300)),
                 Box::new(Noun::new_cell(
                     Box::new(Noun::new_atom(400)),
-                    Box::new(Noun::new_atom(500))
-                ))
+                    Box::new(Noun::new_atom(500)),
+                )),
             );
             assert_eq!(noun, noun.clone());
         }
@@ -233,28 +255,16 @@ mod tests {
         // [71 109] == [71 109]
         {
             assert_eq!(
-                Cell::new(
-                    Box::new(Noun::new_atom(71)),
-                    Box::new(Noun::new_atom(109))
-                ),
-                Cell::new(
-                    Box::new(Noun::new_atom(71)),
-                    Box::new(Noun::new_atom(109))
-                )
+                Cell::new(Box::new(Noun::new_atom(71)), Box::new(Noun::new_atom(109))),
+                Cell::new(Box::new(Noun::new_atom(71)), Box::new(Noun::new_atom(109)))
             );
         }
 
         // [71 109] != [109 71]
         {
             assert_ne!(
-                Cell::new(
-                    Box::new(Noun::new_atom(71)),
-                    Box::new(Noun::new_atom(109))
-                ),
-                Cell::new(
-                    Box::new(Noun::new_atom(109)),
-                    Box::new(Noun::new_atom(71))
-                )
+                Cell::new(Box::new(Noun::new_atom(71)), Box::new(Noun::new_atom(109))),
+                Cell::new(Box::new(Noun::new_atom(109)), Box::new(Noun::new_atom(71)))
             );
         }
 
@@ -264,15 +274,15 @@ mod tests {
                 Noun::new_cell(
                     Box::new(Noun::new_atom(11)),
                     Box::new(Noun::new_cell(
-                            Box::new(Noun::new_atom(12)),
-                            Box::new(Noun::new_atom(13))
+                        Box::new(Noun::new_atom(12)),
+                        Box::new(Noun::new_atom(13))
                     ))
                 ),
                 Noun::new_cell(
                     Box::new(Noun::new_atom(11)),
                     Box::new(Noun::new_cell(
-                            Box::new(Noun::new_atom(12)),
-                            Box::new(Noun::new_atom(13))
+                        Box::new(Noun::new_atom(12)),
+                        Box::new(Noun::new_atom(13))
                     ))
                 )
             );
@@ -284,15 +294,15 @@ mod tests {
                 Noun::new_cell(
                     Box::new(Noun::new_atom(11)),
                     Box::new(Noun::new_cell(
-                            Box::new(Noun::new_atom(12)),
-                            Box::new(Noun::new_atom(13))
+                        Box::new(Noun::new_atom(12)),
+                        Box::new(Noun::new_atom(13))
                     ))
                 ),
                 Noun::new_cell(
                     Box::new(Noun::new_atom(11)),
                     Box::new(Noun::new_cell(
-                            Box::new(Noun::new_atom(13)),
-                            Box::new(Noun::new_atom(12))
+                        Box::new(Noun::new_atom(13)),
+                        Box::new(Noun::new_atom(12))
                     ))
                 )
             );
@@ -314,28 +324,16 @@ mod tests {
         // [0 5] == [0 5]
         {
             assert_eq!(
-                Noun::new_cell(
-                    Box::new(Noun::new_atom(0)),
-                    Box::new(Noun::new_atom(5))
-                ),
-                Noun::new_cell(
-                    Box::new(Noun::new_atom(0)),
-                    Box::new(Noun::new_atom(5))
-                )
+                Noun::new_cell(Box::new(Noun::new_atom(0)), Box::new(Noun::new_atom(5))),
+                Noun::new_cell(Box::new(Noun::new_atom(0)), Box::new(Noun::new_atom(5)))
             );
         }
 
         // [0 0] == [0 5]
         {
             assert_ne!(
-                Noun::new_cell(
-                    Box::new(Noun::new_atom(0)),
-                    Box::new(Noun::new_atom(0))
-                ),
-                Noun::new_cell(
-                    Box::new(Noun::new_atom(0)),
-                    Box::new(Noun::new_atom(5))
-                )
+                Noun::new_cell(Box::new(Noun::new_atom(0)), Box::new(Noun::new_atom(0))),
+                Noun::new_cell(Box::new(Noun::new_atom(0)), Box::new(Noun::new_atom(5)))
             );
         }
 
@@ -346,14 +344,14 @@ mod tests {
                     Box::new(Noun::new_cell(
                         Box::new(Noun::new_atom(44)),
                         Box::new(Noun::new_atom(22))
-                     )),
+                    )),
                     Box::new(Noun::new_atom(88))
                 ),
                 Noun::new_cell(
                     Box::new(Noun::new_cell(
                         Box::new(Noun::new_atom(44)),
                         Box::new(Noun::new_atom(22))
-                     )),
+                    )),
                     Box::new(Noun::new_atom(88))
                 )
             );
@@ -366,7 +364,7 @@ mod tests {
                     Box::new(Noun::new_cell(
                         Box::new(Noun::new_atom(44)),
                         Box::new(Noun::new_atom(22))
-                     )),
+                    )),
                     Box::new(Noun::new_atom(88))
                 ),
                 Noun::new_cell(
@@ -374,7 +372,7 @@ mod tests {
                     Box::new(Noun::new_cell(
                         Box::new(Noun::new_atom(22)),
                         Box::new(Noun::new_atom(88))
-                     )),
+                    )),
                 )
             );
         }
