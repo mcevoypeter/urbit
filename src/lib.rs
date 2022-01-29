@@ -26,9 +26,6 @@ trait Request {
     /// Get the request as a noun.
     fn request(&self) -> &Cell;
 
-    /// Get the kernel that will be used to generate the response.
-    fn kernel(&self) -> &Kernel;
-
     /// Pass the request to the kernel and generate a response.
     fn fulfill(self) -> Self::Next;
 }
@@ -42,9 +39,6 @@ trait StagedResponse {
     /// Get the response as a noun.
     fn response(&self) -> &Noun;
 
-    /// Get the kernel that resulted from generating the response.
-    fn kernel(&self) -> &Kernel;
-
     /// Commit the response to the event log.
     fn commit(self) -> Self::Next;
 }
@@ -53,115 +47,79 @@ trait CommittedResponse {
     fn send(self) -> Result<(), Error>;
 }
 
+/// Arvo kernel.
+#[allow(dead_code)]
 struct Kernel(Cell);
 
 /// Read request.
 #[allow(dead_code)]
-struct PeekRequest {
-    req: Cell,
-    kern: Kernel,
-}
+struct PeekRequest(Cell);
 
 impl Request for PeekRequest {
     type Next = PeekResponse;
 
     fn request(&self) -> &Cell {
-        &self.req
-    }
-
-    fn kernel(&self) -> &Kernel {
-        &self.kern
+        &self.0
     }
 
     fn fulfill(self) -> Self::Next {
-        PeekResponse {
-            req: self.req,
-            res: Noun::new_atom(0),
-            kern: self.kern,
-        }
+        unimplemented!()
     }
 }
 
 /// Write request.
 #[allow(dead_code)]
-struct PokeRequest {
-    req: Cell,
-    kern: Kernel,
-}
+struct PokeRequest(Cell);
 
 impl Request for PokeRequest {
     type Next = PokeResponse;
 
     fn request(&self) -> &Cell {
-        &self.req
-    }
-
-    fn kernel(&self) -> &Kernel {
-        &self.kern
+        &self.0
     }
 
     fn fulfill(self) -> Self::Next {
-        PokeResponse {
-            req: self.req,
-            res: Noun::new_atom(0),
-            kern: self.kern,
-        }
+        unimplemented!()
     }
 }
 
 /// Uncommitted read response.
 #[allow(dead_code)]
-struct PeekResponse {
-    req: Cell,
-    res: Noun,
-    kern: Kernel,
-}
+struct PeekResponse(Cell, Noun);
 
 impl StagedResponse for PeekResponse {
     type Next = Response;
 
     fn request(&self) -> &Cell {
-        &self.req
+        &self.0
     }
 
     fn response(&self) -> &Noun {
-        &self.res
-    }
-
-    fn kernel(&self) -> &Kernel {
-        &self.kern
+        &self.1
     }
 
     fn commit(self) -> Self::Next {
-        Response(self.res)
+        unimplemented!()
     }
 }
 
 /// Uncommitted write response.
 #[allow(dead_code)]
-struct PokeResponse {
-    req: Cell,
-    res: Noun,
-    kern: Kernel,
-}
+struct PokeResponse(Cell, Noun);
 
 impl StagedResponse for PokeResponse {
     type Next = Response;
 
     fn request(&self) -> &Cell {
-        &self.req
+        &self.0
     }
 
     fn response(&self) -> &Noun {
-        &self.res
-    }
-
-    fn kernel(&self) -> &Kernel {
-        &self.kern
+        &self.1
     }
 
     fn commit(self) -> Self::Next {
-        Response(self.res)
+        unimplemented!()
     }
 }
 
@@ -170,7 +128,7 @@ struct Response(Noun);
 
 impl CommittedResponse for Response {
     fn send(self) -> Result<(), Error> {
-        Ok(())
+        unimplemented!()
     }
 }
 
