@@ -20,21 +20,30 @@ use nock::{Cell, Noun};
 /// | PokeRequest  | ------> | PokeResponse |
 /// +--------------+         +--------------+
 
+trait Kernel<I, O>: Sized
+where
+    I: Request,
+    O: StagedResponse,
+{
+    /// Get the kernel as a cell.
+    fn kernel(&self) -> &Cell;
+
+    /// Evaluate a request, producing a new kernel and the result of the request.
+    fn evaluate(self, req: I) -> (Self, Result<O, Error>);
+}
+
 trait Request {
-    type Next: StagedResponse;
+    type Out: StagedResponse;
 
     /// Get the request as a noun.
     fn request(&self) -> &Cell;
 
-    /// Get the kernel that will be used to generate the response.
-    fn kernel(&self) -> &Kernel;
-
     /// Pass the request to the kernel and generate a response.
-    fn fulfill(self) -> Self::Next;
+    fn fulfill(self) -> Self::Out;
 }
 
 trait StagedResponse {
-    type Next: CommittedResponse;
+    type Out: CommittedResponse;
 
     /// Get the request as a noun.
     fn request(&self) -> &Cell;
@@ -42,126 +51,108 @@ trait StagedResponse {
     /// Get the response as a noun.
     fn response(&self) -> &Noun;
 
-    /// Get the kernel that resulted from generating the response.
-    fn kernel(&self) -> &Kernel;
-
     /// Commit the response to the event log.
-    fn commit(self) -> Self::Next;
+    fn commit(self) -> Self::Out;
 }
 
 trait CommittedResponse {
     fn send(self) -> Result<(), Error>;
 }
 
-struct Kernel(Cell);
+/// Arvo kernel.
+struct Arvo(Cell);
+
+/// Kernel interface for peeks.
+impl Kernel<PeekRequest, PeekResponse> for Arvo {
+    fn kernel(&self) -> &Cell {
+        &self.0
+    }
+
+    fn evaluate(self, req: PeekRequest) -> (Self, Result<PeekResponse, Error>) {
+        unimplemented!()
+    }
+}
+
+/// Kernel interface for pokes.
+impl Kernel<PokeRequest, PokeResponse> for Arvo {
+    fn kernel(&self) -> &Cell {
+        &self.0
+    }
+
+    fn evaluate(self, req: PokeRequest) -> (Self, Result<PokeResponse, Error>) {
+        unimplemented!()
+    }
+}
 
 /// Read request.
 #[allow(dead_code)]
-struct PeekRequest {
-    req: Cell,
-    kern: Kernel,
-}
+struct PeekRequest(Cell);
 
 impl Request for PeekRequest {
-    type Next = PeekResponse;
+    type Out = PeekResponse;
 
     fn request(&self) -> &Cell {
-        &self.req
+        &self.0
     }
 
-    fn kernel(&self) -> &Kernel {
-        &self.kern
-    }
-
-    fn fulfill(self) -> Self::Next {
-        PeekResponse {
-            req: self.req,
-            res: Noun::new_atom(0),
-            kern: self.kern,
-        }
+    fn fulfill(self) -> PeekResponse {
+        unimplemented!()
     }
 }
 
 /// Write request.
 #[allow(dead_code)]
-struct PokeRequest {
-    req: Cell,
-    kern: Kernel,
-}
+struct PokeRequest(Cell);
 
 impl Request for PokeRequest {
-    type Next = PokeResponse;
+    type Out = PokeResponse;
 
     fn request(&self) -> &Cell {
-        &self.req
+        &self.0
     }
 
-    fn kernel(&self) -> &Kernel {
-        &self.kern
-    }
-
-    fn fulfill(self) -> Self::Next {
-        PokeResponse {
-            req: self.req,
-            res: Noun::new_atom(0),
-            kern: self.kern,
-        }
+    fn fulfill(self) -> PokeResponse {
+        unimplemented!()
     }
 }
 
 /// Uncommitted read response.
 #[allow(dead_code)]
-struct PeekResponse {
-    req: Cell,
-    res: Noun,
-    kern: Kernel,
-}
+struct PeekResponse(Cell, Noun);
 
 impl StagedResponse for PeekResponse {
-    type Next = Response;
+    type Out = Response;
 
     fn request(&self) -> &Cell {
-        &self.req
+        &self.0
     }
 
     fn response(&self) -> &Noun {
-        &self.res
+        &self.1
     }
 
-    fn kernel(&self) -> &Kernel {
-        &self.kern
-    }
-
-    fn commit(self) -> Self::Next {
-        Response(self.res)
+    fn commit(self) -> Response {
+        unimplemented!()
     }
 }
 
 /// Uncommitted write response.
 #[allow(dead_code)]
-struct PokeResponse {
-    req: Cell,
-    res: Noun,
-    kern: Kernel,
-}
+struct PokeResponse(Cell, Noun);
 
 impl StagedResponse for PokeResponse {
-    type Next = Response;
+    type Out = Response;
 
     fn request(&self) -> &Cell {
-        &self.req
+        &self.0
     }
 
     fn response(&self) -> &Noun {
-        &self.res
+        &self.1
     }
 
-    fn kernel(&self) -> &Kernel {
-        &self.kern
-    }
-
-    fn commit(self) -> Self::Next {
-        Response(self.res)
+    fn commit(self) -> Response {
+        unimplemented!()
     }
 }
 
