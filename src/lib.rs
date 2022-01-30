@@ -39,8 +39,8 @@ trait StagedResponse {
     /// Get the response as a noun.
     fn response(&self) -> &Noun;
 
-    /// Commit the response to the event log.
-    fn commit(self) -> Self::Output;
+    /// Commit the response to the event log, generating a committed response and a new event log.
+    fn commit(self, evt_log: EventLog) -> (Self::Output, EventLog);
 }
 
 trait CommittedResponse {
@@ -83,6 +83,9 @@ impl Request for PokeRequest {
     }
 }
 
+#[allow(dead_code)]
+struct EventLog;
+
 /// Uncommitted read response.
 #[allow(dead_code)]
 struct PeekResponse(Cell, Noun);
@@ -98,7 +101,7 @@ impl StagedResponse for PeekResponse {
         &self.1
     }
 
-    fn commit(self) -> Response {
+    fn commit(self, _evt_log: EventLog) -> (Response, EventLog) {
         unimplemented!()
     }
 }
@@ -118,7 +121,7 @@ impl StagedResponse for PokeResponse {
         &self.1
     }
 
-    fn commit(self) -> Response {
+    fn commit(self, _evt_log: EventLog) -> (Response, EventLog) {
         unimplemented!()
     }
 }
