@@ -1,6 +1,10 @@
 #[allow(dead_code)]
 use nock::{Cell, Noun};
 
+use crate::event_log::*;
+
+mod event_log;
+
 /// Trait-based flow:
 ///
 /// +--------------+ evaluate +----------------+ commit +-------------------+
@@ -80,9 +84,6 @@ impl Request for PokeRequest {
         unimplemented!()
     }
 }
-
-#[allow(dead_code)]
-struct EventLog;
 
 /// Uncommitted read response.
 struct PeekResponse(Cell, Noun);
