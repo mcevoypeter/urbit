@@ -21,17 +21,17 @@ use nock::{Cell, Noun};
 /// +--------------+          +--------------+
 
 trait Request {
-    type Next: StagedResponse;
+    type Output: StagedResponse;
 
     /// Get the request as a noun.
     fn request(&self) -> &Cell;
 
     /// Pass the request to the kernel and generate a response.
-    fn evaluate(self, arvo: Kernel) -> (Self::Next, Kernel);
+    fn evaluate(self, arvo: Kernel) -> (Self::Output, Kernel);
 }
 
 trait StagedResponse {
-    type Next: CommittedResponse;
+    type Output: CommittedResponse;
 
     /// Get the request as a noun.
     fn request(&self) -> &Cell;
@@ -40,7 +40,7 @@ trait StagedResponse {
     fn response(&self) -> &Noun;
 
     /// Commit the response to the event log.
-    fn commit(self) -> Self::Next;
+    fn commit(self) -> Self::Output;
 }
 
 trait CommittedResponse {
@@ -56,7 +56,7 @@ struct Kernel(Cell);
 struct PeekRequest(Cell);
 
 impl Request for PeekRequest {
-    type Next = PeekResponse;
+    type Output = PeekResponse;
 
     fn request(&self) -> &Cell {
         &self.0
@@ -72,7 +72,7 @@ impl Request for PeekRequest {
 struct PokeRequest(Cell);
 
 impl Request for PokeRequest {
-    type Next = PokeResponse;
+    type Output = PokeResponse;
 
     fn request(&self) -> &Cell {
         &self.0
@@ -88,7 +88,7 @@ impl Request for PokeRequest {
 struct PeekResponse(Cell, Noun);
 
 impl StagedResponse for PeekResponse {
-    type Next = Response;
+    type Output = Response;
 
     fn request(&self) -> &Cell {
         &self.0
@@ -98,7 +98,7 @@ impl StagedResponse for PeekResponse {
         &self.1
     }
 
-    fn commit(self) -> Self::Next {
+    fn commit(self) -> Response {
         unimplemented!()
     }
 }
@@ -108,7 +108,7 @@ impl StagedResponse for PeekResponse {
 struct PokeResponse(Cell, Noun);
 
 impl StagedResponse for PokeResponse {
-    type Next = Response;
+    type Output = Response;
 
     fn request(&self) -> &Cell {
         &self.0
@@ -118,7 +118,7 @@ impl StagedResponse for PokeResponse {
         &self.1
     }
 
-    fn commit(self) -> Self::Next {
+    fn commit(self) -> Response {
         unimplemented!()
     }
 }
