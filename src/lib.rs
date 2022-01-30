@@ -134,7 +134,4 @@ impl CommittedResponse for Response {
 
 /// A Vere-specific error encapsulating an informative error message.
 #[derive(Debug)]
-struct Error {
-    #[allow(dead_code)]
-    msg: String,
-}
+enum Error {}
