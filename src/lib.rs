@@ -26,7 +26,7 @@ trait Request {
     /// Get the request as a noun.
     fn request(&self) -> &Cell;
 
-    /// Pass the request to the kernel and generate a response.
+    /// Pass the request to the kernel, generating a staged response and a new kernel.
     fn evaluate(self, arvo: Kernel) -> (Self::Output, Kernel);
 }
 
