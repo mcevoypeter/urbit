@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 use nock::{Cell, Noun};
 
 /// Trait-based flow:
@@ -48,11 +49,9 @@ trait CommittedResponse {
 }
 
 /// Arvo kernel.
-#[allow(dead_code)]
 struct Kernel(Cell);
 
 /// Read request.
-#[allow(dead_code)]
 struct PeekRequest(Cell);
 
 impl Request for PeekRequest {
@@ -68,7 +67,6 @@ impl Request for PeekRequest {
 }
 
 /// Write request.
-#[allow(dead_code)]
 struct PokeRequest(Cell);
 
 impl Request for PokeRequest {
@@ -87,7 +85,6 @@ impl Request for PokeRequest {
 struct EventLog;
 
 /// Uncommitted read response.
-#[allow(dead_code)]
 struct PeekResponse(Cell, Noun);
 
 impl StagedResponse for PeekResponse {
@@ -107,7 +104,6 @@ impl StagedResponse for PeekResponse {
 }
 
 /// Uncommitted write response.
-#[allow(dead_code)]
 struct PokeResponse(Cell, Noun);
 
 impl StagedResponse for PokeResponse {
