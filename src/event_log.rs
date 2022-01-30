@@ -1,9 +1,11 @@
-use std::{
-    collections::VecDeque,
-    path::Path,
-};
+use std::{collections::VecDeque, path::Path};
 
-use crate::*;
+use nock::Cell;
+
+use crate::{
+    snapshot::{SnapshotBase, SnapshotPatch},
+    Error, Kernel,
+};
 
 #[allow(dead_code)]
 struct Event {
@@ -24,6 +26,7 @@ impl Event {
 #[allow(dead_code)]
 struct Epoch {
     id: u64,
+    patch: Option<SnapshotPatch>,
     events: VecDeque<Event>,
 }
 
@@ -37,7 +40,7 @@ impl Epoch {
     }
 
     fn _last_event(&self) -> Option<&Event> {
-       self.events.back()
+        self.events.back()
     }
 
     fn _drop(self) -> Result<(), Error> {
@@ -48,6 +51,7 @@ impl Epoch {
 #[allow(dead_code)]
 pub struct EventLog {
     path: Box<Path>,
+    snapshot: Option<SnapshotBase>,
     epochs: VecDeque<Epoch>,
 }
 

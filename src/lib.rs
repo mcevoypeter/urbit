@@ -1,9 +1,10 @@
 #[allow(dead_code)]
 use nock::{Cell, Noun};
 
-use crate::event_log::*;
+use crate::event_log::EventLog;
 
 mod event_log;
+mod snapshot;
 
 /// Trait-based flow:
 ///
