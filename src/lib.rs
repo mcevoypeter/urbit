@@ -2,23 +2,23 @@ use nock::{Cell, Noun};
 
 /// Trait-based flow:
 ///
-/// +--------------+ fulfill +----------------+ commit +-------------------+
-/// | Request      | ------> | StagedResponse | -----> | CommittedResponse |
-/// +--------------+         +----------------+        +-------------------+
+/// +--------------+ evaluate +----------------+ commit +-------------------+
+/// | Request      | -------> | StagedResponse | -----> | CommittedResponse |
+/// +--------------+          +----------------+        +-------------------+
 ///
 ///
 /// Struct-based flow:
 ///
-/// +--------------+ fulfill +--------------+
-/// | PeekRequest  | ------> | PeekResponse | \
-/// +--------------+         +--------------+  \
-///                                             \ commit +----------+
-///                                              ------> | Response |
-///                                             /        +----------+
-///                                            /
-/// +--------------+ fulfill +--------------+ /
-/// | PokeRequest  | ------> | PokeResponse |
-/// +--------------+         +--------------+
+/// +--------------+ evaluate +--------------+
+/// | PeekRequest  | -------> | PeekResponse | \
+/// +--------------+          +--------------+  \
+///                                              \ commit +----------+
+///                                               ------> | Response |
+///                                              /        +----------+
+///                                             /
+/// +--------------+ evaluate +--------------+ /
+/// | PokeRequest  | -------> | PokeResponse |
+/// +--------------+          +--------------+
 
 trait Request {
     type Next: StagedResponse;
@@ -27,7 +27,7 @@ trait Request {
     fn request(&self) -> &Cell;
 
     /// Pass the request to the kernel and generate a response.
-    fn fulfill(self) -> Self::Next;
+    fn evaluate(self, arvo: Kernel) -> (Self::Next, Kernel);
 }
 
 trait StagedResponse {
@@ -62,7 +62,7 @@ impl Request for PeekRequest {
         &self.0
     }
 
-    fn fulfill(self) -> Self::Next {
+    fn evaluate(self, _arvo: Kernel) -> (PeekResponse, Kernel) {
         unimplemented!()
     }
 }
@@ -78,7 +78,7 @@ impl Request for PokeRequest {
         &self.0
     }
 
-    fn fulfill(self) -> Self::Next {
+    fn evaluate(self, _arvo: Kernel) -> (PokeResponse, Kernel) {
         unimplemented!()
     }
 }
