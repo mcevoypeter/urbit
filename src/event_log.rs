@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, path::Path};
+use std::{cmp::Ordering, collections::VecDeque, path::Path};
 
 use nock::Cell;
 
@@ -6,6 +6,31 @@ use crate::{
     snapshot::{SnapshotBase, SnapshotPatch},
     Error, Kernel,
 };
+
+/// Generic event log interface.
+pub trait EvtLog: Sized {
+    type Event;
+
+    fn _new(_path: &Path) -> Result<Self, Error>;
+
+    fn _path(&self) -> &Path;
+
+    fn _append(&mut self, _evt: Self::Event) -> Result<(), Error>;
+
+    fn _replay(&self, _kern: Kernel) -> Result<Kernel, Error>;
+
+    fn _truncate(&mut self, _evt: Self::Event) -> Result<(), Error>;
+}
+
+/// Generic event interface.
+pub trait Evt: Ord + Sized {
+    type Id;
+    type Request;
+
+    fn _id(&self) -> &Self::Id;
+
+    fn _request(&self) -> &Self::Request;
+}
 
 ///  +-------------------+
 ///  | SnapshotBase      |
@@ -44,17 +69,40 @@ use crate::{
 ///  +--------------------+
 
 #[allow(dead_code)]
-struct Event {
+pub struct Event {
     id: u64,
     req: Cell,
 }
 
-impl Event {
-    fn _id(&self) -> &u64 {
+impl Eq for Event {}
+
+impl Ord for Event {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.id.cmp(&other.id)
+    }
+}
+
+impl PartialEq for Event {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl PartialOrd for Event {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Evt for Event {
+    type Id = u64;
+    type Request = Cell;
+
+    fn _id(&self) -> &Self::Id {
         &self.id
     }
 
-    fn _request(&self) -> &Cell {
+    fn _request(&self) -> &Self::Request {
         &self.req
     }
 }
@@ -91,7 +139,9 @@ pub struct EventLog {
     epochs: VecDeque<Epoch>,
 }
 
-impl EventLog {
+impl EvtLog for EventLog {
+    type Event = Event;
+
     /// Create an event log rooted at the given path.
     fn _new(_path: &Path) -> Result<Self, Error> {
         unimplemented!()
@@ -101,27 +151,15 @@ impl EventLog {
         &self.path
     }
 
-    fn _first_epoch(&self) -> Option<&Epoch> {
-        self.epochs.front()
-    }
-
-    fn _last_epoch(&self) -> Option<&Epoch> {
-        self.epochs.back()
-    }
-
-    fn _append(self, _evt: Event) -> Result<Self, Error> {
+    fn _append(&mut self, _evt: Self::Event) -> Result<(), Error> {
         unimplemented!()
     }
 
-    fn _replay(self, _kern: Kernel) -> Result<Kernel, Error> {
+    fn _replay(&self, _kern: Kernel) -> Result<Kernel, Error> {
         unimplemented!()
     }
 
-    fn _rollover(self) -> Result<Epoch, Error> {
-        unimplemented!()
-    }
-
-    fn _truncate(self) -> Result<(), Error> {
+    fn _truncate(&mut self, _evt: Self::Event) -> Result<(), Error> {
         unimplemented!()
     }
 }

@@ -1,7 +1,7 @@
 #[allow(dead_code)]
 use nock::{Cell, Noun};
 
-use crate::event_log::EventLog;
+use crate::event_log::{EventLog, EvtLog};
 
 mod event_log;
 mod snapshot;
@@ -38,6 +38,7 @@ trait Request {
 
 trait StagedResponse {
     type Output: CommittedResponse;
+    type Log: EvtLog;
 
     /// Get the request as a noun.
     fn request(&self) -> &Cell;
@@ -46,7 +47,7 @@ trait StagedResponse {
     fn response(&self) -> &Noun;
 
     /// Commit the response to the event log, generating a committed response and a new event log.
-    fn commit(self, evt_log: EventLog) -> (Self::Output, EventLog);
+    fn commit(self, evt_log: Self::Log) -> (Self::Output, Self::Log);
 }
 
 trait CommittedResponse {
@@ -54,7 +55,7 @@ trait CommittedResponse {
 }
 
 /// Arvo kernel.
-struct Kernel(Cell);
+pub struct Kernel(Cell);
 
 /// Read request.
 struct PeekRequest(Cell);
@@ -91,6 +92,7 @@ struct PeekResponse(Cell, Noun);
 
 impl StagedResponse for PeekResponse {
     type Output = Response;
+    type Log = EventLog;
 
     fn request(&self) -> &Cell {
         &self.0
@@ -100,7 +102,7 @@ impl StagedResponse for PeekResponse {
         &self.1
     }
 
-    fn commit(self, _evt_log: EventLog) -> (Response, EventLog) {
+    fn commit(self, _evt_log: Self::Log) -> (Self::Output, Self::Log) {
         unimplemented!()
     }
 }
@@ -110,6 +112,7 @@ struct PokeResponse(Cell, Noun);
 
 impl StagedResponse for PokeResponse {
     type Output = Response;
+    type Log = EventLog;
 
     fn request(&self) -> &Cell {
         &self.0
@@ -119,7 +122,7 @@ impl StagedResponse for PokeResponse {
         &self.1
     }
 
-    fn commit(self, _evt_log: EventLog) -> (Response, EventLog) {
+    fn commit(self, _evt_log: Self::Log) -> (Self::Output, Self::Log) {
         unimplemented!()
     }
 }
@@ -135,4 +138,4 @@ impl CommittedResponse for Response {
 
 /// A Vere-specific error encapsulating an informative error message.
 #[derive(Debug)]
-enum Error {}
+pub enum Error {}
