@@ -24,3 +24,6 @@ impl Snapshot {
 }
 
 pub struct Patch;
+
+#[cfg(test)]
+mod tests {}

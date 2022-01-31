@@ -166,3 +166,6 @@ impl EvtLog for EventLog {
         unimplemented!()
     }
 }
+
+#[cfg(test)]
+mod tests {}

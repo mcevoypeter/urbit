@@ -140,3 +140,6 @@ impl CommittedResponse for Response {
         unimplemented!()
     }
 }
+
+#[cfg(test)]
+mod tests {}

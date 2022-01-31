@@ -17,3 +17,6 @@ impl Kernel {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {}
