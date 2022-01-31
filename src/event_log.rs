@@ -5,9 +5,9 @@ use std::{cmp::Ordering, collections::VecDeque, path::Path};
 use nock::Cell;
 
 use crate::{
+    error::Error,
     event_log::snapshot::{Patch, Snapshot},
     kernel::Kernel,
-    Error,
 };
 
 //=================================================================================================

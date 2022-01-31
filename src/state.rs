@@ -1,9 +1,9 @@
 use nock::{Cell, Noun};
 
 use crate::{
+    error::Error,
     event_log::{EventLog, EvtLog},
     kernel::Kernel,
-    Error,
 };
 
 /// Trait-based flow:
