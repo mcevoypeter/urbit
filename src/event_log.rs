@@ -5,7 +5,7 @@ use std::{cmp::Ordering, collections::VecDeque, path::Path};
 use nock::Cell;
 
 use crate::{
-    event_log::snapshot::{SnapshotBase, SnapshotPatch},
+    event_log::snapshot::{Patch, Snapshot},
     kernel::Kernel,
     Error,
 };
@@ -36,7 +36,7 @@ pub trait Evt: Ord + Sized {
 }
 
 ///  +-------------------+
-///  | SnapshotBase      |
+///  | Snapshot          |
 ///  +-------------------+
 ///            |
 ///  +-------------------+
@@ -51,7 +51,7 @@ pub trait Evt: Ord + Sized {
 ///  | | Event         | |
 ///  | +---------------+ |
 ///  | +===============+ |
-///  | | SnapshotPatch | |
+///  | | Patch         | |
 ///  | +===============+ |
 ///  +--------------------+
 ///            |
@@ -67,7 +67,7 @@ pub trait Evt: Ord + Sized {
 ///  | | Event         | |
 ///  | +---------------+ |
 ///  | +===============+ |
-///  | | SnapshotPatch | |
+///  | | Patch         | |
 ///  | +===============+ |
 ///  +--------------------+
 
@@ -113,7 +113,7 @@ impl Evt for Event {
 #[allow(dead_code)]
 struct Epoch {
     id: u64,
-    patch: Option<SnapshotPatch>,
+    patch: Option<Patch>,
     events: VecDeque<Event>,
 }
 
@@ -138,7 +138,7 @@ impl Epoch {
 #[allow(dead_code)]
 pub struct EventLog {
     path: Box<Path>,
-    snapshot: Option<SnapshotBase>,
+    snapshot: Option<Snapshot>,
     epochs: VecDeque<Epoch>,
 }
 

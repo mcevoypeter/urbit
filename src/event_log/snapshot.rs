@@ -3,17 +3,17 @@ use std::path::Path;
 use crate::Error;
 
 #[allow(dead_code)]
-pub struct SnapshotBase {
+pub struct Snapshot {
     path: Box<Path>,
 }
 
-impl SnapshotBase {
+impl Snapshot {
     fn _new(_path: &Path) -> Result<Self, Error> {
         unimplemented!()
     }
 
     /// Apply a patch to the snapshot, creating a new snapshot.
-    fn _apply_patch(self, _patch: SnapshotPatch) -> Result<Self, Error> {
+    fn _apply_patch(self, _patch: Patch) -> Result<Self, Error> {
         unimplemented!()
     }
 
@@ -23,4 +23,4 @@ impl SnapshotBase {
     }
 }
 
-pub struct SnapshotPatch;
+pub struct Patch;
