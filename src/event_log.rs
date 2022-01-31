@@ -1,10 +1,13 @@
+mod snapshot;
+
 use std::{cmp::Ordering, collections::VecDeque, path::Path};
 
 use nock::Cell;
 
 use crate::{
-    snapshot::{SnapshotBase, SnapshotPatch},
-    Error, Kernel,
+    event_log::snapshot::{SnapshotBase, SnapshotPatch},
+    kernel::Kernel,
+    Error,
 };
 
 /// Generic event log interface.
