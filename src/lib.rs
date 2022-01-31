@@ -1,4 +1,3 @@
-#[allow(dead_code)]
 mod event_log;
 mod kernel;
 mod state;
