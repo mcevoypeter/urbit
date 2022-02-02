@@ -72,7 +72,7 @@ impl Req for PeekRequest {
         &self.0
     }
 
-    fn evaluate(self, _arvo: Kernel) -> (PeekResponse, Kernel) {
+    fn evaluate(self, _arvo: Kernel) -> (Self::Output, Kernel) {
         unimplemented!()
     }
 }
@@ -87,7 +87,7 @@ impl Req for PokeRequest {
         &self.0
     }
 
-    fn evaluate(self, _arvo: Kernel) -> (PokeResponse, Kernel) {
+    fn evaluate(self, _arvo: Kernel) -> (Self::Output, Kernel) {
         unimplemented!()
     }
 }
