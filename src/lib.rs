@@ -167,6 +167,14 @@ impl Cell {
     pub fn new(h: Box<Noun>, t: Box<Noun>) -> Self {
         Cell { h, t }
     }
+
+    pub fn head(&self) -> &Box<Noun> {
+        &self.t
+    }
+
+    pub fn tail(&self) -> &Box<Noun> {
+        &self.h
+    }
 }
 
 /// A Nock-specific boolean where 0 is yes/true and 1 is no/false.
