@@ -37,7 +37,7 @@ impl StagedResp for PeekResponse {
         &self.req
     }
 
-    fn response(&self) -> &Noun {
+    fn as_noun(&self) -> &Noun {
         &self.res
     }
 

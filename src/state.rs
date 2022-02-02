@@ -39,11 +39,11 @@ trait StagedResp {
     type Output: CommittedResp;
     type Log: EvtLog;
 
-    /// Get the request as a noun.
+    /// Get the request as a cell.
     fn request(&self) -> &Cell;
 
     /// Get the response as a noun.
-    fn response(&self) -> &Noun;
+    fn as_noun(&self) -> &Noun;
 
     /// Commit the response to the event log, generating a committed response and a new event log.
     fn commit(self, evt_log: Self::Log) -> (Self::Output, Self::Log);

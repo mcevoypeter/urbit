@@ -73,7 +73,7 @@ impl StagedResp for PokeResponse {
         &self.req
     }
 
-    fn response(&self) -> &Noun {
+    fn as_noun(&self) -> &Noun {
         &self.res
     }
 
