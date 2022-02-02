@@ -2,28 +2,28 @@ use std::path::Path;
 
 use lmdb::Environment;
 
-pub trait KeyValStore<T> {
+pub trait KeyValStore<K, V> {
     fn new(path: &Path) -> Self;
 
-    fn read(&self, key: u64) -> Result<T, ()>;
+    fn read(&self, key: K) -> Result<V, ()>;
 
-    fn write(&self, key: u64, val: T) -> Result<Option<T>, ()>;
+    fn write(&self, key: K, val: V) -> Result<Option<V>, ()>;
 }
 
 pub struct Lmdb {
     _env: Environment,
 }
 
-impl<T> KeyValStore<T> for Lmdb {
+impl<K, V> KeyValStore<K, V> for Lmdb {
     fn new(path: &Path) -> Self {
         unimplemented!("{}", path.display())
     }
 
-    fn read(&self, key: u64) -> Result<T, ()> {
-        unimplemented!("{}", key)
+    fn read(&self, _key: K) -> Result<V, ()> {
+        unimplemented!()
     }
 
-    fn write(&self, key: u64, _val: T) -> Result<Option<T>, ()> {
-        unimplemented!("{}", key)
+    fn write(&self, _key: K, _val: V) -> Result<Option<V>, ()> {
+        unimplemented!()
     }
 }

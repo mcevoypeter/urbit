@@ -3,6 +3,8 @@ mod snapshot;
 
 use std::{collections::VecDeque, fmt, path::Path};
 
+use nock::Cell;
+
 use crate::{
     error::Error,
     event_log::{
@@ -108,14 +110,14 @@ impl Epoch<PokeRequest> {
 }
 
 #[allow(dead_code)]
-pub struct EventLog<T>
+pub struct EventLog<DB>
 where
-    T: KeyValStore<PokeRequest>,
+    DB: KeyValStore<u64, Cell>,
 {
     path: Box<Path>,
     snapshot: Option<Snapshot>,
     epochs: VecDeque<Epoch<PokeRequest>>,
-    db: T,
+    db: DB,
 }
 
 impl fmt::Debug for EventLog<Lmdb> {
