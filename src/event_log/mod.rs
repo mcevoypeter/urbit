@@ -1,10 +1,14 @@
+pub mod database;
 mod snapshot;
 
 use std::{collections::VecDeque, fmt, path::Path};
 
 use crate::{
     error::Error,
-    event_log::snapshot::{Patch, Snapshot},
+    event_log::{
+        database::{KeyValStore, Lmdb},
+        snapshot::{Patch, Snapshot},
+    },
     kernel::Kernel,
     state::poke::PokeRequest,
 };
@@ -104,13 +108,14 @@ impl Epoch<PokeRequest> {
 }
 
 #[allow(dead_code)]
-pub struct EventLog {
+pub struct EventLog<T: KeyValStore> {
     path: Box<Path>,
     snapshot: Option<Snapshot>,
     epochs: VecDeque<Epoch<PokeRequest>>,
+    db: T,
 }
 
-impl fmt::Debug for EventLog {
+impl fmt::Debug for EventLog<Lmdb> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("EventLog")
             .field("path", &self.path)
@@ -118,7 +123,7 @@ impl fmt::Debug for EventLog {
     }
 }
 
-impl EvtLog for EventLog {
+impl EvtLog for EventLog<Lmdb> {
     type Event = PokeRequest;
 
     /// Create an event log rooted at the given path.
@@ -130,8 +135,8 @@ impl EvtLog for EventLog {
         &self.path
     }
 
-    fn append(self, _evt: Self::Event) -> Result<Self, Self> {
-        unimplemented!()
+    fn append(self, evt: Self::Event) -> Result<Self, Self> {
+        unimplemented!("{:?}", evt)
     }
 
     fn _replay(&self, _kern: Kernel) -> Result<Kernel, Error> {

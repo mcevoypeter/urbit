@@ -1,7 +1,7 @@
 use nock::{Cell, Noun};
 
 use crate::{
-    event_log::EventLog,
+    event_log::{database::Lmdb, EventLog},
     kernel::Kernel,
     state::{Req, Response, StagedResp},
 };
@@ -29,8 +29,9 @@ struct PeekResponse {
 
 impl StagedResp for PeekResponse {
     type Output = Response;
-    type Log = EventLog;
+    type Log = EventLog<Lmdb>;
 
+    /// Peek responses aren't committed to the event log.
     fn commit(self, evt_log: Self::Log) -> (Self::Output, Self::Log) {
         (Response { res: self.res }, evt_log)
     }

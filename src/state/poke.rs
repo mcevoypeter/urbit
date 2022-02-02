@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use nock::{Cell, Noun};
 
 use crate::{
-    event_log::{EventLog, Evt, EvtLog},
+    event_log::{database::Lmdb, EventLog, Evt, EvtLog},
     kernel::Kernel,
     state::{Req, Response, StagedResp},
 };
@@ -73,7 +73,7 @@ pub struct PokeResponse {
 
 impl StagedResp for PokeResponse {
     type Output = Response;
-    type Log = EventLog;
+    type Log = EventLog<Lmdb>;
 
     fn commit(self, evt_log: Self::Log) -> (Self::Output, Self::Log) {
         match evt_log.append(self.req) {
