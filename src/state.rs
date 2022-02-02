@@ -8,9 +8,9 @@ use crate::{
 
 /// Trait-based flow:
 ///
-/// +--------------+ evaluate +----------------+ commit +-------------------+
-/// | Request      | -------> | StagedResponse | -----> | CommittedResponse |
-/// +--------------+          +----------------+        +-------------------+
+/// +--------------+ evaluate +--------------+   commit   +---------------+
+/// | Req          | -------> | StagedResp   | ---------> | CommittedResp |
+/// +--------------+          +--------------+            +---------------+
 ///
 ///
 /// Struct-based flow:
@@ -30,8 +30,8 @@ use crate::{
 // Traits
 //=================================================================================================
 
-trait Request {
-    type Output: StagedResponse;
+trait Req {
+    type Output: StagedResp;
 
     /// Get the request as a noun.
     fn request(&self) -> &Cell;
@@ -40,8 +40,8 @@ trait Request {
     fn evaluate(self, arvo: Kernel) -> (Self::Output, Kernel);
 }
 
-trait StagedResponse {
-    type Output: CommittedResponse;
+trait StagedResp {
+    type Output: CommittedResp;
     type Log: EvtLog;
 
     /// Get the request as a noun.
@@ -54,7 +54,7 @@ trait StagedResponse {
     fn commit(self, evt_log: Self::Log) -> (Self::Output, Self::Log);
 }
 
-trait CommittedResponse {
+trait CommittedResp {
     fn send(self) -> Result<(), Error>;
 }
 
@@ -65,7 +65,7 @@ trait CommittedResponse {
 /// Read request.
 struct PeekRequest(Cell);
 
-impl Request for PeekRequest {
+impl Req for PeekRequest {
     type Output = PeekResponse;
 
     fn request(&self) -> &Cell {
@@ -80,7 +80,7 @@ impl Request for PeekRequest {
 /// Write request.
 struct PokeRequest(Cell);
 
-impl Request for PokeRequest {
+impl Req for PokeRequest {
     type Output = PokeResponse;
 
     fn request(&self) -> &Cell {
@@ -95,7 +95,7 @@ impl Request for PokeRequest {
 /// Uncommitted read response.
 struct PeekResponse(Cell, Noun);
 
-impl StagedResponse for PeekResponse {
+impl StagedResp for PeekResponse {
     type Output = Response;
     type Log = EventLog;
 
@@ -115,7 +115,7 @@ impl StagedResponse for PeekResponse {
 /// Uncommitted write response.
 struct PokeResponse(Cell, Noun);
 
-impl StagedResponse for PokeResponse {
+impl StagedResp for PokeResponse {
     type Output = Response;
     type Log = EventLog;
 
@@ -135,7 +135,7 @@ impl StagedResponse for PokeResponse {
 /// Committed (read or write) response.
 struct Response(Noun);
 
-impl CommittedResponse for Response {
+impl CommittedResp for Response {
     fn send(self) -> Result<(), Error> {
         unimplemented!()
     }
