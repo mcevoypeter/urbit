@@ -2,34 +2,28 @@ use std::path::Path;
 
 use lmdb::Environment;
 
-use serde::{de::DeserializeOwned, Serialize};
-
-pub trait KeyValStore {
-    type Val: DeserializeOwned + Serialize;
-
+pub trait KeyValStore<T> {
     fn new(path: &Path) -> Self;
 
-    fn read(&self, key: u64) -> Result<Self::Val, ()>;
+    fn read(&self, key: u64) -> Result<T, ()>;
 
-    fn write(&self, key: u64, val: Self::Val) -> Result<Option<Self::Val>, ()>;
+    fn write(&self, key: u64, val: T) -> Result<Option<T>, ()>;
 }
 
 pub struct Lmdb {
     _env: Environment,
 }
 
-impl KeyValStore for Lmdb {
-    type Val = Vec<u8>;
-
+impl<T> KeyValStore<T> for Lmdb {
     fn new(path: &Path) -> Self {
         unimplemented!("{}", path.display())
     }
 
-    fn read(&self, key: u64) -> Result<Self::Val, ()> {
+    fn read(&self, key: u64) -> Result<T, ()> {
         unimplemented!("{}", key)
     }
 
-    fn write(&self, key: u64, val: Self::Val) -> Result<Option<Self::Val>, ()> {
-        unimplemented!("{} {:?}", key, val)
+    fn write(&self, key: u64, _val: T) -> Result<Option<T>, ()> {
+        unimplemented!("{}", key)
     }
 }

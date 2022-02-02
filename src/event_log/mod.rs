@@ -108,7 +108,10 @@ impl Epoch<PokeRequest> {
 }
 
 #[allow(dead_code)]
-pub struct EventLog<T: KeyValStore> {
+pub struct EventLog<T>
+where
+    T: KeyValStore<PokeRequest>,
+{
     path: Box<Path>,
     snapshot: Option<Snapshot>,
     epochs: VecDeque<Epoch<PokeRequest>>,
