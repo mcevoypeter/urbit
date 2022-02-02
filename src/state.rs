@@ -1,5 +1,5 @@
 mod peek;
-mod poke;
+pub mod poke;
 
 use nock::{Cell, Noun};
 
