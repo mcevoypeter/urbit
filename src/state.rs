@@ -49,11 +49,14 @@ trait CommittedResp {
 //=================================================================================================
 
 /// Committed (read or write) response.
-struct Response(Noun);
+#[derive(Debug)]
+struct Response {
+    res: Noun,
+}
 
 impl CommittedResp for Response {
     fn send(self) -> Result<(), Error> {
-        unimplemented!()
+        unimplemented!("{:?}", self.res)
     }
 }
 

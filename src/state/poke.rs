@@ -3,12 +3,13 @@ use std::cmp::Ordering;
 use nock::{Cell, Noun};
 
 use crate::{
-    event_log::{EventLog, Evt},
+    event_log::{EventLog, Evt, EvtLog},
     kernel::Kernel,
     state::{Req, Response, StagedResp},
 };
 
 /// Write request.
+#[derive(Debug)]
 pub struct PokeRequest {
     id: u64,
     req: Cell,
@@ -53,13 +54,20 @@ impl Req for PokeRequest {
     fn evaluate(self, arvo: Kernel) -> (Self::Output, Kernel) {
         let req = self.req.clone();
         let (res, arvo) = arvo.evaluate(Noun::Cell(self.req));
-        (Self::Output { req, res }, arvo)
+        (
+            Self::Output {
+                req: Self { id: self.id, req },
+                res,
+            },
+            arvo,
+        )
     }
 }
 
 /// Uncommitted write response.
+#[derive(Debug)]
 pub struct PokeResponse {
-    req: Cell,
+    req: PokeRequest,
     res: Noun,
 }
 
@@ -68,6 +76,13 @@ impl StagedResp for PokeResponse {
     type Log = EventLog;
 
     fn commit(self, evt_log: Self::Log) -> (Self::Output, Self::Log) {
-        unimplemented!("{:?} {:?} {:?}", self.req, self.res, evt_log)
+        match evt_log.append(self.req) {
+            Ok(evt_log) => (Response { res: self.res }, evt_log),
+            Err(_evt_log) => {
+                let _err = todo!();
+                #[allow(unreachable_code)]
+                (Response { res: _err }, _evt_log)
+            }
+        }
     }
 }

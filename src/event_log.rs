@@ -21,7 +21,7 @@ pub trait EvtLog: Sized {
 
     fn _path(&self) -> &Path;
 
-    fn _append(&mut self, _evt: Self::Event) -> Result<(), Error>;
+    fn append(self, _evt: Self::Event) -> Result<Self, Self>;
 
     fn _replay(&self, _kern: Kernel) -> Result<Kernel, Error>;
 
@@ -130,7 +130,7 @@ impl EvtLog for EventLog {
         &self.path
     }
 
-    fn _append(&mut self, _evt: Self::Event) -> Result<(), Error> {
+    fn append(self, _evt: Self::Event) -> Result<Self, Self> {
         unimplemented!()
     }
 
