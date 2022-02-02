@@ -21,7 +21,7 @@ use crate::{
 
 /// Generic event log interface.
 pub trait EvtLog: Sized {
-    type Evt;
+    type Evt: Evt;
 
     fn _new(_path: &Path) -> Result<Self, Error>;
 
