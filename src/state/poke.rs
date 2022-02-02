@@ -50,10 +50,6 @@ impl PartialOrd for PokeRequest {
 impl Req for PokeRequest {
     type Output = PokeResponse;
 
-    fn as_cell(&self) -> &Cell {
-        &self.req
-    }
-
     fn evaluate(self, _arvo: Kernel) -> (Self::Output, Kernel) {
         unimplemented!()
     }
@@ -61,21 +57,13 @@ impl Req for PokeRequest {
 
 /// Uncommitted write response.
 pub struct PokeResponse {
-    req: Cell,
-    res: Noun,
+    _req: Cell,
+    _res: Noun,
 }
 
 impl StagedResp for PokeResponse {
     type Output = Response;
     type Log = EventLog;
-
-    fn request(&self) -> &Cell {
-        &self.req
-    }
-
-    fn as_noun(&self) -> &Noun {
-        &self.res
-    }
 
     fn commit(self, _evt_log: Self::Log) -> (Self::Output, Self::Log) {
         unimplemented!()

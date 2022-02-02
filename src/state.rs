@@ -1,7 +1,7 @@
 mod peek;
 pub mod poke;
 
-use nock::{Cell, Noun};
+use nock::Noun;
 
 use crate::{error::Error, event_log::EvtLog, kernel::Kernel};
 
@@ -28,9 +28,6 @@ use crate::{error::Error, event_log::EvtLog, kernel::Kernel};
 trait Req {
     type Output: StagedResp;
 
-    /// Get the request as a cell.
-    fn as_cell(&self) -> &Cell;
-
     /// Pass the request to the kernel, generating a staged response and a new kernel.
     fn evaluate(self, arvo: Kernel) -> (Self::Output, Kernel);
 }
@@ -38,12 +35,6 @@ trait Req {
 trait StagedResp {
     type Output: CommittedResp;
     type Log: EvtLog;
-
-    /// Get the request as a cell.
-    fn request(&self) -> &Cell;
-
-    /// Get the response as a noun.
-    fn as_noun(&self) -> &Noun;
 
     /// Commit the response to the event log, generating a committed response and a new event log.
     fn commit(self, evt_log: Self::Log) -> (Self::Output, Self::Log);
