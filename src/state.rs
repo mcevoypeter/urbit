@@ -1,10 +1,9 @@
+mod peek;
+mod poke;
+
 use nock::{Cell, Noun};
 
-use crate::{
-    error::Error,
-    event_log::{EventLog, EvtLog},
-    kernel::Kernel,
-};
+use crate::{error::Error, event_log::EvtLog, kernel::Kernel};
 
 /// Trait-based flow:
 ///
@@ -25,10 +24,6 @@ use crate::{
 /// +--------------+ evaluate +--------------+ /
 /// | PokeRequest  | -------> | PokeResponse |
 /// +--------------+          +--------------+
-
-//=================================================================================================
-// Traits
-//=================================================================================================
 
 trait Req {
     type Output: StagedResp;
@@ -61,76 +56,6 @@ trait CommittedResp {
 //=================================================================================================
 // Structs
 //=================================================================================================
-
-/// Read request.
-struct PeekRequest(Cell);
-
-impl Req for PeekRequest {
-    type Output = PeekResponse;
-
-    fn request(&self) -> &Cell {
-        &self.0
-    }
-
-    fn evaluate(self, _arvo: Kernel) -> (Self::Output, Kernel) {
-        unimplemented!()
-    }
-}
-
-/// Write request.
-struct PokeRequest(Cell);
-
-impl Req for PokeRequest {
-    type Output = PokeResponse;
-
-    fn request(&self) -> &Cell {
-        &self.0
-    }
-
-    fn evaluate(self, _arvo: Kernel) -> (Self::Output, Kernel) {
-        unimplemented!()
-    }
-}
-
-/// Uncommitted read response.
-struct PeekResponse(Cell, Noun);
-
-impl StagedResp for PeekResponse {
-    type Output = Response;
-    type Log = EventLog;
-
-    fn request(&self) -> &Cell {
-        &self.0
-    }
-
-    fn response(&self) -> &Noun {
-        &self.1
-    }
-
-    fn commit(self, _evt_log: Self::Log) -> (Self::Output, Self::Log) {
-        unimplemented!()
-    }
-}
-
-/// Uncommitted write response.
-struct PokeResponse(Cell, Noun);
-
-impl StagedResp for PokeResponse {
-    type Output = Response;
-    type Log = EventLog;
-
-    fn request(&self) -> &Cell {
-        &self.0
-    }
-
-    fn response(&self) -> &Noun {
-        &self.1
-    }
-
-    fn commit(self, _evt_log: Self::Log) -> (Self::Output, Self::Log) {
-        unimplemented!()
-    }
-}
 
 /// Committed (read or write) response.
 struct Response(Noun);
