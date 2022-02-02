@@ -91,16 +91,19 @@ struct Epoch<E: Evt> {
     events: VecDeque<E>,
 }
 
-impl Epoch<PokeRequest> {
+impl<E> Epoch<E>
+where
+    E: Evt,
+{
     fn _id(&self) -> &u64 {
         &self.id
     }
 
-    fn _first_event(&self) -> Option<&PokeRequest> {
+    fn _first_event(&self) -> Option<&E> {
         self.events.front()
     }
 
-    fn _last_event(&self) -> Option<&PokeRequest> {
+    fn _last_event(&self) -> Option<&E> {
         self.events.back()
     }
 
