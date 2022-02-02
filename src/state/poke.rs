@@ -53,27 +53,21 @@ impl Req for PokeRequest {
     fn evaluate(self, arvo: Kernel) -> (Self::Output, Kernel) {
         let req = self.req.clone();
         let (res, arvo) = arvo.evaluate(Noun::Cell(self.req));
-        (
-            Self::Output {
-                _req: req,
-                _res: res,
-            },
-            arvo,
-        )
+        (Self::Output { req, res }, arvo)
     }
 }
 
 /// Uncommitted write response.
 pub struct PokeResponse {
-    _req: Cell,
-    _res: Noun,
+    req: Cell,
+    res: Noun,
 }
 
 impl StagedResp for PokeResponse {
     type Output = Response;
     type Log = EventLog;
 
-    fn commit(self, _evt_log: Self::Log) -> (Self::Output, Self::Log) {
-        unimplemented!()
+    fn commit(self, evt_log: Self::Log) -> (Self::Output, Self::Log) {
+        unimplemented!("{:?} {:?} {:?}", self.req, self.res, evt_log)
     }
 }

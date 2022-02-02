@@ -17,27 +17,21 @@ impl Req for PeekRequest {
     fn evaluate(self, arvo: Kernel) -> (Self::Output, Kernel) {
         let req = self.req.clone();
         let (res, arvo) = arvo.evaluate(Noun::Cell(self.req));
-        (
-            Self::Output {
-                _req: req,
-                _res: res,
-            },
-            arvo,
-        )
+        (Self::Output { req, res }, arvo)
     }
 }
 
 /// Uncommitted read response.
 struct PeekResponse {
-    _req: Cell,
-    _res: Noun,
+    req: Cell,
+    res: Noun,
 }
 
 impl StagedResp for PeekResponse {
     type Output = Response;
     type Log = EventLog;
 
-    fn commit(self, _evt_log: Self::Log) -> (Self::Output, Self::Log) {
-        unimplemented!()
+    fn commit(self, evt_log: Self::Log) -> (Self::Output, Self::Log) {
+        unimplemented!("{:?} {:?} {:?}", self.req, self.res, evt_log)
     }
 }

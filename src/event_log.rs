@@ -1,6 +1,6 @@
 mod snapshot;
 
-use std::{collections::VecDeque, path::Path};
+use std::{collections::VecDeque, fmt, path::Path};
 
 use crate::{
     error::Error,
@@ -108,6 +108,14 @@ pub struct EventLog {
     path: Box<Path>,
     snapshot: Option<Snapshot>,
     epochs: VecDeque<Epoch<PokeRequest>>,
+}
+
+impl fmt::Debug for EventLog {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("EventLog")
+            .field("path", &self.path)
+            .finish()
+    }
 }
 
 impl EvtLog for EventLog {
