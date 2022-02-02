@@ -1,17 +1,23 @@
-pub trait KeyValStore {
-    fn read(key: u64) -> Result<Vec<u8>, ()>;
+use serde::{de::DeserializeOwned, Serialize};
 
-    fn write(key: u64, val: Vec<u8>) -> Result<Option<Vec<u8>>, ()>;
+pub trait KeyValStore {
+    type Val: DeserializeOwned + Serialize;
+
+    fn read(key: u64) -> Result<Self::Val, ()>;
+
+    fn write(key: u64, val: Self::Val) -> Result<Option<Self::Val>, ()>;
 }
 
 pub struct Lmdb;
 
 impl KeyValStore for Lmdb {
-    fn read(key: u64) -> Result<Vec<u8>, ()> {
+    type Val = Vec<u8>;
+
+    fn read(key: u64) -> Result<Self::Val, ()> {
         unimplemented!("{}", key)
     }
 
-    fn write(key: u64, val: Vec<u8>) -> Result<Option<Vec<u8>>, ()> {
+    fn write(key: u64, val: Self::Val) -> Result<Option<Self::Val>, ()> {
         unimplemented!("{} {:?}", key, val)
     }
 }
