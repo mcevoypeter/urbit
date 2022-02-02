@@ -8,14 +8,22 @@ use crate::{
 
 /// Read request.
 struct PeekRequest {
-    _req: Cell,
+    req: Cell,
 }
 
 impl Req for PeekRequest {
     type Output = PeekResponse;
 
-    fn evaluate(self, _arvo: Kernel) -> (Self::Output, Kernel) {
-        unimplemented!()
+    fn evaluate(self, arvo: Kernel) -> (Self::Output, Kernel) {
+        let req = self.req.clone();
+        let (res, arvo) = arvo.evaluate(Noun::Cell(self.req));
+        (
+            Self::Output {
+                _req: req,
+                _res: res,
+            },
+            arvo,
+        )
     }
 }
 

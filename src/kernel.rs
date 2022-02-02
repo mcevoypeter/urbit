@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use nock::Cell;
+use nock::{Cell, Noun};
 
 //=================================================================================================
 // Structs
@@ -19,6 +19,10 @@ impl Kernel {
                 unimplemented!("download from bootstrap.urbit.org")
             }
         }
+    }
+
+    pub fn evaluate(self, req: Noun) -> (Noun, Self) {
+        unimplemented!("{}", req)
     }
 }
 
