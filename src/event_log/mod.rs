@@ -19,17 +19,17 @@ use crate::{
 
 /// Generic event log interface.
 pub trait EvtLog: Sized {
-    type Event;
+    type Evt;
 
     fn _new(_path: &Path) -> Result<Self, Error>;
 
     fn _path(&self) -> &Path;
 
-    fn append(self, _evt: Self::Event) -> Result<Self, Self>;
+    fn append(self, _evt: Self::Evt) -> Result<Self, Self>;
 
     fn _replay(&self, _kern: Kernel) -> Result<Kernel, Error>;
 
-    fn _truncate(&mut self, _evt: Self::Event) -> Result<(), Error>;
+    fn _truncate(&mut self, _evt: Self::Evt) -> Result<(), Error>;
 }
 
 /// Generic event interface.
@@ -124,7 +124,7 @@ impl fmt::Debug for EventLog<Lmdb> {
 }
 
 impl EvtLog for EventLog<Lmdb> {
-    type Event = PokeRequest;
+    type Evt = PokeRequest;
 
     /// Create an event log rooted at the given path.
     fn _new(_path: &Path) -> Result<Self, Error> {
@@ -135,7 +135,7 @@ impl EvtLog for EventLog<Lmdb> {
         &self.path
     }
 
-    fn append(self, evt: Self::Event) -> Result<Self, Self> {
+    fn append(self, evt: Self::Evt) -> Result<Self, Self> {
         unimplemented!("{:?}", evt)
     }
 
@@ -143,7 +143,7 @@ impl EvtLog for EventLog<Lmdb> {
         unimplemented!()
     }
 
-    fn _truncate(&mut self, _evt: Self::Event) -> Result<(), Error> {
+    fn _truncate(&mut self, _evt: Self::Evt) -> Result<(), Error> {
         unimplemented!()
     }
 }
