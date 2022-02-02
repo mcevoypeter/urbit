@@ -14,7 +14,7 @@ struct PeekRequest {
 impl Req for PeekRequest {
     type Output = PeekResponse;
 
-    fn request(&self) -> &Cell {
+    fn as_cell(&self) -> &Cell {
         &self.req
     }
 

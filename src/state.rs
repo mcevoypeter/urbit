@@ -28,8 +28,8 @@ use crate::{error::Error, event_log::EvtLog, kernel::Kernel};
 trait Req {
     type Output: StagedResp;
 
-    /// Get the request as a noun.
-    fn request(&self) -> &Cell;
+    /// Get the request as a cell.
+    fn as_cell(&self) -> &Cell;
 
     /// Pass the request to the kernel, generating a staged response and a new kernel.
     fn evaluate(self, arvo: Kernel) -> (Self::Output, Kernel);

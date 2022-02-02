@@ -50,7 +50,7 @@ impl PartialOrd for PokeRequest {
 impl Req for PokeRequest {
     type Output = PokeResponse;
 
-    fn request(&self) -> &Cell {
+    fn as_cell(&self) -> &Cell {
         &self.req
     }
 
