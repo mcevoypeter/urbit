@@ -7,13 +7,15 @@ use crate::{
 };
 
 /// Read request.
-struct PeekRequest(Cell);
+struct PeekRequest {
+    req: Cell,
+}
 
 impl Req for PeekRequest {
     type Output = PeekResponse;
 
     fn request(&self) -> &Cell {
-        &self.0
+        &self.req
     }
 
     fn evaluate(self, _arvo: Kernel) -> (Self::Output, Kernel) {
@@ -22,18 +24,21 @@ impl Req for PeekRequest {
 }
 
 /// Uncommitted read response.
-struct PeekResponse(Cell, Noun);
+struct PeekResponse {
+    req: Cell,
+    res: Noun,
+}
 
 impl StagedResp for PeekResponse {
     type Output = Response;
     type Log = EventLog;
 
     fn request(&self) -> &Cell {
-        &self.0
+        &self.req
     }
 
     fn response(&self) -> &Noun {
-        &self.1
+        &self.res
     }
 
     fn commit(self, _evt_log: Self::Log) -> (Self::Output, Self::Log) {
