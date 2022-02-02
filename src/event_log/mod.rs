@@ -35,11 +35,11 @@ pub trait EvtLog: Sized {
 /// Generic event interface.
 pub trait Evt: Ord + Sized {
     type Id;
-    type Request;
+    type Req;
 
     fn _id(&self) -> &Self::Id;
 
-    fn _request(&self) -> &Self::Request;
+    fn _request(&self) -> &Self::Req;
 }
 
 ///  +-------------------+

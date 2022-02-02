@@ -19,13 +19,13 @@ impl Eq for PokeRequest {}
 
 impl Evt for PokeRequest {
     type Id = u64;
-    type Request = Cell;
+    type Req = Cell;
 
     fn _id(&self) -> &Self::Id {
         &self.id
     }
 
-    fn _request(&self) -> &Self::Request {
+    fn _request(&self) -> &Self::Req {
         &self.req
     }
 }
