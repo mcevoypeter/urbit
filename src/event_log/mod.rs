@@ -4,7 +4,7 @@ mod snapshot;
 use crate::{
     error::Error,
     event_log::{
-        database::{KeyValStore, Lmdb},
+        database::{lmdb::Lmdb, KeyValStore},
         snapshot::{Patch, Snapshot},
     },
     kernel::Kernel,

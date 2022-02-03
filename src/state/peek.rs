@@ -1,5 +1,5 @@
 use crate::{
-    event_log::{database::Lmdb, EventLog},
+    event_log::{database::lmdb::Lmdb, EventLog},
     kernel::Kernel,
     state::{Req, Response, StagedResp},
 };
