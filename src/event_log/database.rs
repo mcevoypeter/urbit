@@ -1,13 +1,13 @@
-use std::path::Path;
+use std::{collections::HashMap, path::Path};
 
 use lmdb::Environment;
 
 pub trait KeyValStore<K, V> {
     fn new(path: &Path) -> Self;
 
-    fn read(&self, key: K) -> Result<V, ()>;
+    fn get(&self, keys: Vec<K>) -> HashMap<K, Option<V>>;
 
-    fn write(&self, key: K, val: V) -> Result<Option<V>, ()>;
+    fn put(&self, keys: Vec<K>) -> HashMap<K, Option<V>>;
 }
 
 pub struct Lmdb {
@@ -16,14 +16,20 @@ pub struct Lmdb {
 
 impl<K, V> KeyValStore<K, V> for Lmdb {
     fn new(path: &Path) -> Self {
+        // - Create a directory at [path] if it doesn't already exist.
+        // - mdb_env_create(): create an environment
+        // - mdb_env_open(): open the just-created environment
         unimplemented!("{}", path.display())
     }
 
-    fn read(&self, _key: K) -> Result<V, ()> {
+    fn get(&self, _keys: Vec<K>) -> HashMap<K, Option<V>> {
         unimplemented!()
     }
 
-    fn write(&self, _key: K, _val: V) -> Result<Option<V>, ()> {
+    fn put(&self, _keys: Vec<K>) -> HashMap<K, Option<V>> {
         unimplemented!()
     }
 }
+
+#[cfg(test)]
+mod tests {}
