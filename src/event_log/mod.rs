@@ -1,10 +1,6 @@
 pub mod database;
 mod snapshot;
 
-use std::{collections::VecDeque, fmt, path::Path};
-
-use nock::Cell;
-
 use crate::{
     error::Error,
     event_log::{
@@ -14,6 +10,8 @@ use crate::{
     kernel::Kernel,
     state::poke::PokeRequest,
 };
+use nock::Cell;
+use std::{collections::VecDeque, fmt, path::Path};
 
 //=================================================================================================
 // Traits

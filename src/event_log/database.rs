@@ -1,6 +1,5 @@
-use std::{collections::HashMap, path::Path};
-
 use lmdb::Environment;
+use std::{collections::HashMap, path::Path};
 
 pub trait KeyValStore<K, V> {
     fn new(path: &Path) -> Self;

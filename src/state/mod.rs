@@ -1,9 +1,8 @@
 mod peek;
 pub mod poke;
 
-use nock::Noun;
-
 use crate::{error::Error, event_log::EvtLog, kernel::Kernel};
+use nock::Noun;
 
 /// Trait-based flow:
 ///

@@ -1,10 +1,9 @@
-use nock::{Cell, Noun};
-
 use crate::{
     event_log::{database::Lmdb, EventLog},
     kernel::Kernel,
     state::{Req, Response, StagedResp},
 };
+use nock::{Cell, Noun};
 
 /// Read request.
 #[derive(Debug)]

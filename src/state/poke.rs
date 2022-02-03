@@ -1,12 +1,10 @@
-use std::cmp::Ordering;
-
-use nock::{Cell, Noun};
-
 use crate::{
     event_log::{database::Lmdb, EventLog, Evt, EvtLog},
     kernel::Kernel,
     state::{Req, Response, StagedResp},
 };
+use nock::{Cell, Noun};
+use std::cmp::Ordering;
 
 /// Write request.
 #[derive(Debug)]
