@@ -1,67 +1,16 @@
 mod peek;
-pub mod poke;
+mod poke;
 
-use crate::{error::Error, event_log::EvtLog, kernel::Kernel};
-use nock::Noun;
+use crate::{error::Error, kernel::Kernel};
 
-/// Trait-based flow:
-///
-/// +--------------+ evaluate +--------------+   commit   +---------------+
-/// | Req          | -------> | StagedResp   | ---------> | CommittedResp |
-/// +--------------+          +--------------+            +---------------+
-///
-///
-/// Struct-based flow:
-///
-/// +--------------+ evaluate +--------------+
-/// | PeekRequest  | -------> | PeekResponse | \
-/// +--------------+          +--------------+  \
-///                                              \ commit +----------+
-///                                               ------> | Response |
-///                                              /        +----------+
-///                                             /
-/// +--------------+ evaluate +--------------+ /
-/// | PokeRequest  | -------> | PokeResponse |
-/// +--------------+          +--------------+
+trait Req: Sized {
+    type Res: Res;
 
-trait Req {
-    type Output: StagedResp;
-
-    /// Pass the request to the kernel, generating a staged response and a new kernel.
-    fn evaluate(self, arvo: Kernel) -> (Self::Output, Kernel);
+    fn evaluate(self, arvo: Kernel) -> (Self::Res, Kernel);
 }
 
-trait StagedResp {
-    type Output: CommittedResp;
-    type Log: EvtLog;
-
-    /// Commit the response to the event log, generating a committed response and a new event log.
-    fn commit(self, evt_log: Self::Log) -> (Self::Output, Self::Log);
-}
-
-trait CommittedResp {
-    fn send(self) -> Result<(), Error>;
-}
-
-//=================================================================================================
-// Structs
-//=================================================================================================
-
-/// Committed (read or write) response.
-#[derive(Debug)]
-struct Response {
-    res: Noun,
-}
-
-impl CommittedResp for Response {
+trait Res: Sized {
     fn send(self) -> Result<(), Error> {
-        unimplemented!("{:?}", self.res)
+        unimplemented!()
     }
 }
-
-//=================================================================================================
-// Tests
-//=================================================================================================
-
-#[cfg(test)]
-mod tests {}

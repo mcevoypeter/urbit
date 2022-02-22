@@ -1,37 +1,28 @@
 use crate::{
-    event_log::{database::lmdb::Lmdb, EventLog},
     kernel::Kernel,
-    state::{Req, Response, StagedResp},
+    state::{Req, Res},
 };
 use nock::{Cell, Noun};
 
-/// Read request.
-#[derive(Debug)]
-struct PeekRequest {
+#[allow(dead_code)]
+struct PeekReq {
     req: Cell,
 }
 
-impl Req for PeekRequest {
-    type Output = PeekResponse;
-
-    fn evaluate(self, arvo: Kernel) -> (Self::Output, Kernel) {
-        let (res, arvo) = arvo.evaluate(Noun::Cell(self.req));
-        (Self::Output { res }, arvo)
-    }
-}
-
-/// Uncommitted read response.
-#[derive(Debug)]
-struct PeekResponse {
+#[allow(dead_code)]
+struct PeekRes {
+    req: Cell,
     res: Noun,
 }
 
-impl StagedResp for PeekResponse {
-    type Output = Response;
-    type Log = EventLog<Lmdb>;
+impl Req for PeekReq {
+    type Res = PeekRes;
 
-    /// Peek responses aren't committed to the event log.
-    fn commit(self, evt_log: Self::Log) -> (Self::Output, Self::Log) {
-        (Response { res: self.res }, evt_log)
+    fn evaluate(self, arvo: Kernel) -> (Self::Res, Kernel) {
+        let req = Noun::Cell(self.req.clone());
+        let (res, arvo) = arvo.evaluate(req);
+        (Self::Res { req: self.req, res }, arvo)
     }
 }
+
+impl Res for PeekRes {}
