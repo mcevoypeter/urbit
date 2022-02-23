@@ -5,7 +5,7 @@ pub mod cell;
 pub mod error;
 pub mod loobean;
 pub mod noun;
-pub mod tree;
+pub mod interpreters;
 
 /// The ? Nock operator.
 ///
