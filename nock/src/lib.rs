@@ -68,11 +68,8 @@ pub enum Noun {
 impl Clone for Noun {
     fn clone(&self) -> Self {
         match self {
-            Noun::Atom(a) => Noun::Atom(Atom(a.0)),
-            Noun::Cell(c) => Noun::Cell(Cell {
-                h: c.h.clone(),
-                t: c.t.clone(),
-            }),
+            Noun::Atom(a) => na!(a.0),
+            Noun::Cell(c) => nc!(c.h.clone(), c.t.clone()),
         }
     }
 }
@@ -103,26 +100,48 @@ impl fmt::Display for Noun {
 }
 
 impl Noun {
-    #[allow(dead_code)]
     pub fn new_atom(v: u64) -> Self {
-        Noun::Atom(Atom(v))
+        Noun::Atom(a!(v))
     }
 
-    #[allow(dead_code)]
     pub fn new_cell(h: Box<Self>, t: Box<Self>) -> Self {
-        Noun::Cell(Cell { h, t })
+        Noun::Cell(c!(h, t))
     }
 
     fn from_loobean(l: Loobean) -> Self {
         match l {
-            Loobean::Yes => Noun::Atom(Atom(0)),
-            Loobean::No => Noun::Atom(Atom(1)),
+            Loobean::Yes => Noun::new_atom(0),
+            Loobean::No => Noun::new_atom(1),
         }
     }
 
     pub fn into_box(self) -> Box<Self> {
         Box::new(self)
     }
+}
+
+/// Noun::new_atom($v)
+#[macro_export]
+macro_rules! na {
+    ($v:expr) => {
+        Noun::new_atom($v)
+    };
+}
+
+/// Noun::new_cell($h, $t)
+#[macro_export]
+macro_rules! nc {
+    ($h:expr, $t:expr) => {
+        Noun::new_cell($h, $t)
+    };
+}
+
+/// Box::new($e)
+#[macro_export]
+macro_rules! b {
+    ($e:expr) => {
+        Box::new($e)
+    };
 }
 
 /// An unsigned integer.
@@ -133,6 +152,14 @@ impl Atom {
     pub fn new(v: u64) -> Self {
         Atom(v)
     }
+}
+
+/// Atom::new($v)
+#[macro_export]
+macro_rules! a {
+    ($v:expr) => {
+        Atom::new($v)
+    };
 }
 
 /// A pair of heap-allocated nouns.
@@ -175,6 +202,14 @@ impl Cell {
     pub fn tail(&self) -> &Box<Noun> {
         &self.h
     }
+}
+
+/// Cell::new($h, $t)
+#[macro_export]
+macro_rules! c {
+    ($h:expr, $t:expr) => {
+        Cell::new($h, $t)
+    };
 }
 
 /// A Nock-specific boolean where 0 is yes/true and 1 is no/false.
@@ -223,7 +258,7 @@ mod tests {
     fn clone_atom() {
         // Clone 777.
         {
-            let a = Atom(777);
+            let a = a!(777);
             assert_eq!(a, a.clone());
         }
     }
@@ -232,7 +267,7 @@ mod tests {
     fn clone_cell() {
         // Clone [8 808].
         {
-            let c = Cell::new(Box::new(Noun::new_atom(8)), Box::new(Noun::new_atom(808)));
+            let c = c!(b!(na!(8)), b!(na!(808)));
             assert_eq!(c, c.clone());
         }
     }
@@ -241,19 +276,13 @@ mod tests {
     fn clone_noun() {
         // Clone 101010.
         {
-            let noun = Noun::Atom(Atom(101010));
+            let noun = na!(101010);
             assert_eq!(noun, noun.clone());
         }
 
         // Clone [300 [400 500]].
         {
-            let noun = Noun::new_cell(
-                Box::new(Noun::new_atom(300)),
-                Box::new(Noun::new_cell(
-                    Box::new(Noun::new_atom(400)),
-                    Box::new(Noun::new_atom(500)),
-                )),
-            );
+            let noun = nc!(b!(na!(300)), b!(nc!(b!(na!(400)), b!(na!(500)))));
             assert_eq!(noun, noun.clone());
         }
     }
@@ -262,57 +291,27 @@ mod tests {
     fn partialeq_cell() {
         // [71 109] == [71 109]
         {
-            assert_eq!(
-                Cell::new(Box::new(Noun::new_atom(71)), Box::new(Noun::new_atom(109))),
-                Cell::new(Box::new(Noun::new_atom(71)), Box::new(Noun::new_atom(109)))
-            );
+            assert_eq!(c!(b!(na!(71)), b!(na!(109))), c!(b!(na!(71)), b!(na!(109))));
         }
 
         // [71 109] != [109 71]
         {
-            assert_ne!(
-                Cell::new(Box::new(Noun::new_atom(71)), Box::new(Noun::new_atom(109))),
-                Cell::new(Box::new(Noun::new_atom(109)), Box::new(Noun::new_atom(71)))
-            );
+            assert_ne!(c!(b!(na!(71)), b!(na!(109))), c!(b!(na!(109)), b!(na!(71))));
         }
 
         // [11 [12 13]] == [11 [12 13]]
         {
             assert_eq!(
-                Noun::new_cell(
-                    Box::new(Noun::new_atom(11)),
-                    Box::new(Noun::new_cell(
-                        Box::new(Noun::new_atom(12)),
-                        Box::new(Noun::new_atom(13))
-                    ))
-                ),
-                Noun::new_cell(
-                    Box::new(Noun::new_atom(11)),
-                    Box::new(Noun::new_cell(
-                        Box::new(Noun::new_atom(12)),
-                        Box::new(Noun::new_atom(13))
-                    ))
-                )
+                nc!(b!(na!(11)), b!(nc!(b!(na!(12)), b!(na!(13))))),
+                nc!(b!(na!(11)), b!(nc!(b!(na!(12)), b!(na!(13)))))
             );
         }
 
         // [11 [12 13]] != [11 [13 12]]
         {
             assert_ne!(
-                Noun::new_cell(
-                    Box::new(Noun::new_atom(11)),
-                    Box::new(Noun::new_cell(
-                        Box::new(Noun::new_atom(12)),
-                        Box::new(Noun::new_atom(13))
-                    ))
-                ),
-                Noun::new_cell(
-                    Box::new(Noun::new_atom(11)),
-                    Box::new(Noun::new_cell(
-                        Box::new(Noun::new_atom(13)),
-                        Box::new(Noun::new_atom(12))
-                    ))
-                )
+                nc!(b!(na!(11)), b!(nc!(b!(na!(12)), b!(na!(13))))),
+                nc!(b!(na!(11)), b!(nc!(b!(na!(13)), b!(na!(12)))))
             );
         }
     }
@@ -321,67 +320,37 @@ mod tests {
     fn partialeq_noun() {
         // 500 == 500
         {
-            assert_eq!(Atom(500), Atom(500));
+            assert_eq!(a!(500), a!(500));
         }
 
         // 499 != 501
         {
-            assert_ne!(Atom(499), Atom(501));
+            assert_ne!(a!(499), a!(501));
         }
 
         // [0 5] == [0 5]
         {
-            assert_eq!(
-                Noun::new_cell(Box::new(Noun::new_atom(0)), Box::new(Noun::new_atom(5))),
-                Noun::new_cell(Box::new(Noun::new_atom(0)), Box::new(Noun::new_atom(5)))
-            );
+            assert_eq!(nc!(b!(na!(0)), b!(na!(5))), nc!(b!(na!(0)), b!(na!(5))));
         }
 
         // [0 0] == [0 5]
         {
-            assert_ne!(
-                Noun::new_cell(Box::new(Noun::new_atom(0)), Box::new(Noun::new_atom(0))),
-                Noun::new_cell(Box::new(Noun::new_atom(0)), Box::new(Noun::new_atom(5)))
-            );
+            assert_ne!(nc!(b!(na!(0)), b!(na!(0))), nc!(b!(na!(0)), b!(na!(5))));
         }
 
         // [[44 22] 88] == [[44 22] 88]
         {
             assert_eq!(
-                Noun::new_cell(
-                    Box::new(Noun::new_cell(
-                        Box::new(Noun::new_atom(44)),
-                        Box::new(Noun::new_atom(22))
-                    )),
-                    Box::new(Noun::new_atom(88))
-                ),
-                Noun::new_cell(
-                    Box::new(Noun::new_cell(
-                        Box::new(Noun::new_atom(44)),
-                        Box::new(Noun::new_atom(22))
-                    )),
-                    Box::new(Noun::new_atom(88))
-                )
+                nc!(b!(nc!(b!(na!(44)), b!(na!(22)))), b!(na!(88))),
+                nc!(b!(nc!(b!(na!(44)), b!(na!(22)))), b!(na!(88)))
             );
         }
 
         // [[44 22] 88] != [44 [22 88]]
         {
             assert_ne!(
-                Noun::new_cell(
-                    Box::new(Noun::new_cell(
-                        Box::new(Noun::new_atom(44)),
-                        Box::new(Noun::new_atom(22))
-                    )),
-                    Box::new(Noun::new_atom(88))
-                ),
-                Noun::new_cell(
-                    Box::new(Noun::new_atom(44)),
-                    Box::new(Noun::new_cell(
-                        Box::new(Noun::new_atom(22)),
-                        Box::new(Noun::new_atom(88))
-                    )),
-                )
+                nc!(b!(nc!(b!(na!(44)), b!(na!(22)))), b!(na!(88))),
+                nc!(b!(na!(44)), b!(nc!(b!(na!(22)), b!(na!(88)))))
             );
         }
     }
