@@ -1,5 +1,7 @@
+use crate::atom::Atom;
 use std::{error, fmt};
 
+pub mod atom;
 pub mod tree;
 
 /// The ? Nock operator.
@@ -141,24 +143,6 @@ macro_rules! nc {
 macro_rules! b {
     ($e:expr) => {
         Box::new($e)
-    };
-}
-
-/// An unsigned integer.
-#[derive(Clone, Debug, PartialEq)]
-pub struct Atom(u64);
-
-impl Atom {
-    pub fn new(v: u64) -> Self {
-        Atom(v)
-    }
-}
-
-/// Atom::new($v)
-#[macro_export]
-macro_rules! a {
-    ($v:expr) => {
-        Atom::new($v)
     };
 }
 
