@@ -41,7 +41,7 @@ macro_rules! c {
 macro_rules! ch {
     ($c:expr) => {
         $c.h
-    }
+    };
 }
 
 /// Get the tail of a cell.
@@ -49,7 +49,7 @@ macro_rules! ch {
 macro_rules! ct {
     ($c:expr) => {
         $c.t
-    }
+    };
 }
 
 #[cfg(test)]

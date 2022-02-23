@@ -2,15 +2,15 @@ use super::*;
 
 impl Fas for Cell {
     fn fas(self) -> Result<Noun, Error> {
-        if let Noun::Atom(h) = *self.h {
+        if let Noun::Atom(h) = *ch!(self) {
             match av!(h) {
                 0 => Err(Error {
                     msg: "/[0 a] cannot be evaluated".to_string(),
                 }),
-                1 => Ok(*self.t),
+                1 => Ok(*ct!(self)),
                 2 => {
-                    if let Noun::Cell(t) = *self.t {
-                        Ok(*t.h)
+                    if let Noun::Cell(t) = *ct!(self) {
+                        Ok(*ch!(t))
                     } else {
                         Err(Error {
                             msg: "/[2 a] cannot be evaluated when a is an atom".to_string(),
@@ -18,15 +18,15 @@ impl Fas for Cell {
                     }
                 }
                 3 => {
-                    if let Noun::Cell(t) = *self.t {
-                        Ok(*t.t)
+                    if let Noun::Cell(t) = *ct!(self) {
+                        Ok(*ct!(t))
                     } else {
                         Err(Error {
                             msg: "/[3 a] cannot be evaluated when a is an atom".to_string(),
                         })
                     }
                 }
-                n => c!(b!(na!(2 + n % 2)), b!(c!(b!(na!(n / 2)), self.t).fas()?)).fas(),
+                n => c!(b!(na!(2 + n % 2)), b!(c!(b!(na!(n / 2)), ct!(self)).fas()?)).fas(),
             }
         } else {
             Err(Error {
@@ -38,25 +38,25 @@ impl Fas for Cell {
 
 impl Hax for Cell {
     fn hax(self) -> Result<Noun, Error> {
-        if let (Noun::Atom(h), Noun::Cell(t)) = (*self.h, *self.t) {
+        if let (Noun::Atom(h), Noun::Cell(t)) = (*ch!(self), *ct!(self)) {
             match h {
                 Atom(0) => Err(Error {
                     msg: "#[0 a b] cannot be evaluated".to_string(),
                 }),
-                Atom(1) => Ok(*t.h),
+                Atom(1) => Ok(*ch!(t)),
                 Atom(n) if 0 == n % 2 => c!(
                     b!(na!(n / 2)),
                     b!(nc!(
-                        b!(nc!(t.h, b!(c!(b!(na!(n + 1)), t.t.clone()).fas()?))),
-                        t.t
+                        b!(nc!(ch!(t), b!(c!(b!(na!(n + 1)), ct!(t).clone()).fas()?))),
+                        ct!(t)
                     ))
                 )
                 .hax(),
                 Atom(n) => c!(
                     b!(na!(n / 2)),
                     b!(nc!(
-                        b!(nc!(b!(c!(b!(na!(n - 1)), t.t.clone()).fas()?), t.h)),
-                        t.t
+                        b!(nc!(b!(c!(b!(na!(n - 1)), ct!(t).clone()).fas()?), ch!(t))),
+                        ct!(t)
                     ))
                 )
                 .hax(),
@@ -71,15 +71,15 @@ impl Hax for Cell {
 
 impl Tar for Cell {
     fn tar(self) -> Result<Noun, Error> {
-        if let Noun::Cell(t) = *self.t {
-            match *t.h {
-                Noun::Atom(Atom(0)) => c!(t.t, self.h).fas(),
-                Noun::Atom(Atom(1)) => Ok(*t.t),
+        if let Noun::Cell(t) = *ct!(self) {
+            match *ch!(t) {
+                Noun::Atom(Atom(0)) => c!(ct!(t), ch!(self)).fas(),
+                Noun::Atom(Atom(1)) => Ok(*ct!(t)),
                 Noun::Atom(Atom(2)) => {
-                    if let Noun::Cell(tt) = *t.t {
+                    if let Noun::Cell(tt) = *ct!(t) {
                         c!(
-                            b!(c!(self.h.clone(), tt.h).tar()?),
-                            b!(c!(self.h, tt.t).tar()?)
+                            b!(c!(ch!(self).clone(), ch!(tt)).tar()?),
+                            b!(c!(ch!(self), ct!(tt)).tar()?)
                         )
                         .tar()
                     } else {
@@ -88,12 +88,12 @@ impl Tar for Cell {
                         })
                     }
                 }
-                Noun::Atom(Atom(3)) => match c!(self.h, t.t).tar()? {
+                Noun::Atom(Atom(3)) => match c!(ch!(self), ct!(t)).tar()? {
                     Noun::Atom(a) => Ok(Noun::from_loobean(a.wut())),
                     Noun::Cell(c) => Ok(Noun::from_loobean(c.wut())),
                 },
                 Noun::Atom(Atom(4)) => {
-                    if let Noun::Atom(a) = c!(self.h, t.t).tar()? {
+                    if let Noun::Atom(a) = c!(ch!(self), ct!(t)).tar()? {
                         Ok(Noun::Atom(a.lus()))
                     } else {
                         Err(Error {
@@ -102,11 +102,11 @@ impl Tar for Cell {
                     }
                 }
                 Noun::Atom(Atom(5)) => {
-                    if let Noun::Cell(tt) = *t.t {
+                    if let Noun::Cell(tt) = *ct!(t) {
                         Ok(Noun::from_loobean(
                             c!(
-                                b!(c!(self.h.clone(), tt.h).tar()?),
-                                b!(c!(self.h, tt.t).tar()?)
+                                b!(c!(ch!(self).clone(), ch!(tt)).tar()?),
+                                b!(c!(ch!(self), ct!(tt)).tar()?)
                             )
                             .tis(),
                         ))
@@ -117,12 +117,12 @@ impl Tar for Cell {
                     }
                 }
                 Noun::Atom(Atom(6)) => {
-                    if let Noun::Cell(tt) = *t.t {
-                        if let Noun::Cell(ttt) = *tt.t {
+                    if let Noun::Cell(tt) = *ct!(t) {
+                        if let Noun::Cell(ttt) = *ct!(tt) {
                             c!(
-                                self.h.clone(),
+                                ch!(self).clone(),
                                 b!(c!(
-                                    b!(nc!(ttt.h, ttt.t)),
+                                    b!(nc!(ch!(ttt), ct!(ttt))),
                                     b!(nc!(
                                         b!(na!(0)),
                                         b!(c!(
@@ -130,8 +130,11 @@ impl Tar for Cell {
                                             b!(nc!(
                                                 b!(na!(0)),
                                                 b!(c!(
-                                                    self.h,
-                                                    b!(nc!(b!(na!(4)), b!(nc!(b!(na!(4)), tt.h))))
+                                                    ch!(self),
+                                                    b!(nc!(
+                                                        b!(na!(4)),
+                                                        b!(nc!(b!(na!(4)), ch!(tt)))
+                                                    ))
                                                 )
                                                 .tar()?)
                                             ))
@@ -154,8 +157,8 @@ impl Tar for Cell {
                     }
                 }
                 Noun::Atom(Atom(7)) => {
-                    if let Noun::Cell(tt) = *t.t {
-                        c!(b!(c!(self.h, tt.h).tar()?), tt.t).tar()
+                    if let Noun::Cell(tt) = *ct!(t) {
+                        c!(b!(c!(ch!(self), ch!(tt)).tar()?), ct!(tt)).tar()
                     } else {
                         Err(Error {
                             msg: "*[a 7 b] cannot be evaluated when b is an atom".to_string(),
@@ -163,8 +166,12 @@ impl Tar for Cell {
                     }
                 }
                 Noun::Atom(Atom(8)) => {
-                    if let Noun::Cell(tt) = *t.t {
-                        c!(b!(nc!(b!(c!(self.h.clone(), tt.h).tar()?), self.h)), tt.t).tar()
+                    if let Noun::Cell(tt) = *ct!(t) {
+                        c!(
+                            b!(nc!(b!(c!(ch!(self).clone(), ch!(tt)).tar()?), ch!(self))),
+                            ct!(tt)
+                        )
+                        .tar()
                     } else {
                         Err(Error {
                             msg: "*[a 8 b] cannot be evaluated when b is an atom".to_string(),
@@ -172,14 +179,14 @@ impl Tar for Cell {
                     }
                 }
                 Noun::Atom(Atom(9)) => {
-                    if let Noun::Cell(tt) = *t.t {
+                    if let Noun::Cell(tt) = *ct!(t) {
                         c!(
-                            b!(c!(self.h, tt.t).tar()?),
+                            b!(c!(ch!(self), ct!(tt)).tar()?),
                             b!(nc!(
                                 b!(na!(2)),
                                 b!(nc!(
                                     b!(nc!(b!(na!(0)), b!(na!(1)))),
-                                    b!(nc!(b!(na!(0)), tt.h))
+                                    b!(nc!(b!(na!(0)), ch!(tt)))
                                 ))
                             ))
                         )
@@ -191,13 +198,13 @@ impl Tar for Cell {
                     }
                 }
                 Noun::Atom(Atom(10)) => {
-                    if let Noun::Cell(tt) = *t.t {
-                        if let Noun::Cell(tth) = *tt.h {
+                    if let Noun::Cell(tt) = *ct!(t) {
+                        if let Noun::Cell(tth) = *ch!(tt) {
                             c!(
-                                tth.h,
+                                ch!(tth),
                                 b!(nc!(
-                                    b!(c!(self.h.clone(), tth.t).tar()?),
-                                    b!(c!(self.h, tt.t).tar()?)
+                                    b!(c!(ch!(self).clone(), ct!(tth)).tar()?),
+                                    b!(c!(ch!(self), ct!(tt)).tar()?)
                                 ))
                             )
                             .hax()
@@ -214,13 +221,13 @@ impl Tar for Cell {
                     }
                 }
                 Noun::Atom(Atom(11)) => {
-                    if let Noun::Cell(tt) = *t.t {
-                        match *tt.h {
-                            Noun::Atom(_) => c!(self.h, tt.t).tar(),
+                    if let Noun::Cell(tt) = *ct!(t) {
+                        match *ch!(tt) {
+                            Noun::Atom(_) => c!(ch!(self), ct!(tt)).tar(),
                             Noun::Cell(c) => c!(
                                 b!(nc!(
-                                    b!(c!(self.h.clone(), c.t).tar()?),
-                                    b!(c!(self.h, tt.t).tar()?)
+                                    b!(c!(ch!(self).clone(), ct!(c)).tar()?),
+                                    b!(c!(ch!(self), ct!(tt)).tar()?)
                                 )),
                                 b!(nc!(b!(na!(0)), b!(na!(3))))
                             )
@@ -236,8 +243,8 @@ impl Tar for Cell {
                     msg: "unsupported opcode".to_string(),
                 }),
                 Noun::Cell(th) => Ok(nc!(
-                    b!(c!(self.h.clone(), b!(Noun::Cell(th))).tar()?),
-                    b!(c!(self.h, t.t).tar()?)
+                    b!(c!(ch!(self).clone(), b!(Noun::Cell(th))).tar()?),
+                    b!(c!(ch!(self), ct!(t)).tar()?)
                 )),
             }
         } else {

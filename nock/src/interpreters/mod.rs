@@ -30,7 +30,7 @@ impl Wut for Cell {
 
 impl Tis for Cell {
     fn tis(&self) -> Loobean {
-        Loobean::from_boolean(self.h == self.t)
+        Loobean::from_boolean(ch!(self) == ct!(self))
     }
 }
 

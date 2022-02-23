@@ -1,4 +1,4 @@
-use crate::{a, atom::Atom, c, ch, ct, cell::Cell, loobean::Loobean, na, nc};
+use crate::{a, atom::Atom, c, cell::Cell, ch, ct, loobean::Loobean, na, nc};
 use std::fmt;
 
 /// An atom or a cell.
@@ -36,10 +36,10 @@ impl fmt::Display for Noun {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Noun::Atom(a) => {
-                write!(f, "{}", a.0)
+                write!(f, "{}", av!(a))
             }
             Noun::Cell(ref c) => {
-                write!(f, "[{} {}]", c.h, c.t)
+                write!(f, "[{} {}]", ch!(c), ct!(c))
             }
         }
     }
