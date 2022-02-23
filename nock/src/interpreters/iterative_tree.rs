@@ -6,20 +6,14 @@ impl Fas for Cell {
         loop {
             if let Noun::Atom(h) = *ch!(s) {
                 match h {
-                    Atom::Direct(0) => {
-                        break Err(Error {
-                            msg: "/[0 a] cannot be evaluated".to_string(),
-                        })
-                    }
+                    Atom::Direct(0) => break Err(bad_literal!("/[0 a]", 2)),
                     Atom::Direct(1) => break Ok(*ct!(s)),
                     Atom::Direct(2) => {
                         break {
                             if let Noun::Cell(t) = *ct!(s) {
                                 Ok(*ch!(t))
                             } else {
-                                Err(Error {
-                                    msg: "/[2 a] cannot be evaluated when a is an atom".to_string(),
-                                })
+                                Err(unexpected_atom!("/[2 a]", 2))
                             }
                         }
                     }
@@ -28,26 +22,17 @@ impl Fas for Cell {
                             if let Noun::Cell(t) = *ct!(s) {
                                 Ok(*ct!(t))
                             } else {
-                                Err(Error {
-                                    msg: "/[3 a] cannot be evaluated when a is an atom".to_string(),
-                                })
+                                Err(unexpected_atom!("/[3 a]", 2))
                             }
                         }
                     }
                     Atom::Direct(n) => {
                         s = c!(b!(na!(2 + n % 2)), b!(c!(b!(na!(n / 2)), ct!(s)).fas()?))
                     }
-                    Atom::Indirect(_) => {
-                        break Err(Error {
-                            msg: "/[a b] cannot be evaluated when a is an indirect atom"
-                                .to_string(),
-                        });
-                    }
+                    Atom::Indirect(_) => break Err(unexpected_iatom!("/[a b]", 2)),
                 }
             } else {
-                break Err(Error {
-                    msg: "/[a b] cannot be evaluated when a is a cell".to_string(),
-                });
+                break Err(unexpected_cell!("/[a b]", 2));
             }
         }
     }
@@ -57,44 +42,36 @@ impl Hax for Cell {
     fn hax(self) -> Result<Noun, Error> {
         let mut s = self;
         loop {
-            if let (Noun::Atom(h), Noun::Cell(t)) = (*ch!(s), *ct!(s)) {
-                match h {
-                    Atom::Direct(0) => {
-                        break Err(Error {
-                            msg: "#[0 a b] cannot be evaluated".to_string(),
-                        })
+            if let Noun::Atom(h) = *ch!(s) {
+                if let Noun::Cell(t) = *ct!(s) {
+                    match h {
+                        Atom::Direct(0) => break Err(bad_literal!("#[0 a b]", 2)),
+                        Atom::Direct(1) => break Ok(*ch!(t)),
+                        Atom::Direct(n) if 0 == n % 2 => {
+                            s = c!(
+                                b!(na!(n / 2)),
+                                b!(nc!(
+                                    b!(nc!(ch!(t), b!(c!(b!(na!(n + 1)), ct!(t).clone()).fas()?))),
+                                    ct!(t)
+                                ))
+                            )
+                        }
+                        Atom::Direct(n) => {
+                            s = c!(
+                                b!(na!(n / 2)),
+                                b!(nc!(
+                                    b!(nc!(b!(c!(b!(na!(n - 1)), ct!(t).clone()).fas()?), ch!(t))),
+                                    ct!(t)
+                                ))
+                            )
+                        }
+                        Atom::Indirect(_) => break Err(unexpected_iatom!("#[a b]", 2)),
                     }
-                    Atom::Direct(1) => break Ok(*ch!(t)),
-                    Atom::Direct(n) if 0 == n % 2 => {
-                        s = c!(
-                            b!(na!(n / 2)),
-                            b!(nc!(
-                                b!(nc!(ch!(t), b!(c!(b!(na!(n + 1)), ct!(t).clone()).fas()?))),
-                                ct!(t)
-                            ))
-                        )
-                    }
-                    Atom::Direct(n) => {
-                        s = c!(
-                            b!(na!(n / 2)),
-                            b!(nc!(
-                                b!(nc!(b!(c!(b!(na!(n - 1)), ct!(t).clone()).fas()?), ch!(t))),
-                                ct!(t)
-                            ))
-                        )
-                    }
-                    Atom::Indirect(_) => {
-                        break Err(Error {
-                            msg: "#[a b] cannot be evaluated when a is an indirect atom"
-                                .to_string(),
-                        });
-                    }
+                } else {
+                    break Err(unexpected_atom!("#[a b]", 3));
                 }
             } else {
-                break Err(Error {
-                    msg: "#[a b] cannot be evaluated when a is a cell and/or b is an atom"
-                        .to_string(),
-                });
+                break Err(unexpected_cell!("#[a b]", 2));
             }
         }
     }
@@ -116,10 +93,7 @@ impl Tar for Cell {
                                     b!(c!(ch!(s), ct!(tt)).tar()?)
                                 )
                             } else {
-                                break Err(Error {
-                                    msg: "*[a 2 b] cannot be evaluated when b is an atom"
-                                        .to_string(),
-                                });
+                                break Err(unexpected_atom!("*[a 2 b]", 7));
                             }
                         }
                         Atom::Direct(3) => {
@@ -135,9 +109,7 @@ impl Tar for Cell {
                                 if let Noun::Atom(a) = c!(ch!(s), ct!(t)).tar()? {
                                     Ok(Noun::Atom(a.lus()))
                                 } else {
-                                    Err(Error {
-                                        msg: "Cannot apply the + operator to a cell".to_string(),
-                                    })
+                                    Err(unexpected_cell!("+a", 1))
                                 }
                             }
                         }
@@ -152,10 +124,7 @@ impl Tar for Cell {
                                         .tis(),
                                     ))
                                 } else {
-                                    Err(Error {
-                                        msg: "*[a 5 b] cannot be evaluated when b is an atom"
-                                            .to_string(),
-                                    })
+                                    Err(unexpected_atom!("*[a 5 b]", 7))
                                 }
                             }
                         }
@@ -188,26 +157,17 @@ impl Tar for Cell {
                                         .tar()?)
                                     )
                                 } else {
-                                    break Err(Error {
-                                        msg: "*[a 6 b c] cannot be evaluated when c is an atom"
-                                            .to_string(),
-                                    });
+                                    break Err(unexpected_atom!("*[a 6 b c]", 15));
                                 }
                             } else {
-                                break Err(Error {
-                                    msg: "*[a 6 b] cannot be evaluated when b is an atom"
-                                        .to_string(),
-                                });
+                                break Err(unexpected_atom!("*[a 6 b]", 7));
                             }
                         }
                         Atom::Direct(7) => {
                             if let Noun::Cell(tt) = *ct!(t) {
                                 s = c!(b!(c!(ch!(s), ch!(tt)).tar()?), ct!(tt))
                             } else {
-                                break Err(Error {
-                                    msg: "*[a 7 b] cannot be evaluated when b is an atom"
-                                        .to_string(),
-                                });
+                                break Err(unexpected_atom!("*[a 7 b]", 7));
                             }
                         }
                         Atom::Direct(8) => {
@@ -217,10 +177,7 @@ impl Tar for Cell {
                                     ct!(tt)
                                 )
                             } else {
-                                break Err(Error {
-                                    msg: "*[a 8 b] cannot be evaluated when b is an atom"
-                                        .to_string(),
-                                });
+                                break Err(unexpected_atom!("*[a 8 b]", 7));
                             }
                         }
                         Atom::Direct(9) => {
@@ -236,10 +193,7 @@ impl Tar for Cell {
                                     ))
                                 )
                             } else {
-                                break Err(Error {
-                                    msg: "*[a 9 b] cannot be evaluated when b is an atom"
-                                        .to_string(),
-                                });
+                                break Err(unexpected_atom!("*[a 9 b]", 7));
                             }
                         }
                         Atom::Direct(10) => {
@@ -254,16 +208,10 @@ impl Tar for Cell {
                                     )
                                     .hax()
                                 } else {
-                                    Err(Error {
-                                        msg: "*[a 10 b c] cannot be evaluated when b is an atom"
-                                            .to_string(),
-                                    })
+                                    Err(unexpected_atom!("*[a 10 b c]", 14))
                                 }
                             } else {
-                                Err(Error {
-                                    msg: "*[a 10 b] cannot be evaluated when b is an atom"
-                                        .to_string(),
-                                })
+                                Err(unexpected_atom!("*[a 10 b]", 7))
                             }
                         }
                         Atom::Direct(11) => {
@@ -281,17 +229,11 @@ impl Tar for Cell {
                                     }
                                 }
                             } else {
-                                break Err(Error {
-                                    msg: "*[a 11 b] cannot be evaluated when b is an atom"
-                                        .to_string(),
-                                });
+                                break Err(unexpected_atom!("*[a 11 b]", 7));
                             }
                         }
-                        _ => {
-                            break Err(Error {
-                                msg: "unsupported opcode".to_string(),
-                            })
-                        }
+                        Atom::Direct(n) => break Err(bad_literal!(format!("*[a {} b]", n), 6)),
+                        Atom::Indirect(_) => break Err(unexpected_iatom!("*[a b c]", 6)),
                     },
                     Noun::Cell(th) => {
                         break Ok(nc!(
@@ -301,9 +243,7 @@ impl Tar for Cell {
                     }
                 }
             } else {
-                break Err(Error {
-                    msg: "*[a b] cannot be evaluated when b is an atom".to_string(),
-                });
+                break Err(unexpected_atom!("*[a b]", 3));
             }
         }
     }

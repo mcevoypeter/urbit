@@ -52,7 +52,7 @@ mod tests {
                     assert_eq!(nc!(b!(na!(1)), b!(na!(0))), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -72,7 +72,7 @@ mod tests {
                     assert_eq!(nc!(b!(na!(0)), b!(na!(42))), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -138,20 +138,21 @@ mod tests {
                     assert_eq!(na!(41), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
 
         // *[107 decrement increment] -> [106 108]
-        // TODO: resolve the stack overflow that occurs when this test is run.
+        // Note: this test overflows the stack when run using the interpreter defined in
+        // recursive_tree.rs.
         {
             match c!(b!(na!(107)), b!(nc!(decrement.clone(), increment.clone()))).tar() {
                 Ok(res) => {
                     assert_eq!(nc!(b!(na!(106)), b!(na!(108))), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -167,7 +168,7 @@ mod tests {
                     assert_eq!(*t, res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -180,7 +181,7 @@ mod tests {
                     assert_eq!(*th, res)
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -210,7 +211,7 @@ mod tests {
                     assert_eq!(*tt, res)
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -228,7 +229,7 @@ mod tests {
                     assert_eq!(*tht, res)
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -246,7 +247,7 @@ mod tests {
                     assert!(*tth == res)
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -279,7 +280,7 @@ mod tests {
                     assert_eq!(*th, res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -298,7 +299,7 @@ mod tests {
                     assert_eq!(nc!(th, ttt), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -317,7 +318,7 @@ mod tests {
                     assert_eq!(nc!(tth, th), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -340,7 +341,7 @@ mod tests {
                     assert_eq!(nc!(b!(nc!(th, ttht)), ttt), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -363,7 +364,7 @@ mod tests {
                     assert_eq!(nc!(b!(nc!(tthh, th)), ttt), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -425,7 +426,7 @@ mod tests {
                     assert_eq!(*htt, res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -438,7 +439,7 @@ mod tests {
                     assert_eq!(*tt, res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -462,7 +463,7 @@ mod tests {
                     assert_eq!(*ttttt, res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -479,7 +480,7 @@ mod tests {
                     assert_eq!(na!(0), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -496,7 +497,7 @@ mod tests {
                     assert_eq!(na!(58), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -519,7 +520,7 @@ mod tests {
                     assert_eq!(na!(1), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -545,7 +546,7 @@ mod tests {
                     assert_eq!(na!(43), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -571,7 +572,7 @@ mod tests {
                     assert_eq!(na!(233), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -594,7 +595,7 @@ mod tests {
                     assert_eq!(na!(44), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -617,7 +618,7 @@ mod tests {
                     assert_eq!(nc!(b!(na!(43)), b!(na!(42))), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -640,7 +641,7 @@ mod tests {
                     assert_eq!(na!(43), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -660,7 +661,7 @@ mod tests {
                     assert_eq!(nc!(b!(nc!(b!(na!(0)), b!(na!(1)))), b!(na!(137))), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -680,7 +681,7 @@ mod tests {
                     assert_eq!(nc!(b!(na!(0)), b!(na!(2))), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -700,7 +701,7 @@ mod tests {
                     assert_eq!(na!(137), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
@@ -723,7 +724,7 @@ mod tests {
                     assert_eq!(na!(16), res);
                 }
                 Err(err) => {
-                    assert!(false, "Unexpected failure: {}.", err.msg);
+                    assert!(false, "Unexpected failure: {}.", err);
                 }
             }
         }
