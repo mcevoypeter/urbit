@@ -100,8 +100,7 @@ impl Tar for Cell {
                             s = c!(b!(c!(s.h.clone(), tt.h).tar()?), b!(c!(s.h, tt.t).tar()?))
                         } else {
                             break Err(Error {
-                                msg: "*[a 2 b] cannot be evaluated when b is an atom"
-                                    .to_string(),
+                                msg: "*[a 2 b] cannot be evaluated when b is an atom".to_string(),
                             });
                         }
                     }
@@ -128,11 +127,8 @@ impl Tar for Cell {
                         break {
                             if let Noun::Cell(tt) = *t.t {
                                 Ok(Noun::from_loobean(
-                                    c!(
-                                        b!(c!(s.h.clone(), tt.h).tar()?),
-                                        b!(c!(s.h, tt.t).tar()?)
-                                    )
-                                    .tis(),
+                                    c!(b!(c!(s.h.clone(), tt.h).tar()?), b!(c!(s.h, tt.t).tar()?))
+                                        .tis(),
                                 ))
                             } else {
                                 Err(Error {
@@ -178,8 +174,7 @@ impl Tar for Cell {
                             }
                         } else {
                             break Err(Error {
-                                msg: "*[a 6 b] cannot be evaluated when b is an atom"
-                                    .to_string(),
+                                msg: "*[a 6 b] cannot be evaluated when b is an atom".to_string(),
                             });
                         }
                     }
@@ -188,8 +183,7 @@ impl Tar for Cell {
                             s = c!(b!(c!(s.h, tt.h).tar()?), tt.t)
                         } else {
                             break Err(Error {
-                                msg: "*[a 7 b] cannot be evaluated when b is an atom"
-                                    .to_string(),
+                                msg: "*[a 7 b] cannot be evaluated when b is an atom".to_string(),
                             });
                         }
                     }
@@ -198,8 +192,7 @@ impl Tar for Cell {
                             s = c!(b!(nc!(b!(c!(s.h.clone(), tt.h).tar()?), s.h)), tt.t)
                         } else {
                             break Err(Error {
-                                msg: "*[a 8 b] cannot be evaluated when b is an atom"
-                                    .to_string(),
+                                msg: "*[a 8 b] cannot be evaluated when b is an atom".to_string(),
                             });
                         }
                     }
@@ -217,8 +210,7 @@ impl Tar for Cell {
                             )
                         } else {
                             break Err(Error {
-                                msg: "*[a 9 b] cannot be evaluated when b is an atom"
-                                    .to_string(),
+                                msg: "*[a 9 b] cannot be evaluated when b is an atom".to_string(),
                             });
                         }
                     }
@@ -241,8 +233,7 @@ impl Tar for Cell {
                             }
                         } else {
                             Err(Error {
-                                msg: "*[a 10 b] cannot be evaluated when b is an atom"
-                                    .to_string(),
+                                msg: "*[a 10 b] cannot be evaluated when b is an atom".to_string(),
                             })
                         }
                     }
@@ -262,8 +253,7 @@ impl Tar for Cell {
                             }
                         } else {
                             break Err(Error {
-                                msg: "*[a 11 b] cannot be evaluated when b is an atom"
-                                    .to_string(),
+                                msg: "*[a 11 b] cannot be evaluated when b is an atom".to_string(),
                             });
                         }
                     }

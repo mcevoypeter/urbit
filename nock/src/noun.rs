@@ -46,18 +46,10 @@ impl fmt::Display for Noun {
 }
 
 impl Noun {
-    pub fn new_atom(v: u64) -> Self {
-        Noun::Atom(a!(v))
-    }
-
-    pub fn new_cell(h: Box<Self>, t: Box<Self>) -> Self {
-        Noun::Cell(c!(h, t))
-    }
-
     pub fn from_loobean(l: Loobean) -> Self {
         match l {
-            Loobean::Yes => Noun::new_atom(0),
-            Loobean::No => Noun::new_atom(1),
+            Loobean::Yes => na!(0),
+            Loobean::No => na!(1),
         }
     }
 
@@ -66,19 +58,19 @@ impl Noun {
     }
 }
 
-/// Noun::new_atom($v)
+/// Create a noun-wrapped atom.
 #[macro_export]
 macro_rules! na {
     ($v:expr) => {
-        Noun::new_atom($v)
+        crate::noun::Noun::Atom(a!($v))
     };
 }
 
-/// Noun::new_cell($h, $t)
+/// Create a noun-wrapped cell.
 #[macro_export]
 macro_rules! nc {
     ($h:expr, $t:expr) => {
-        Noun::new_cell($h, $t)
+        crate::noun::Noun::Cell(c!($h, $t))
     };
 }
 

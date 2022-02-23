@@ -1,11 +1,13 @@
 use crate::{atom::Atom, cell::Cell, error::Error, loobean::Loobean, noun::Noun};
 
+#[macro_use]
 pub mod atom;
+#[macro_use]
 pub mod cell;
 pub mod error;
+pub mod interpreters;
 pub mod loobean;
 pub mod noun;
-pub mod interpreters;
 
 /// The ? Nock operator.
 ///

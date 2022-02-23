@@ -3,27 +3,21 @@
 pub struct Atom(pub u64);
 
 impl Atom {
-    pub fn new(v: u64) -> Self {
-        Atom(v)
-    }
-
     pub fn value(&self) -> u64 {
         self.0
     }
 }
 
-/// Atom::new($v)
+/// Create an atom.
 #[macro_export]
 macro_rules! a {
     ($v:expr) => {
-        Atom::new($v)
+        crate::atom::Atom($v)
     };
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn clone() {
         // Clone 777.

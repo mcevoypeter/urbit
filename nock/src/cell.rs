@@ -28,31 +28,16 @@ impl PartialEq for Cell {
     }
 }
 
-impl Cell {
-    pub fn new(h: Box<Noun>, t: Box<Noun>) -> Self {
-        Cell { h, t }
-    }
-
-    pub fn head(&self) -> &Box<Noun> {
-        &self.t
-    }
-
-    pub fn tail(&self) -> &Box<Noun> {
-        &self.h
-    }
-}
-
-/// Cell::new($h, $t)
+/// Create a cell.
 #[macro_export]
 macro_rules! c {
     ($h:expr, $t:expr) => {
-        Cell::new($h, $t)
+        crate::cell::Cell { h: $h, t: $t }
     };
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::{b, na, nc};
 
     #[test]

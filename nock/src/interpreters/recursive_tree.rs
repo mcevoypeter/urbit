@@ -63,8 +63,7 @@ impl Hax for Cell {
             }
         } else {
             Err(Error {
-                msg: "#[a b] cannot be evaluated when a is cell and/or b is an atom"
-                    .to_string(),
+                msg: "#[a b] cannot be evaluated when a is cell and/or b is an atom".to_string(),
             })
         }
     }
@@ -132,10 +131,7 @@ impl Tar for Cell {
                                                 b!(na!(0)),
                                                 b!(c!(
                                                     self.h,
-                                                    b!(nc!(
-                                                        b!(na!(4)),
-                                                        b!(nc!(b!(na!(4)), tt.h))
-                                                    ))
+                                                    b!(nc!(b!(na!(4)), b!(nc!(b!(na!(4)), tt.h))))
                                                 )
                                                 .tar()?)
                                             ))
@@ -148,8 +144,7 @@ impl Tar for Cell {
                             .tar()
                         } else {
                             Err(Error {
-                                msg: "*[a 6 b c] cannot be evaluated when c is an atom"
-                                    .to_string(),
+                                msg: "*[a 6 b c] cannot be evaluated when c is an atom".to_string(),
                             })
                         }
                     } else {
@@ -252,4 +247,3 @@ impl Tar for Cell {
         }
     }
 }
-
