@@ -3,25 +3,25 @@ use crate::noun::Noun;
 /// A pair of heap-allocated nouns.
 #[derive(Debug)]
 pub struct Cell {
-    pub h: Box<Noun>,
-    pub t: Box<Noun>,
+    pub head: Box<Noun>,
+    pub tail: Box<Noun>,
 }
 
 impl Clone for Cell {
     fn clone(&self) -> Self {
         Cell {
-            h: self.h.clone(),
-            t: self.t.clone(),
+            head: self.head.clone(),
+            tail: self.tail.clone(),
         }
     }
 }
 
 impl PartialEq for Cell {
     fn eq(&self, other: &Self) -> bool {
-        if let (Noun::Atom(lh_h), Noun::Atom(rh_h)) = (&*self.h, &*other.h) {
-            lh_h == rh_h && *self.t == *other.t
-        } else if let (Noun::Cell(lh_h), Noun::Cell(rh_h)) = (&*self.h, &*other.h) {
-            Self::eq(lh_h, rh_h) && *self.t == *other.t
+        if let (Noun::Atom(lh_h), Noun::Atom(rh_h)) = (&*self.head, &*other.head) {
+            lh_h == rh_h && *self.tail == *other.tail
+        } else if let (Noun::Cell(lh_h), Noun::Cell(rh_h)) = (&*self.head, &*other.head) {
+            Self::eq(lh_h, rh_h) && *self.tail == *other.tail
         } else {
             false
         }
@@ -32,7 +32,7 @@ impl PartialEq for Cell {
 #[macro_export]
 macro_rules! c {
     ($h:expr, $t:expr) => {
-        crate::cell::Cell { h: $h, t: $t }
+        crate::cell::Cell { head: $h, tail: $t }
     };
 }
 
@@ -40,7 +40,7 @@ macro_rules! c {
 #[macro_export]
 macro_rules! ch {
     ($c:expr) => {
-        $c.h
+        $c.head
     };
 }
 
@@ -48,7 +48,7 @@ macro_rules! ch {
 #[macro_export]
 macro_rules! ct {
     ($c:expr) => {
-        $c.t
+        $c.tail
     };
 }
 
