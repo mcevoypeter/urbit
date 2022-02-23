@@ -19,3 +19,17 @@ macro_rules! a {
         Atom::new($v)
     };
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn clone() {
+        // Clone 777.
+        {
+            let a = a!(777);
+            assert_eq!(a, a.clone());
+        }
+    }
+}
