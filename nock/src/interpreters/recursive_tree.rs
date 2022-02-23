@@ -3,7 +3,7 @@ use super::*;
 impl Fas for Cell {
     fn fas(self) -> Result<Noun, Error> {
         if let Noun::Atom(h) = *self.h {
-            match h.value() {
+            match av!(h) {
                 0 => Err(Error {
                     msg: "/[0 a] cannot be evaluated".to_string(),
                 }),

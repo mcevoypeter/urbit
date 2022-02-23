@@ -36,6 +36,22 @@ macro_rules! c {
     };
 }
 
+/// Get the head of a cell.
+#[macro_export]
+macro_rules! ch {
+    ($c:expr) => {
+        $c.h
+    }
+}
+
+/// Get the tail of a cell.
+#[macro_export]
+macro_rules! ct {
+    ($c:expr) => {
+        $c.t
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::{b, na, nc};

@@ -1,4 +1,4 @@
-use crate::{a, atom::Atom, c, cell::Cell, loobean::Loobean, na, nc};
+use crate::{a, atom::Atom, c, ch, ct, cell::Cell, loobean::Loobean, na, nc};
 use std::fmt;
 
 /// An atom or a cell.
@@ -15,7 +15,7 @@ impl Clone for Noun {
     fn clone(&self) -> Self {
         match self {
             Noun::Atom(a) => na!(a.0),
-            Noun::Cell(c) => nc!(c.h.clone(), c.t.clone()),
+            Noun::Cell(c) => nc!(ch!(c).clone(), ct!(c).clone()),
         }
     }
 }

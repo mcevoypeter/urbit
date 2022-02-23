@@ -2,17 +2,18 @@
 #[derive(Clone, Debug, PartialEq)]
 pub struct Atom(pub u64);
 
-impl Atom {
-    pub fn value(&self) -> u64 {
-        self.0
-    }
-}
-
 /// Create an atom.
 #[macro_export]
 macro_rules! a {
     ($v:expr) => {
         crate::atom::Atom($v)
+    };
+}
+
+/// Get an atom's value.
+macro_rules! av {
+    ($a:expr) => {
+        $a.0
     };
 }
 

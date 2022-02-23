@@ -18,7 +18,7 @@ impl Wut for Atom {
 
 impl Lus for Atom {
     fn lus(self) -> Atom {
-        a!(1 + self.value())
+        a!(1 + av!(self))
     }
 }
 
@@ -374,7 +374,7 @@ mod tests {
         // +999 -> 1000
         {
             let a = Atom(999);
-            assert_eq!(1000, a.lus().value());
+            assert_eq!(1000, av!(a.lus()));
         }
     }
 
