@@ -2,7 +2,7 @@ use crate::{
     kernel::Kernel,
     state::{Req, Res},
 };
-use nock::{Cell, Noun};
+use nock::{cell::Cell, noun::Noun};
 
 #[allow(dead_code)]
 struct PeekReq {

@@ -1,4 +1,4 @@
-use nock::{Cell, Noun};
+use nock::{cell::Cell, noun::Noun};
 use std::path::Path;
 
 pub struct Kernel(Cell);
