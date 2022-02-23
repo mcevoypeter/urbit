@@ -373,7 +373,7 @@ mod tests {
     fn lus_atom() {
         // +999 -> 1000
         {
-            let a = Atom(999);
+            let a = a!(999);
             assert_eq!(1000, av!(a.lus()));
         }
     }
@@ -770,7 +770,7 @@ mod tests {
     fn wut_atom() {
         // ?137 -> 1
         {
-            assert_eq!(Loobean::No, Atom(137).wut());
+            assert_eq!(Loobean::No, a!(137).wut());
         }
     }
 

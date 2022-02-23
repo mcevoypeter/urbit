@@ -14,7 +14,7 @@ pub enum Noun {
 impl Clone for Noun {
     fn clone(&self) -> Self {
         match self {
-            Noun::Atom(a) => na!(a.0),
+            Noun::Atom(a) => na!(av!(*a)),
             Noun::Cell(c) => nc!(ch!(c).clone(), ct!(c).clone()),
         }
     }

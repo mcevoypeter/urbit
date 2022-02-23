@@ -1,19 +1,25 @@
 /// An unsigned integer.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Atom(pub u64);
+pub enum Atom {
+    Direct(u64),
+    Indirect(Vec<u64>),
+}
 
 /// Create an atom.
 #[macro_export]
 macro_rules! a {
     ($v:expr) => {
-        crate::atom::Atom($v)
+        crate::atom::Atom::Direct($v)
     };
 }
 
 /// Get an atom's value.
 macro_rules! av {
     ($a:expr) => {
-        $a.0
+        match $a {
+            crate::atom::Atom::Direct(v) => v,
+            crate::atom::Atom::Indirect(_) => unimplemented!(),
+        }
     };
 }
 
