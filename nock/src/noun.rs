@@ -52,10 +52,6 @@ impl Noun {
             Loobean::No => na!(1),
         }
     }
-
-    pub fn into_box(self) -> Box<Self> {
-        Box::new(self)
-    }
 }
 
 /// Create a noun-wrapped atom.

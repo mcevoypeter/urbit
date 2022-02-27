@@ -218,7 +218,7 @@ mod tests {
     fn fas_cell() {
         // /[1 [98 89]] -> [98 89]
         {
-            let t = nc!(b!(na!(98)), b!(na!(89))).into_box();
+            let t = b!(nc!(b!(na!(98)), b!(na!(89))));
             match c!(b!(na!(1)), t.clone()).fas() {
                 Ok(res) => {
                     assert_eq!(*t, res);
@@ -256,7 +256,7 @@ mod tests {
 
         // /[3 [[80 50] [19 95]]] -> [19 95]
         {
-            let tt = nc!(b!(na!(19)), b!(na!(95))).into_box();
+            let tt = b!(nc!(b!(na!(19)), b!(na!(95))));
             match c!(
                 b!(na!(3)),
                 b!(nc!(b!(nc!(b!(na!(80)), b!(na!(50)))), tt.clone()))
@@ -468,7 +468,7 @@ mod tests {
 
         // *[[[4 5] [6 14 15]] [0 7]] -> [14 15]
         {
-            let htt = nc!(b!(na!(14)), b!(na!(15))).into_box();
+            let htt = b!(nc!(b!(na!(14)), b!(na!(15))));
             match c!(
                 b!(nc!(
                     b!(nc!(b!(na!(4)), b!(na!(5)))),
@@ -489,7 +489,7 @@ mod tests {
 
         // *[42 [1 153 218]] -> [153 218]
         {
-            let tt = nc!(b!(na!(153)), b!(na!(218))).into_box();
+            let tt = b!(nc!(b!(na!(153)), b!(na!(218))));
             match c!(b!(na!(42)), b!(nc!(b!(na!(1)), tt.clone()))).tar() {
                 Ok(res) => {
                     assert_eq!(*tt, res);
@@ -502,7 +502,7 @@ mod tests {
 
         // *[77 [2 [1 42] [1 1 153 218]]] -> [153 218]
         {
-            let ttttt = nc!(b!(na!(153)), b!(na!(218))).into_box();
+            let ttttt = b!(nc!(b!(na!(153)), b!(na!(218))));
             match c!(
                 b!(na!(77)),
                 b!(nc!(
