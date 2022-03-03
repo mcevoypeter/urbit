@@ -32,7 +32,20 @@ macro_rules! av {
 }
 */
 
-/*
+/// Create a new reference-counted atom from a variadic list of u64.
+#[macro_export]
+macro_rules! a {
+    ( $( $elem:expr ),+ ) => {
+        {
+            let mut temp_vec: Vec<u64> = Vec::new();
+            $(
+                temp_vec.push($elem);
+             )*
+            crate::atom::Atom::new(temp_vec)
+        }
+    };
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
@@ -42,6 +55,11 @@ mod tests {
             let a = a!(777);
             assert_eq!(a, a.clone());
         }
+
+        // Clone a very large number.
+        {
+            let a = a![u64::MAX, u64::MAX, u64::MAX, u64::MAX];
+            assert_eq!(a, a.clone());
+        }
     }
 }
-*/
