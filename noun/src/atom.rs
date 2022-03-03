@@ -20,18 +20,6 @@ impl Atom {
     }
 }
 
-/*
-/// Get an atom's value.
-macro_rules! av {
-    ($a:expr) => {
-        match $a {
-            crate::atom::Atom::Direct(v) => v,
-            crate::atom::Atom::Indirect(_) => unimplemented!(),
-        }
-    };
-}
-*/
-
 /// Create a new reference-counted atom from a variadic list of u64.
 #[macro_export]
 macro_rules! a {
@@ -52,14 +40,37 @@ mod tests {
     fn clone() {
         // Clone 777.
         {
-            let a = a!(777);
+            let a = a![777];
             assert_eq!(a, a.clone());
         }
 
-        // Clone a very large number.
+        // Clone 0xffff_ffff_ffff_ffff_ffff_ffff_ffff_ffff.
         {
             let a = a![u64::MAX, u64::MAX, u64::MAX, u64::MAX];
             assert_eq!(a, a.clone());
+        }
+    }
+
+    #[test]
+    fn partialeq() {
+        // 500 == 500
+        {
+            assert_eq!(a![500], a![500]);
+        }
+
+        // 499 != 501
+        {
+            assert_ne!(a![499], a![501]);
+        }
+
+        // 0xffff_ffff_ffff_ffff_ffff_ffff_ffff_ffff == 0xffff_ffff_ffff_ffff_ffff_ffff_ffff_ffff
+        {
+            assert_eq!(a![u64::MAX, u64::MAX], a![u64::MAX, u64::MAX]);
+        }
+
+        // 0xffff_ffff_ffff_ffff_ffff_ffff_ffff_ffff != 0xffff_ffff_ffff_ffff_0000_0000_0000_0000
+        {
+            assert_ne!(a![u64::MAX, u64::MAX], a![u64::MAX, 0]);
         }
     }
 }

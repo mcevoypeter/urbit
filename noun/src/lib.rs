@@ -103,16 +103,6 @@ mod tests {
 
     #[test]
     fn partialeq() {
-        // 500 == 500
-        {
-            assert_eq!(a!(500), a!(500));
-        }
-
-        // 499 != 501
-        {
-            assert_ne!(a!(499), a!(501));
-        }
-
         // [0 5] == [0 5]
         {
             assert_eq!(nc!(b!(na!(0)), b!(na!(5))), nc!(b!(na!(0)), b!(na!(5))));
