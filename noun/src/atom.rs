@@ -1,4 +1,4 @@
-use std::{fmt, rc::Rc};
+use std::fmt;
 
 /// Arbitrarily large unsigned integer.
 #[derive(Clone, Debug, PartialEq)]
@@ -7,10 +7,10 @@ pub struct Atom {
 }
 
 impl Atom {
-    /// Create a new reference-counted atom.
+    /// Create a new atom.
     #[allow(dead_code)]
-    pub fn new(val: Vec<u64>) -> Rc<Self> {
-        Rc::new(Self { val })
+    pub fn new(val: Vec<u64>) -> Self {
+        Self { val }
     }
 
     /// Get the value of an atom.
@@ -33,7 +33,7 @@ impl fmt::Display for Atom {
     }
 }
 
-/// Create a new reference-counted atom from a variadic list of u64.
+/// Shorthand for Atom::new(vec![...]).
 #[macro_export]
 macro_rules! a {
     ( $( $elem:expr ),+ ) => {
@@ -41,7 +41,7 @@ macro_rules! a {
             let mut temp_vec: Vec<u64> = Vec::new();
             $(
                 temp_vec.push($elem);
-             )*
+            )*
             Atom::new(temp_vec)
         }
     };
