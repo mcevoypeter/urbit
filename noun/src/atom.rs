@@ -1,3 +1,7 @@
+use crate::{
+    hash::Mug,
+    serdes::{Cue, Jam},
+};
 use std::fmt;
 
 /// Arbitrarily large unsigned integer.
@@ -17,6 +21,24 @@ impl Atom {
     #[allow(dead_code)]
     pub fn v(&self) -> &Vec<u64> {
         &self.val
+    }
+}
+
+impl Mug for Atom {
+    fn mug(&self) -> u32 {
+        unimplemented!()
+    }
+}
+
+impl Jam for Atom {
+    fn jam(self) -> Vec<u8> {
+        unimplemented!()
+    }
+}
+
+impl Cue for Atom {
+    fn cue(_bytes: Vec<u8>) -> Self {
+        unimplemented!()
     }
 }
 

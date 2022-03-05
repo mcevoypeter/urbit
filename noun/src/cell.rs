@@ -1,4 +1,8 @@
-use crate::Noun;
+use crate::{
+    hash::Mug,
+    serdes::{Cue, Jam},
+    Noun,
+};
 use std::rc::Rc;
 
 /// Pair of nouns.
@@ -28,6 +32,24 @@ impl Cell {
     #[allow(dead_code)]
     pub fn t(&self) -> Rc<Noun> {
         Rc::clone(&self.tail)
+    }
+}
+
+impl Mug for Cell {
+    fn mug(&self) -> u32 {
+        unimplemented!()
+    }
+}
+
+impl Jam for Cell {
+    fn jam(self) -> Vec<u8> {
+        unimplemented!()
+    }
+}
+
+impl Cue for Cell {
+    fn cue(_bytes: Vec<u8>) -> Self {
+        unimplemented!()
     }
 }
 

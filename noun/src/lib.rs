@@ -1,9 +1,10 @@
-use crate::{atom::Atom, cell::Cell};
+use crate::{atom::Atom, cell::Cell, hash::Mug};
 use std::{fmt, rc::Rc};
 
-#[macro_use]
 pub mod atom;
 pub mod cell;
+pub mod hash;
+pub mod serdes;
 
 /// Atom or a cell.
 #[derive(Debug)]
@@ -23,6 +24,15 @@ impl Noun {
     #[allow(dead_code)]
     pub fn new_cell(cell: Cell) -> Rc<Noun> {
         Rc::new(Noun::Cell(cell))
+    }
+}
+
+impl Mug for Noun {
+    fn mug(&self) -> u32 {
+        match self {
+            Self::Atom(a) => a.mug(),
+            Self::Cell(c) => c.mug(),
+        }
     }
 }
 
