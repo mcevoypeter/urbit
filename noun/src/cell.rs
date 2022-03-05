@@ -11,7 +11,7 @@ pub struct Cell {
 impl Cell {
     /// Create a new cell.
     #[allow(dead_code)]
-    fn new(head: &Rc<Noun>, tail: &Rc<Noun>) -> Self {
+    pub fn new(head: &Rc<Noun>, tail: &Rc<Noun>) -> Self {
         Self {
             head: Rc::clone(head),
             tail: Rc::clone(tail),
@@ -52,35 +52,56 @@ impl PartialEq for Cell {
     }
 }
 
-/// Create a cell from a pair of &Rc<Noun>.
+/// Shorthand for Cell::new(...).
 #[macro_export]
 macro_rules! c {
-    ($h:expr, $t:expr) => {
-        Cell::new($h, $t)
+    ($head:expr, $tail:expr) => {
+        Cell::new($head, $tail)
     };
 }
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use crate::{atom::Atom, c, na, nc};
 
     #[test]
     fn clone() {
         // Clone [8 808].
-        {}
+        {
+            let c = c!(&na![8], &na![808]);
+            assert_eq!(c, c.clone());
+        }
     }
 
     #[test]
     fn partialeq() {
         // [71 109] == [71 109]
-        {}
+        {
+            let lh = c!(&na![71], &na![109]);
+            let rh = c!(&na![71], &na![109]);
+            assert_eq!(lh, rh);
+        }
 
         // [71 109] != [109 71]
-        {}
+        {
+            let lh = c!(&na![71], &na![109]);
+            let rh = c!(&na![109], &na![71]);
+            assert_ne!(lh, rh);
+        }
 
         // [11 [12 13]] == [11 [12 13]]
-        {}
+        {
+            let lh = c!(&na![11], &nc!(&na![12], &na![13]));
+            let rh = c!(&na![11], &nc!(&na![12], &na![13]));
+            assert_eq!(lh, rh);
+        }
 
         // [11 [12 13]] != [11 [13 12]]
-        {}
+        {
+            let lh = c!(&nc!(&na![11], &na![12]), &na![13]);
+            let rh = c!(&na![11], &nc!(&na![12], &na![13]));
+            assert_ne!(lh, rh);
+        }
     }
 }
