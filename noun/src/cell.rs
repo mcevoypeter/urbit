@@ -52,35 +52,13 @@ impl PartialEq for Cell {
     }
 }
 
-/*
-/// Create a cell.
+/// Create a cell from a pair of &Rc<Noun>.
 #[macro_export]
 macro_rules! c {
     ($h:expr, $t:expr) => {
-        crate::cell::Cell { head: Rc::clone($h), tail: Rc::clone($t) }
+        Cell::new($h, $t)
     };
 }
-*/
-
-/*
-/// Get the head of a cell.
-#[macro_export]
-macro_rules! ch {
-    ($c:expr) => {
-        $c.head
-    };
-}
-*/
-
-/*
-/// Get the tail of a cell.
-#[macro_export]
-macro_rules! ct {
-    ($c:expr) => {
-        $c.tail
-    };
-}
-*/
 
 /*
 #[cfg(test)]

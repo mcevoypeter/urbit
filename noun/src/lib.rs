@@ -46,34 +46,21 @@ impl fmt::Display for Noun {
     }
 }
 
-/*
-#[macro_export]
-macro_rules! b {
-    ($e:expr) => {
-        std::rc::Rc::clone($e)
-    }
-}
-*/
-
-/*
-/// Create a noun-wrapped atom.
+/// Wrap an atom in a noun.
 #[macro_export]
 macro_rules! na {
-    ($v:expr) => {
-        crate::Noun::Atom(a!($v))
+    ($atom:expr) => {
+        Noun::Atom($atom)
     };
 }
-*/
 
-/*
-/// Create a noun-wrapped cell.
+/// Wrap a cell in a noun.
 #[macro_export]
 macro_rules! nc {
-    ($h:expr, $t:expr) => {
-        crate::Noun::Cell(c!($h, $t))
+    ($cell:expr) => {
+        Noun::Cell($cell)
     };
 }
-*/
 
 /*
 #[cfg(test)]

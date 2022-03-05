@@ -42,13 +42,15 @@ macro_rules! a {
             $(
                 temp_vec.push($elem);
              )*
-            noun::atom::Atom::new(temp_vec)
+            Atom::new(temp_vec)
         }
     };
 }
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
     fn clone() {
         // Clone 777.
