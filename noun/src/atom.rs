@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{fmt, rc::Rc};
 
 /// Arbitrarily large unsigned integer.
 #[derive(Clone, Debug, PartialEq)]
@@ -9,14 +9,27 @@ pub struct Atom {
 impl Atom {
     /// Create a new reference-counted atom.
     #[allow(dead_code)]
-    fn new(val: Vec<u64>) -> Rc<Atom> {
-        Rc::new(Atom { val })
+    pub fn new(val: Vec<u64>) -> Rc<Self> {
+        Rc::new(Self { val })
     }
 
     /// Get the value of an atom.
     #[allow(dead_code)]
-    fn v(&self) -> &Vec<u64> {
+    pub fn v(&self) -> &Vec<u64> {
         &self.val
+    }
+}
+
+impl fmt::Display for Atom {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let prefix = "0x";
+        let mut string = String::from(prefix);
+        for num in self.v() {
+            let num_string = &format!("{:#016x}_", num)[prefix.len()..];
+            string += num_string;
+        }
+        string.pop(); // remove trailing _
+        write!(f, "{}", string)
     }
 }
 
@@ -29,7 +42,7 @@ macro_rules! a {
             $(
                 temp_vec.push($elem);
              )*
-            crate::atom::Atom::new(temp_vec)
+            noun::atom::Atom::new(temp_vec)
         }
     };
 }

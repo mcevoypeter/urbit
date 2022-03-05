@@ -4,15 +4,15 @@ use std::rc::Rc;
 /// Pair of nouns.
 #[derive(Debug)]
 pub struct Cell {
-    pub head: Rc<Noun>,
-    pub tail: Rc<Noun>,
+    head: Rc<Noun>,
+    tail: Rc<Noun>,
 }
 
 impl Cell {
     /// Create a new reference-counted cell.
     #[allow(dead_code)]
-    fn new(head: &Rc<Noun>, tail: &Rc<Noun>) -> Rc<Cell> {
-        Rc::new(Cell {
+    fn new(head: &Rc<Noun>, tail: &Rc<Noun>) -> Rc<Self> {
+        Rc::new(Self {
             head: Rc::clone(head),
             tail: Rc::clone(tail),
         })
@@ -20,41 +20,37 @@ impl Cell {
 
     /// Get the head of a cell.
     #[allow(dead_code)]
-    fn h(&self) -> Rc<Noun> {
+    pub fn h(&self) -> Rc<Noun> {
         Rc::clone(&self.head)
     }
 
     /// Get the tail of a cell.
     #[allow(dead_code)]
-    fn t(&self) -> Rc<Noun> {
+    pub fn t(&self) -> Rc<Noun> {
         Rc::clone(&self.tail)
     }
 }
 
-/*
 impl Clone for Cell {
     fn clone(&self) -> Self {
-        Cell {
+        Self {
             head: self.head.clone(),
             tail: self.tail.clone(),
         }
     }
 }
-*/
 
-/*
 impl PartialEq for Cell {
     fn eq(&self, other: &Self) -> bool {
-        if let (Noun::Atom(lh_h), Noun::Atom(rh_h)) = (&*self.head, &*other.head) {
-            lh_h == rh_h && *self.tail == *other.tail
-        } else if let (Noun::Cell(lh_h), Noun::Cell(rh_h)) = (&*self.head, &*other.head) {
-            Self::eq(lh_h, rh_h) && *self.tail == *other.tail
+        if let (Noun::Atom(lh), Noun::Atom(rh)) = (&*self.head, &*other.head) {
+            lh == rh && *self.tail == *other.tail
+        } else if let (Noun::Cell(lh), Noun::Cell(rh)) = (&*self.head, &*other.head) {
+            Self::eq(lh, rh) && *self.tail == *other.tail
         } else {
             false
         }
     }
 }
-*/
 
 /*
 /// Create a cell.

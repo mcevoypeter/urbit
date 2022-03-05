@@ -1,6 +1,7 @@
 use crate::{atom::Atom, cell::Cell};
-use std::rc::Rc;
+use std::{fmt, rc::Rc};
 
+#[macro_use]
 pub mod atom;
 pub mod cell;
 
@@ -11,45 +12,39 @@ pub enum Noun {
     Cell(Rc<Cell>),
 }
 
-/*
 impl Clone for Noun {
     fn clone(&self) -> Self {
         match self {
-            Noun::Atom(a) => Noun::Atom(a!(av!(*a))),
-            Noun::Cell(c) => Noun::Cell(c!(ch!(c).clone(), ct!(c).clone())),
+            Self::Atom(a) => Self::Atom(a.clone()),
+            Self::Cell(c) => Self::Cell(c.clone()),
         }
     }
 }
-*/
 
-/*
 impl PartialEq for Noun {
     fn eq(&self, other: &Self) -> bool {
-        if let (Noun::Atom(lh), Noun::Atom(rh)) = (&*self, &*other) {
+        if let (Self::Atom(lh), Self::Atom(rh)) = (&*self, &*other) {
             lh == rh
-        } else if let (Noun::Cell(lh), Noun::Cell(rh)) = (&*self, &*other) {
-            lh == rh
+        } else if let (Self::Cell(lh), Self::Cell(rh)) = (&*self, &*other) {
+            *lh == *rh
         } else {
             false
         }
     }
 }
-*/
 
-/*
 impl fmt::Display for Noun {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Noun::Atom(a) => {
-                write!(f, "{}", av!(a))
+            Self::Atom(a) => {
+                write!(f, "{}", a)
             }
-            Noun::Cell(ref c) => {
-                write!(f, "[{} {}]", ch!(c), ct!(c))
+            Self::Cell(c) => {
+                write!(f, "[{} {}]", c.h(), c.t())
             }
         }
     }
 }
-*/
 
 /*
 #[macro_export]
