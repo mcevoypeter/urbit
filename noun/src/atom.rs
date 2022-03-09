@@ -1,6 +1,7 @@
 use crate::{
     hash::Mug,
     serdes::{Cue, Jam},
+    Noun,
 };
 use std::fmt;
 
@@ -11,12 +12,6 @@ pub struct Atom {
 }
 
 impl Atom {
-    /// Create a new atom.
-    #[allow(dead_code)]
-    pub fn new(val: Vec<u64>) -> Self {
-        Self { val }
-    }
-
     /// Get the value of an atom.
     #[allow(dead_code)]
     pub fn v(&self) -> &Vec<u64> {
@@ -42,6 +37,39 @@ impl Cue for Atom {
     }
 }
 
+/// Atom from u64.
+impl From<u64> for Atom {
+    fn from(val: u64) -> Self {
+        Self { val: vec![val] }
+    }
+}
+
+/// Atom from non-empty Vec<u64>.
+impl TryFrom<Vec<u64>> for Atom {
+    type Error = ();
+
+    fn try_from(val: Vec<u64>) -> Result<Self, Self::Error> {
+        if !val.is_empty() {
+            Ok(Self { val })
+        } else {
+            Err(())
+        }
+    }
+}
+
+/// Atom from Noun.
+impl TryFrom<Noun> for Atom {
+    type Error = ();
+
+    fn try_from(noun: Noun) -> Result<Self, Self::Error> {
+        if let Noun::Atom(atom) = noun {
+            Ok(atom)
+        } else {
+            Err(())
+        }
+    }
+}
+
 impl fmt::Display for Atom {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let prefix = "0x";
@@ -55,59 +83,69 @@ impl fmt::Display for Atom {
     }
 }
 
-/// Shorthand for Atom::new(vec![...]).
-#[macro_export]
-macro_rules! a {
-    ( $( $elem:expr ),+ ) => {
-        {
-            let mut temp_vec: Vec<u64> = Vec::new();
-            $(
-                temp_vec.push($elem);
-            )*
-            Atom::new(temp_vec)
-        }
-    };
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn clone() {
+    fn clone() -> Result<(), ()> {
         // Clone 777.
         {
-            let a = a![777];
-            assert_eq!(a, a.clone());
+            let a = Atom::from(777);
+            assert_eq!(a.clone(), a);
         }
 
         // Clone 0xffff_ffff_ffff_ffff_ffff_ffff_ffff_ffff.
         {
-            let a = a![u64::MAX, u64::MAX, u64::MAX, u64::MAX];
-            assert_eq!(a, a.clone());
+            let a = Atom::from(u64::MAX);
+            assert_eq!(a.clone(), a);
         }
+
+        // Clone 2^64.
+        {
+            let a = Atom::try_from(vec![0, 1])?;
+            assert_eq!(a.clone(), a);
+        }
+
+        // Clone a really big number.
+        {
+            let a = Atom::try_from(vec![0, 1, 2, 3, 4, 5, 6, 7]);
+            assert_eq!(a.clone(), a);
+        }
+
+        Ok(())
     }
 
     #[test]
-    fn partialeq() {
+    fn partialeq() -> Result<(), ()> {
         // 500 == 500
         {
-            assert_eq!(a![500], a![500]);
+            let lh = Atom::from(500);
+            let rh = Atom::from(500);
+            assert_eq!(lh, rh)
         }
 
         // 499 != 501
         {
-            assert_ne!(a![499], a![501]);
+            let lh = Atom::from(499);
+            let rh = Atom::from(501);
+            assert_ne!(lh, rh)
         }
 
-        // 0xffff_ffff_ffff_ffff_ffff_ffff_ffff_ffff == 0xffff_ffff_ffff_ffff_ffff_ffff_ffff_ffff
+        // 2^64 == 2^64.
         {
-            assert_eq!(a![u64::MAX, u64::MAX], a![u64::MAX, u64::MAX]);
+            let lh = Atom::try_from(vec![0, 1])?;
+            let rh = Atom::try_from(vec![0, 1])?;
+            assert_eq!(lh, rh);
         }
 
-        // 0xffff_ffff_ffff_ffff_ffff_ffff_ffff_ffff != 0xffff_ffff_ffff_ffff_0000_0000_0000_0000
+        // 2^64 != 2^65
         {
-            assert_ne!(a![u64::MAX, u64::MAX], a![u64::MAX, 0]);
+            let lh = Atom::try_from(vec![0, 1])?;
+            let rh = Atom::try_from(vec![0, 2])?;
+            assert_ne!(lh, rh);
         }
+
+        Ok(())
     }
 }
