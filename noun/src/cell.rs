@@ -46,6 +46,14 @@ impl Noun for Cell {
     fn as_cell(&self) -> Result<&Cell, ()> {
         Ok(self)
     }
+
+    fn into_atom(self) -> Result<Atom, ()> {
+        Err(())
+    }
+
+    fn into_cell(self) -> Result<Cell, ()> {
+        Ok(self)
+    }
 }
 
 impl Clone for Cell {

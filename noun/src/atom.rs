@@ -23,6 +23,14 @@ impl Noun for Atom {
     fn as_cell(&self) -> Result<&Cell, ()> {
         Err(())
     }
+
+    fn into_atom(self) -> Result<Atom, ()> {
+        Ok(self)
+    }
+
+    fn into_cell(self) -> Result<Cell, ()> {
+        Err(())
+    }
 }
 
 impl fmt::Display for Atom {

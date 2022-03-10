@@ -12,4 +12,8 @@ pub trait Noun {
     fn as_atom(&self) -> Result<&Atom, ()>;
 
     fn as_cell(&self) -> Result<&Cell, ()>;
+
+    fn into_atom(self) -> Result<Atom, ()>;
+
+    fn into_cell(self) -> Result<Cell, ()>;
 }
