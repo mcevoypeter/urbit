@@ -8,24 +8,15 @@ pub struct Cell {
 }
 
 impl Cell {
-    /// Create a new reference-counted cell.
-    #[allow(dead_code)]
-    fn new(head: &Rc<dyn Noun>, tail: &Rc<dyn Noun>) -> Rc<Self> {
-        Rc::new(Self {
-            head: Rc::clone(head),
-            tail: Rc::clone(tail),
-        })
-    }
-
     /// Get the head of a cell.
     #[allow(dead_code)]
-    pub fn h(&self) -> Rc<dyn Noun> {
+    pub fn head(&self) -> Rc<dyn Noun> {
         Rc::clone(&self.head)
     }
 
     /// Get the tail of a cell.
     #[allow(dead_code)]
-    pub fn t(&self) -> Rc<dyn Noun> {
+    pub fn tail(&self) -> Rc<dyn Noun> {
         Rc::clone(&self.tail)
     }
 }
@@ -53,6 +44,51 @@ impl Noun for Cell {
 
     fn into_cell(self) -> Result<Cell, ()> {
         Ok(self)
+    }
+}
+
+impl From<(Atom, Atom)> for Cell {
+    fn from((head, tail): (Atom, Atom)) -> Self {
+        Self {
+            head: Rc::new(head),
+            tail: Rc::new(tail),
+        }
+    }
+}
+
+impl From<(Atom, Cell)> for Cell {
+    fn from((head, tail): (Atom, Self)) -> Self {
+        Self {
+            head: Rc::new(head),
+            tail: Rc::new(tail),
+        }
+    }
+}
+
+impl From<(Cell, Atom)> for Cell {
+    fn from((head, tail): (Self, Atom)) -> Self {
+        Self {
+            head: Rc::new(head),
+            tail: Rc::new(tail),
+        }
+    }
+}
+
+impl From<(Cell, Cell)> for Cell {
+    fn from((head, tail): (Self, Self)) -> Self {
+        Self {
+            head: Rc::new(head),
+            tail: Rc::new(tail),
+        }
+    }
+}
+
+impl From<(Rc<dyn Noun>, Rc<dyn Noun>)> for Cell {
+    fn from((head, tail): (Rc<dyn Noun>, Rc<dyn Noun>)) -> Self {
+        Self {
+            head: Rc::clone(&head),
+            tail: Rc::clone(&tail),
+        }
     }
 }
 
@@ -96,6 +132,13 @@ impl PartialEq for Cell {
     }
 }
 
+#[macro_export]
+macro_rules! c {
+    ( $head:expr, $tail:expr ) => {
+        Cell::from(($head, $tail))
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -103,16 +146,40 @@ mod tests {
     #[test]
     fn clone() {
         // Clone [8 808].
+        {
+            let c = c!(a![8], a![808]);
+            assert_eq!(c.clone(), c);
+        }
     }
 
     #[test]
     fn partialeq() {
         // [71 109] == [71 109]
+        {
+            let lh = c!(a![71], a![109]);
+            let rh = c!(a![71], a![109]);
+            assert_eq!(lh, rh);
+        }
 
         // [71 109] != [109 71]
+        {
+            let lh = c!(a![71], a![109]);
+            let rh = c!(a![109], a![71]);
+            assert_ne!(lh, rh);
+        }
 
         // [11 [12 13]] == [11 [12 13]]
+        {
+            let lh = c!(a![11], c!(a![12], a![13]));
+            let rh = c!(a![11], c!(a![12], a![13]));
+            assert_eq!(lh, rh);
+        }
 
         // [11 [12 13]] != [11 [13 12]]
+        {
+            let lh = c!(a![11], c!(a![12], a![13]));
+            let rh = c!(a![11], c!(a![13], a![12]));
+            assert_ne!(lh, rh);
+        }
     }
 }

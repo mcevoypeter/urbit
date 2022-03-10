@@ -2,6 +2,7 @@ use crate::{atom::Atom, cell::Cell};
 
 #[macro_use]
 pub mod atom;
+#[macro_use]
 pub mod cell;
 
 pub trait Noun {

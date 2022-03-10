@@ -7,6 +7,13 @@ pub struct Atom {
     val: Vec<u64>,
 }
 
+impl Atom {
+    #[allow(dead_code)]
+    pub fn v(&self) -> &Vec<u64> {
+        &self.val
+    }
+}
+
 impl Noun for Atom {
     fn is_atom(&self) -> bool {
         true
@@ -33,6 +40,18 @@ impl Noun for Atom {
     }
 }
 
+impl From<u64> for Atom {
+    fn from(val: u64) -> Self {
+        Atom { val: vec![val] }
+    }
+}
+
+impl From<Vec<u64>> for Atom {
+    fn from(val: Vec<u64>) -> Self {
+        Self { val }
+    }
+}
+
 impl fmt::Display for Atom {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let prefix = "0x";
@@ -46,6 +65,22 @@ impl fmt::Display for Atom {
     }
 }
 
+#[macro_export]
+macro_rules! a {
+    ( $elem:expr ) => {
+        Atom::from($elem)
+    };
+    ( $( $elem:expr ),+ ) => {
+        {
+            let mut temp_vec: Vec<u64> = Vec::new();
+            $(
+                temp_vec.push($elem);
+            )*
+            temp_vec
+        }
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -53,18 +88,46 @@ mod tests {
     #[test]
     fn clone() {
         // Clone 777.
+        {
+            let a = a![777];
+            assert_eq!(a.clone(), a);
+        }
 
-        // Clone 0xffff_ffff_ffff_ffff_ffff_ffff_ffff_ffff.
+        // Clone 2^64.
+        {
+            let a = a![0, 1];
+            assert_eq!(a.clone(), a);
+        }
     }
 
     #[test]
     fn partialeq() {
         // 500 == 500
+        {
+            let lh = a![500];
+            let rh = a![500];
+            assert_eq!(lh, rh);
+        }
 
         // 499 != 501
+        {
+            let lh = a![499];
+            let rh = a![501];
+            assert_ne!(lh, rh);
+        }
 
-        // 0xffff_ffff_ffff_ffff_ffff_ffff_ffff_ffff == 0xffff_ffff_ffff_ffff_ffff_ffff_ffff_ffff
+        // 2^64 == 2^64
+        {
+            let lh = a![0, 1];
+            let rh = a![0, 1];
+            assert_eq!(lh, rh);
+        }
 
-        // 0xffff_ffff_ffff_ffff_ffff_ffff_ffff_ffff != 0xffff_ffff_ffff_ffff_0000_0000_0000_0000
+        // 2^64 != 2^65
+        {
+            let lh = a![0, 1];
+            let rh = a![0, 2];
+            assert_ne!(lh, rh);
+        }
     }
 }
