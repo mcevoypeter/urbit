@@ -47,7 +47,10 @@ impl From<u64> for Atom {
 }
 
 impl From<Vec<u64>> for Atom {
-    fn from(val: Vec<u64>) -> Self {
+    fn from(mut val: Vec<u64>) -> Self {
+        if 0 == val.len() {
+            val.push(0)
+        }
         Self { val }
     }
 }
