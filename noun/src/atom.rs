@@ -1,4 +1,4 @@
-use crate::{cell::Cell, Noun};
+use crate::{cell::Cell, Error, Noun};
 use std::fmt;
 
 /// Arbitrarily large unsigned integer.
@@ -23,20 +23,20 @@ impl Noun for Atom {
         false
     }
 
-    fn as_atom(&self) -> Result<&Atom, ()> {
+    fn as_atom(&self) -> Result<&Atom, Error> {
         Ok(self)
     }
 
-    fn as_cell(&self) -> Result<&Cell, ()> {
-        Err(())
+    fn as_cell(&self) -> Result<&Cell, Error> {
+        Err(Error::UnexpectedAtom)
     }
 
-    fn into_atom(self) -> Result<Atom, ()> {
+    fn into_atom(self) -> Result<Atom, Error> {
         Ok(self)
     }
 
-    fn into_cell(self) -> Result<Cell, ()> {
-        Err(())
+    fn into_cell(self) -> Result<Cell, Error> {
+        Err(Error::UnexpectedAtom)
     }
 }
 

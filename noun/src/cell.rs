@@ -1,4 +1,4 @@
-use crate::{atom::Atom, Noun};
+use crate::{atom::Atom, Error, Noun};
 use std::{fmt, rc::Rc};
 
 /// Pair of nouns.
@@ -30,19 +30,19 @@ impl Noun for Cell {
         true
     }
 
-    fn as_atom(&self) -> Result<&Atom, ()> {
-        Err(())
+    fn as_atom(&self) -> Result<&Atom, Error> {
+        Err(Error::UnexpectedCell)
     }
 
-    fn as_cell(&self) -> Result<&Cell, ()> {
+    fn as_cell(&self) -> Result<&Cell, Error> {
         Ok(self)
     }
 
-    fn into_atom(self) -> Result<Atom, ()> {
-        Err(())
+    fn into_atom(self) -> Result<Atom, Error> {
+        Err(Error::UnexpectedCell)
     }
 
-    fn into_cell(self) -> Result<Cell, ()> {
+    fn into_cell(self) -> Result<Cell, Error> {
         Ok(self)
     }
 }
