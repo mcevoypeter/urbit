@@ -107,28 +107,20 @@ impl fmt::Debug for Cell {
     }
 }
 
-/// Determine if the tails of two cells match.
-macro_rules! tails_match {
-    ( $left:expr, $right:expr ) => {
-        if let (Ok(lt), Ok(rt)) = ($left.tail.as_atom(), $right.tail.as_atom()) {
-            lt == rt
-        } else if let (Ok(lt), Ok(rt)) = ($left.tail.as_cell(), $right.tail.as_cell()) {
-            Cell::eq(lt, rt)
-        } else {
-            false
-        }
-    };
+/// Determine if two Noun objects match.
+fn fields_match(left: &Rc<dyn Noun>, right: &Rc<dyn Noun>) -> bool {
+    if let (Ok(l), Ok(r)) = (left.as_atom(), right.as_atom()) {
+        l == r
+    } else if let (Ok(l), Ok(r)) = (left.as_cell(), right.as_cell()) {
+        Cell::eq(l, r)
+    } else {
+        false
+    }
 }
 
 impl PartialEq for Cell {
     fn eq(&self, other: &Self) -> bool {
-        if let (Ok(sh), Ok(oh)) = (self.head.as_atom(), other.head.as_atom()) {
-            sh == oh && tails_match!(self, other)
-        } else if let (Ok(sh), Ok(oh)) = (self.head.as_cell(), other.head.as_cell()) {
-            Self::eq(sh, oh) && tails_match!(self, other)
-        } else {
-            false
-        }
+        fields_match(&self.head, &other.head) && fields_match(&self.tail, &other.tail)
     }
 }
 
